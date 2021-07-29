@@ -1,0 +1,221 @@
+.page--settings .mt-container {
+  padding-top: 1rem;
+  max-width: 900px;
+}
+
+.page--settings ion-list-header {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.page--settings ion-list-header[transparent] {
+  display: none;
+}
+
+.page--settings ion-item {
+  --padding-end: 1rem;
+}
+
+.page--settings ion-toggle {
+  margin-top: 0.35rem;
+  transform: scale(0.75);
+}
+
+.page--settings .preferences > ion-list,
+.page--settings .identity > ion-list {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.page--settings .identity {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.page--settings .identity .avatar {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  align-items: center;
+  gap: 0 2rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.page--settings .identity .avatar ion-avatar {
+  background: var(--ion-color-light);
+  grid-column: 1 / 2;
+  grid-row: 1 / 3;
+  width: 140px;
+  height: 140px;
+  position: relative;
+}
+
+.page--settings .identity .avatar ion-avatar::before {
+  content: attr(data-initials);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--ion-color-step-750);
+}
+
+.page--settings .identity .avatar ion-avatar img {
+  width: 100%;
+}
+
+.page--settings .identity .avatar ion-button {
+  font-size: 0.9rem;
+  grid-column: 2 / -1;
+  max-width: 150px;
+  width: 100%;
+  justify-self: flex-end;
+  margin: 0.25rem 0;
+  align-self: end;
+}
+
+.page--settings .identity .avatar ion-button.upload ion-icon {
+  margin-left: 0.5rem;
+}
+
+.page--settings .identity .identities {
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+  margin-bottom: 1rem;
+}
+
+.page--settings .identity .identities > div {
+  padding-top: 1rem;
+}
+
+.page--settings .identity .identities ion-list-header {
+  border-bottom: 1px solid var(--ion-color-step-300);
+  margin: 0;
+  padding: 0 0 0.75rem 20px;
+  font-size: 1.3rem;
+}
+
+.page--settings .identity .identities ion-item {
+  --border-color: var(--ion-color-step-150);
+  --inner-padding-end: 0;
+}
+
+.page--settings .identity .identities ion-icon {
+  color: var(--ion-color-step-250);
+  transform: scale(0.85);
+}
+
+.page--settings .identity .identities ion-button[save] {
+  font-size: 1rem;
+}
+
+.page--settings .preferences {
+  margin-bottom: 1rem;
+}
+
+.page--settings .preferences ion-list {
+  padding: 1.5rem;
+}
+
+.page--settings .identity ion-content,
+.page--settings .identity ion-item,
+.page--settings .preferences ion-item {
+  --background: transparent;
+}
+
+.page--settings .preferences .theme ion-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.page--settings .identity .identities ion-list {
+  margin: 0 20px 0 0;
+}
+
+.dark .page--settings ion-list {
+  background: var(--ion-card-background);
+}
+
+@media screen and (min-width: 650px) {
+  .page--settings .identity {
+    column-gap: 2.5rem;
+    grid-template-columns: auto 1fr;
+    margin-bottom: 2rem;
+  }
+
+  .page--settings ion-list-header[transparent] {
+    display: block;
+  }
+
+  .page--settings .identity .avatar,
+  .page--settings .identity .identities {
+    margin-bottom: 0;
+  }
+
+  .page--settings .identity .avatar {
+    grid-template-columns: auto auto;
+    gap: 1.5rem 1rem;
+  }
+
+  .page--settings .identity .avatar ion-avatar {
+    grid-column: 1 / -1;
+    width: 180px;
+    height: 180px;
+  }
+
+  .page--settings .identity .avatar ion-button {
+    grid-column: unset;
+    margin: 0;
+  }
+
+  .page--settings .identity .identities ion-button[save] {
+    font-size: 1rem;
+  }
+
+  .page--settings .preferences {
+    margin-bottom: 0;
+  }
+}
+
+@media screen and (max-width: 390px) {
+  .page--settings .identity .avatar,
+  .page--settings .identity .identities {
+    padding: 1rem 0.5rem;
+  }
+
+  .page--settings .identity .avatar {
+    gap: 0 1rem;
+  }
+
+  .page--settings .preferences ion-list {
+    padding: 0.5rem 0;
+  }
+
+  .page--settings ion-list {
+    margin-right: 0 !important;
+  }
+}
+
+@media screen and (max-width: 305px) {
+  .page--settings .identity .avatar {
+    grid-template-columns: auto auto;
+    gap: 1rem;
+  }
+
+  .page--settings .identity .avatar ion-avatar {
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+
+  .page--settings .identity .avatar ion-button {
+    grid-column: unset;
+    margin: 0;
+  }
+}

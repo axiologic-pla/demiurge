@@ -1,0 +1,70 @@
+dw-header header {
+  border-bottom: 2px solid var(--border-color);
+}
+
+dw-header webc-app-menu {
+  --disable-identity: true;
+  max-width: var(--dw-container-width);
+  margin: 0 auto;
+  align-items: center;
+}
+
+dw-header webc-app-menu[mode='horizontal'] {
+  --background: transparent;
+  --box-shadow: none;
+  --color: inherit;
+  --height: 80px;
+  --padding: 0 2rem;
+}
+
+dw-header webc-app-menu[mode='horizontal'] .app-menu webc-app-menu-item {
+  height: calc(var(--height) / 2);
+}
+
+dw-header webc-app-menu[mode='horizontal'] .app-menu webc-app-menu-item[active] {
+  font-weight: normal;
+}
+
+dw-header webc-app-menu[mode='horizontal'] .app-menu webc-app-menu-item[active]:after {
+  position: absolute;
+  content: '';
+  left: 0;
+  bottom: calc(var(--height) / -4);
+  right: 0;
+  height: 2px;
+  transform: translateY(100%);
+  background: var(--sl-color-primary-500);
+}
+
+dw-header webc-app-menu[mode='horizontal'] .container div {
+  display: flex;
+  align-items: center;
+  column-gap: 1.5rem;
+}
+
+dw-header .logo a {
+  color: var(--sl-color-primary-500);
+  text-decoration: none;
+  font-size: 1.25rem;
+}
+
+dw-header webc-app-menu[mode='horizontal'] [burger] {
+  display: none;
+  font-size: 1.3rem;
+}
+
+@media screen and (max-width: 715px) {
+  dw-header webc-app-menu[mode='horizontal'] .app-menu.items {
+    display: none;
+  }
+
+  dw-header webc-app-menu[mode='horizontal'] [burger] {
+    display: block;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  dw-header webc-app-menu[mode='horizontal'] {
+    --padding: 0 1rem;
+  }
+}

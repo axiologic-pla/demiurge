@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="assets/pages/subdomains.css" />
+
+<webc-container controller="SubdomainsController" id="subdomains-page" class="dw-container">
+  <dw-title shadow>Domain</dw-title>
+  <div class="dw-domain">
+    <span>Current location:</span>
+    <sl-tag size="large" type="info">{{ @domain }}</sl-tag>
+  </div>
+
+  <dw-title shadow>Subdomains</dw-title>
+  <p>List of available subdomains</p>
+  <dw-subdomains shadow content="You can select a subdomain from this list" data-for="@subdomains" data-for="optimistic">
+    <div class="dw-subdomain">
+      <sl-menu-item value="@value" data-tag="subdomain.select">{{ @name }}</sl-menu-item>
+      <sl-icon-button data-tag="subdomain.delete" name="trash-fill"></sl-icon-button>
+    </div>
+    <dw-spinner slot="no-data" content="Subdomains are loading"></dw-spinner>
+  </dw-subdomains>
+  <section class="dw-subdomain-addition" hidden>
+    <sl-input label="New subdomain" placeholder="subdomain" data-tag="subdomain.input">
+      <div slot="help-text">Type your new subdomain of domain "{{ @domain }}"</div>
+    </sl-input>
+    <sl-button type="primary" data-tag="subdomain.add"> Add <sl-icon slot="suffix" name="plus-square-fill"></sl-icon> </sl-button>
+  </section>
+</webc-container>

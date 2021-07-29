@@ -1,0 +1,19 @@
+#dw-dialog-configuration .jsoneditor {
+  border-color: transparent;
+  height: 100%;
+}
+
+#dw-dialog-configuration .jsoneditor-menu {
+  border: none;
+}
+
+#dw-dialog-configuration .jsoneditor-menu {
+  background: var(--sl-color-primary-500);
+}
+
+.jsoneditor-contextmenu .jsoneditor-menu li button.jsoneditor-selected,
+.jsoneditor-contextmenu .jsoneditor-menu li button.jsoneditor-selected:focus,
+.jsoneditor-contextmenu .jsoneditor-menu li button.jsoneditor-selected:hover {
+  color: var(--sl-color-primary-500);
+  background-color: var(--sl-color-primary-text);
+}

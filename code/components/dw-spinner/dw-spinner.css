@@ -1,0 +1,11 @@
+.dw-spinner {
+  display: grid;
+  grid-template-columns: auto 15px auto;
+  justify-content: center;
+  padding: var(--sl-spacing-small);
+  cursor: wait;
+}
+
+.dw-spinner sl-spinner {
+  margin-top: 3px;
+}

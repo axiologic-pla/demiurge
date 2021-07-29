@@ -1,0 +1,64 @@
+{
+  "pages": [
+    {
+      "name": "BDNS",
+      "tag": "bdns",
+      "src": "./blockchain-domains.html"
+    },
+    {
+      "name": "My Identities",
+      "tag": "my-identities"
+    },
+    {
+      "name": "My Keys",
+      "tag": "my-keys"
+    },
+    {
+      "name": "Groups",
+      "tag": "groups"
+    },
+    {
+      "name": "Workspaces",
+      "tag": "workspaces"
+    },
+
+    {
+      "name": "Member",
+      "path": "/groups/member",
+      "tag": "member",
+      "indexed": false
+    },
+    {
+      "path": "/",
+      "name": "Quick Actions",
+      "tag": "quick-actions",
+      "src": "quick-actions.html",
+      "indexed": false
+    },
+    {
+      "name": "Contracts",
+      "tag": "contracts",
+      "indexed": false
+    },
+    {
+      "name": "Domains",
+      "tag": "domains",
+      "indexed": false
+    },
+    {
+      "name": "Subdomains",
+      "tag": "subdomains",
+      "indexed": false
+    },
+    {
+      "name": "Keys",
+      "tag": "keys",
+      "indexed": false
+    },
+    {
+      "name": "Tokens",
+      "tag": "tokens",
+      "indexed": false
+    }
+  ]
+}

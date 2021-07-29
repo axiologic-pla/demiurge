@@ -1,0 +1,14 @@
+.dw-clipboard-input::part(suffix) {
+  padding: var(--sl-spacing-small);
+  cursor: pointer;
+  background-color: var(--sl-color-primary-200);
+}
+
+.dw-clipboard-input::part(input) {
+  font-family: 'courier new', monospace;
+  padding-top: 5px;
+}
+
+.dw-clipboard-input sl-icon::part(base) {
+  color: var(--sl-color-black);
+}

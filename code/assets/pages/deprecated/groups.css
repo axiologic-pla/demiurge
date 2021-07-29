@@ -1,0 +1,336 @@
+#groups-page {
+  --dw-gap: 1.5rem;
+  padding-bottom: calc(2 * var(--dw-gap));
+}
+
+#groups-page,
+#groups-page main {
+  display: grid;
+  gap: var(--dw-gap);
+}
+
+/* blockchain domain */
+
+#groups-page .dw-domain-input {
+  margin-top: var(--sl-spacing-large);
+}
+
+#groups-page .dw-domain-input::part(suffix) {
+  cursor: pointer;
+  background-color: var(--sl-color-primary-200);
+  display: flex;
+}
+
+#groups-page .dw-domain-input[disabled]::part(input) {
+  opacity: 0.5;
+}
+
+#groups-page .dw-domain-input::part(input) {
+  font-family: 'courier new', monospace;
+  padding-top: 5px;
+}
+
+#groups-page .dw-domain-input::part(base) {
+  opacity: 1;
+}
+
+#groups-page .dw-domain-input sl-button::part(base) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  font-weight: bold;
+  font-size: 0.95em;
+}
+
+#groups-page .dw-domain-input sl-button sl-icon {
+  margin-right: var(--sl-spacing-xx-small);
+  font-size: 0.85em;
+}
+
+/* groups management */
+
+#groups-page .dw-groups--header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2.25rem;
+}
+
+#groups-page .dw-groups--addition {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.5rem;
+}
+
+#groups-page .dw-groups--addition sl-button {
+  padding-top: 22px;
+}
+
+#groups-page .dw-group {
+  --dw-group-header-height: 30px;
+  --dw-group-header-spaced-height: calc(var(--dw-group-header-height) + 2 * var(--sl-spacing-medium));
+}
+
+#groups-page .dw-group:first-child {
+  position: relative;
+  padding-top: var(--dw-group-header-spaced-height);
+}
+
+#groups-page .dw-group:first-child:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: calc(var(--dw-group-header-spaced-height));
+  background-color: var(--sl-color-primary-50);
+}
+
+#groups-page .dw-group:first-child .dw-group-data :nth-child(1):before,
+#groups-page .dw-group:first-child .dw-group-data :nth-child(2):before,
+#groups-page .dw-group:first-child sl-icon-button:before {
+  display: block;
+  position: absolute;
+  height: var(--dw-group-header-height);
+  padding: var(--sl-spacing-x-small) 0;
+  bottom: 100%;
+  font-size: 1.1rem;
+  font-weight: bold;
+  font-family: var(--sl-font-sans);
+  color: var(--sl-color-black);
+  border-bottom: 3px solid var(--sl-color-primary-200);
+}
+
+#groups-page .dw-group:first-child .dw-group-data :first-child:before {
+  content: 'Name';
+}
+
+#groups-page .dw-group:first-child .dw-group-data :nth-child(2):before {
+  content: 'DID';
+}
+
+#groups-page .dw-group sl-menu-item .dw-group-data {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+
+#groups-page .dw-group sl-menu-item .dw-group-data code {
+  background-color: var(--sl-color-gray-100);
+  padding: 5px var(--sl-spacing-x-small) 0 var(--sl-spacing-x-small);
+  border-radius: var(--sl-border-radius-medium);
+  font-size: 0.75em;
+  color: var(--sl-color-info-700);
+}
+
+/* members and credentials management */
+
+#groups-page .dw-databases--header,
+#groups-page .dw-credentials--header,
+#groups-page .dw-members--header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+#groups-page .dw-databases--header code,
+#groups-page .dw-credentials--header code,
+#groups-page .dw-members--header code {
+  background-color: var(--sl-color-primary-100);
+  padding: var(--sl-spacing-xx-small);
+  border-radius: var(--sl-border-radius-medium);
+  font-size: 0.9rem;
+}
+
+#groups-page .dw-members--header > div {
+  display: none;
+}
+
+#groups-page .dw-members--header > div[data-loaded] {
+  display: flex;
+}
+
+#groups-page .dw-members--header .dw-open-multiple-selection::part(base) {
+  padding: 0;
+}
+
+#groups-page .dw-members--header .dw-open-multiple-selection::part(label) {
+  padding-right: 0;
+}
+
+#groups-page .dw-members {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sl-spacing-x-large);
+  margin-top: var(--sl-spacing-large);
+}
+
+#groups-page .dw-members .no-data {
+  display: block;
+  padding: var(--sl-spacing-large);
+  border: 1px solid var(--sl-panel-border-color);
+  background: var(--sl-color-white);
+  grid-column: 1 / -1;
+}
+
+#groups-page .dw-members .no-data .dw-spinner {
+  padding: 0;
+}
+
+#groups-page .dw-members .no-data > p {
+  text-align: center;
+}
+
+#groups-page .dw-members sl-menu-item {
+  background-color: var(--sl-color-white);
+  border: 1px solid var(--sl-panel-border-color);
+}
+
+#groups-page .dw-members sl-menu-item::part(base) {
+  padding: var(--sl-spacing-medium) var(--sl-spacing-large);
+}
+
+#groups-page .dw-member {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+
+#groups-page .dw-member > div {
+  grid-column: 2 / 3;
+}
+
+#groups-page .dw-member > sl-checkbox {
+  display: none;
+}
+
+#groups-page .dw-member > sl-checkbox.active {
+  display: inline-block;
+  padding-right: var(--sl-spacing-x-small);
+}
+
+#groups-page .dw-member > div > code {
+  background-color: var(--sl-color-gray-100);
+  padding: 5px var(--sl-spacing-x-small);
+  border-radius: var(--sl-border-radius-medium);
+  font-size: 0.75rem;
+  color: var(--sl-color-info-700);
+}
+
+#groups-page .dw-databases,
+#groups-page .dw-credentials {
+  margin-top: var(--sl-spacing-medium);
+}
+
+#groups-page .dw-databases--header dw-title,
+#groups-page .dw-credentials--header dw-title {
+  margin-top: var(--sl-spacing-medium);
+}
+
+#groups-page .dw-databases--header dw-title > [slot='subheader']:last-child,
+#groups-page .dw-credentials--header dw-title > [slot='subheader']:last-child {
+  color: var(--sl-color-gray-400);
+  font-size: 90%;
+}
+
+#groups-page .dw-credentials article > sl-menu-item::part(base) {
+  padding-right: 0;
+}
+
+#groups-page .dw-credentials article > sl-menu-item > * > sl-icon::part(base),
+#groups-page .dw-credentials article > sl-menu-item:hover > sl-icon-button::part(base) {
+  color: inherit;
+  transition: var(--sl-transition-medium) color;
+  background: transparent;
+}
+
+#groups-page .dw-credentials article > sl-menu-item > sl-icon-button {
+  font-size: 1.2rem;
+}
+
+#groups-page .dw-credentials article > sl-menu-item sl-icon {
+  margin: 0 var(--sl-spacing-x-large) 0 var(--sl-spacing-xx-large);
+}
+
+#groups-page .dw-credentials .dw-group-credential-data sl-input {
+  pointer-events: none;
+}
+
+#groups-page .dw-credentials .dw-group-credential-data sl-input::part(input) {
+  font-family: 'courier new', monospace;
+  font-size: 90%;
+}
+
+#groups-page .dw-content {
+}
+
+#groups-page .dw-content::part(base),
+#groups-page .dw-content > sl-tab-panel::part(base),
+#groups-page .dw-content > sl-tab-panel > .dw-data-grid {
+  padding: 0;
+  border: none;
+}
+
+#groups-page .dw-content > sl-tab::part(base) {
+  font-size: 1.2rem;
+}
+
+#groups-page .dw-content > sl-tab > sl-icon {
+  margin-right: var(--sl-spacing-small);
+}
+
+#groups-fab {
+  position: fixed;
+  right: 2rem;
+  bottom: 2rem;
+}
+
+@media screen and (max-width: 835px) {
+  #groups-page .dw-members,
+  #groups-page .dw-group sl-menu-item .dw-group-data {
+    grid-template-columns: 1fr;
+  }
+
+  #groups-page .dw-group:first-child {
+    padding-top: 0;
+  }
+
+  #groups-page .dw-group:first-child:before,
+  #groups-page .dw-group:first-child .dw-group-data :nth-child(1):before,
+  #groups-page .dw-group:first-child .dw-group-data :nth-child(2):before,
+  #groups-page .dw-group:first-child sl-icon-button:before {
+    display: none;
+  }
+
+  #groups-page .dw-group sl-menu-item .dw-group-data code {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  #groups-page .dw-member > div > code {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 630px) {
+  #groups-page .dw-members--header {
+    grid-template-columns: 1fr;
+    row-gap: 1em;
+  }
+
+  #groups-page .dw-members--header > div {
+    border: 1px solid var(--sl-color-gray-200);
+    padding: var(--sl-spacing-medium);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1em;
+  }
+
+  #groups-page .dw-members--header > div > sl-button:nth-child(2)::part(base) {
+    padding-left: 0;
+  }
+  #groups-page .dw-members--header > div > sl-button:nth-child(2)::part(label) {
+    padding-right: 0;
+  }
+
+  #groups-page .dw-members {
+    gap: var(--sl-spacing-large);
+  }
+}

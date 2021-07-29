@@ -1,0 +1,35 @@
+{
+  "name": "demiurge",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "postinstall": "node ./node_modules/octopus/scripts/run dependencies devmode",
+    "prebuild": "node ./node_modules/octopus/scripts/run prebuild devmode",
+    "build": "node ./node_modules/octopus/scripts/buildDossier",
+    "postbuild": "node ./node_modules/octopus/scripts/run postbuild devmode",
+    "update": "npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenDSU/demiurge.git"
+  },
+  "dependencies": {
+    "@shoelace-style/shoelace": "^2.0.0-beta.47",
+    "jsoneditor": "^9.4.1",
+    "octopus": "git+https://github.com/PrivateSky/octopus.git"
+  },
+  "keywords": [
+    "ssapp"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/OpenDSU/demiurge/issues"
+  },
+  "homepage": "https://github.com/OpenDSU/demiurge#readme",
+  "prettier": {
+    "semi": true,
+    "singleQuote": false,
+    "tabWidth": 2,
+    "printWidth": 120
+  }
+}

@@ -1,0 +1,17 @@
+<link rel="stylesheet" href="assets/pages/quick-actions.css" />
+<webc-container controller="QuickActionsController" id="quick-actions-page" class="dw-container">
+  <dw-title shadow>Domain</dw-title>
+  <div class="dw-domain">
+    <span>Current location:</span>
+    <sl-tag size="large" type="info">{{ @domain }}</sl-tag>
+  </div>
+
+  <dw-title shadow>Quick actions</dw-title>
+  <main class="dw-actions">
+    <dw-action data-tag="configuration.show" action="Configuration" icon="gear" tooltip="Configuration"></dw-action>
+    <dw-action tag="subdomains" action="Subdomains" icon="diagram-3" tooltip="Subdomains"></dw-action>
+    <dw-action tag="contracts" action="Contracts" icon="journal-code" tooltip="Contracts"></dw-action>
+    <dw-action tag="tokens" action="Tokens" icon="coin" tooltip="Tokens"></dw-action>
+    <dw-action tag="keys" action="Keys" icon="lock" tooltip="Keys"></dw-action>
+  </main>
+</webc-container>

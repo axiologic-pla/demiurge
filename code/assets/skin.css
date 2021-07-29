@@ -1,0 +1,64 @@
+@import './components.css';
+
+:root {
+  --webc-primary-color: var(--sl-color-gray-900);
+  --webc-font-family: var(--sl-font-sans);
+  --dw-menu-width: 250px;
+  --dw-container-width: 1000px;
+
+  --sl-z-index-dialog: 1000 !important;
+  --sl-z-index-toast: 1001 !important;
+}
+
+/*::-moz-selection {*/
+/*    background: var(--sl-color-primary-600);*/
+/*}*/
+
+/*::selection {*/
+/*    background: var(--sl-color-primary-600);*/
+/*}*/
+
+webc-app-root {
+  --mode: horizontal;
+}
+
+webc-app-menu {
+  --disable-identity: true;
+}
+
+webc-app-container {
+  --background: var(--sl-color-gray-50);
+}
+
+webc-app-container > .container.before {
+  z-index: 999;
+  background: var(--background);
+}
+
+dw-header {
+  --border-color: var(--sl-color-gray-300);
+}
+
+dw-title {
+  --color: var(--sl-color-gray-900);
+}
+
+:root .sl-theme-dark {
+  --webc-primary-color: --sl-color-gray-50;
+}
+
+.sl-theme-dark webc-app-container {
+  --background: var(--sl-color-gray-950);
+}
+
+.sl-theme-dark webc-app-menu[mode='horizontal'] {
+  --color: var(--sl-color-gray-300);
+}
+
+.sl-theme-dark dw-title {
+  --color: var(--sl-color-gray-300);
+}
+
+.sl-theme-dark dw-header {
+  --border-color: var(--sl-color-gray-800);
+}

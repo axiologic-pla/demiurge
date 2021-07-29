@@ -1,0 +1,6 @@
+sl-menu {
+  /*margin: 1rem 0;*/
+  background: var(--sl-input-background-color);
+  border: solid 1px var(--sl-panel-border-color);
+  padding: 0 var(--sl-spacing-x-small);
+}
