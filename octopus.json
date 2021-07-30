@@ -57,21 +57,6 @@
       ]
     },
     {
-      "name": "Ionic dependency",
-      "actions": [
-        {
-          "type": "copy",
-          "src": "./node_modules/@ionic/core/dist/ionic",
-          "target": "./code/ionic/dist"
-        },
-        {
-          "type": "copy",
-          "src": "./node_modules/@ionic/core/css",
-          "target": "./code/ionic/css"
-        }
-      ]
-    },
-    {
       "name": "Shoelace dependency",
       "actions": [
         {
