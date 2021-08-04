@@ -41,7 +41,7 @@
         <!-- Member credentials -->
         <webc-container controller="member/CredentialsController">
           <section class="dw-credentials--header">
-            <dw-title header="Credentials">
+            <dw-title>
               <p slot="subheader">Manage credentials of member <strong>{{ @selectedMember.username }}</strong></p>
             </dw-title>
             <sl-button type="primary" data-tag="credential.add">
@@ -74,7 +74,7 @@
         <!-- Member databases -->
         <webc-container controller="member/DatabasesController">
           <section class="dw-databases--header">
-            <dw-title header="Databases">
+            <dw-title>
               <p slot="subheader">Manage databases of member <strong>{{ @selectedMember.username }}</strong></p>
             </dw-title>
             <sl-form>

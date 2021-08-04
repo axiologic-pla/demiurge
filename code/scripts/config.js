@@ -43,6 +43,7 @@ addHook("beforeAppLoads", async () => {
   await import("/components/dw-title/dw-title.js");
   await import("/components/dw-data-grid/dw-data-grid.js");
   await import("/components/dw-clipboard-input/dw-clipboard-input.js");
+  await import('/components/dw-did-generator/dw-did-generator.js');
 
   const { default: DwController } = await import("/scripts/controllers/DwController.js");
   addControllers({ DwController });

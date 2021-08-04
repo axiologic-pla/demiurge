@@ -87,7 +87,7 @@
 <template id="dw-group-members--template">
   <webc-container controller="groups/MembersController">
     <section class="dw-members--header">
-      <dw-title header="Members">
+      <dw-title>
         <p slot="subheader">Manage members of group <strong>{{ @selectedGroup.name }}</strong></p>
       </dw-title>
       <div data-loaded="@areMembersLoaded">
@@ -137,7 +137,7 @@
 <template id="dw-group-credentials--template">
   <webc-container controller="groups/CredentialsController">
     <section class="dw-credentials--header">
-      <dw-title header="Credentials">
+      <dw-title>
         <p slot="subheader">Manage credentials of group <strong>{{ @selectedGroup.name }}</strong></p>
         <p slot="subheader">Each item is shared between members of this group</p>
       </dw-title>
@@ -173,7 +173,7 @@
 <template id="dw-group-databases--template">
   <webc-container controller="groups/DatabasesController">
     <section class="dw-databases--header">
-      <dw-title header="Databases">
+      <dw-title>
         <p slot="subheader">Manage databases of group <strong>{{ @selectedGroup.name }}</strong></p>
         <p slot="subheader">Each item is shared between members of this group</p>
       </dw-title>

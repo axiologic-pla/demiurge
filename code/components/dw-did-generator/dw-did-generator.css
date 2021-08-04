@@ -1,0 +1,60 @@
+:host {
+    --sl-input-border-radius-large: 0;
+    --sl-input-border-radius-medium: 0;
+    --sl-input-border-radius-small: 0;
+    --sl-input-font-family: monospace;
+}
+
+:host sl-input,
+:host sl-input::part(form-control) {
+    width: 100%;
+    min-width: 0;
+}
+
+:host > .base {
+    display: grid;
+    grid-template-columns: 70px auto 1fr;
+}
+
+:host > .base > .content {
+    display: flex;
+}
+
+:host .did-ssi-key,
+:host .did-ssi-sread,
+:host .did-ssi-name,
+:host .did-ssi-group {
+    display: grid !important;
+}
+
+:host .did-ssi-key,
+:host .did-ssi-name,
+:host .did-ssi-group {
+    grid-template-columns: auto auto 1fr;
+}
+
+:host .did-ssi-key > .content {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    width: 100%;
+}
+
+:host .did-ssi-key > .content > .input--version {
+    max-width: 50px;
+}
+
+:host .did-ssi-sread {
+    grid-template-columns: auto 1fr 1fr;
+}
+
+:host .did-ssi-sread > .input--domain,
+:host .did-ssi-sread > .content {
+    grid-column: 2 / -1;
+}
+
+:host .did-ssi-sread > .content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    max-width: 100%;
+}

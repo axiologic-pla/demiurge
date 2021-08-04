@@ -25,7 +25,7 @@
 }
 
 #groups-page .dw-domain-input::part(input) {
-  font-family: 'courier new', monospace;
+  font-family: "courier new", monospace;
   padding-top: 5px;
 }
 
@@ -65,7 +65,7 @@
 #groups-page .dw-groups--header sl-form::part(base) {
   display: flex;
   /*align-items: flex-end;*/
-  gap: var(--sl-spacing-large);
+  gap: var(--sl-spacing-large)
 }
 
 #groups-page .dw-groups--header sl-form > sl-input {
@@ -87,7 +87,7 @@
 }
 
 #groups-page .dw-group:first-child:before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   width: 100%;
@@ -271,11 +271,7 @@
   display: grid;
   grid-template-columns: 1fr auto;
   gap: var(--sl-spacing-large);
-}
-
-#groups-page .dw-credentials--header,
-#groups-page .dw-databases--header {
-  align-items: flex-end;
+  align-items: center;
 }
 
 #groups-page .dw-credentials--header strong,
@@ -286,10 +282,14 @@
   border-radius: var(--sl-border-radius-medium);
 }
 
-#groups-page .dw-credentials--header dw-title > [slot='subheader']:last-child,
-#groups-page .dw-databases--header dw-title > [slot='subheader']:last-child {
+#groups-page .dw-credentials--header dw-title > [slot=subheader]:last-child,
+#groups-page .dw-databases--header dw-title > [slot=subheader]:last-child {
   color: var(--sl-color-gray-400);
   font-size: 90%;
+}
+
+#groups-page .dw-credentials--header {
+  padding-top: var(--sl-spacing-small);
 }
 
 #groups-page .dw-databases--header > sl-form::part(base) {

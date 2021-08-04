@@ -1,3 +1,8 @@
+:host .base {
+  display: grid;
+  align-items: center;
+}
+
 :host .header {
   position: relative;
   display: inline-block;
@@ -6,17 +11,16 @@
   padding-right: 2.5rem;
 }
 
-:host .header::after {
-  position: absolute;
-  content: '';
-  right: 0;
-  top: 50%;
-  width: 1.75rem;
-  height: 2px;
-  margin-left: 0.75rem;
-  transform: translateY(50%);
-  background: var(--sl-color-primary-500);
-}
+/*:host .header::after {*/
+/*    position: absolute;*/
+/*    content: '';*/
+/*    right: 0; top: 50%;*/
+/*    width: 1.75rem;*/
+/*    height: 2px;*/
+/*    margin-left: 0.75rem;*/
+/*    transform: translateY(50%);*/
+/*    background: var(--sl-color-primary-500);*/
+/*}*/
 
 :host h2,
 :host .subheader {

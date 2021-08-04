@@ -39,10 +39,18 @@
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 1.5rem;
-  align-items: flex-end;
+  align-items: center;
 }
 
-#member-page sl-details > [slot='summary'] strong,
+#member-page .dw-credentials--header {
+  padding-top: var(--sl-spacing-medium);
+}
+
+#member-page .dw-databases--header {
+  padding-top: var(--sl-spacing-small);
+}
+
+#member-page sl-details > [slot=summary] strong,
 #member-page .dw-credentials--header strong,
 #member-page .dw-databases--header strong {
   background-color: var(--sl-color-primary-100);
