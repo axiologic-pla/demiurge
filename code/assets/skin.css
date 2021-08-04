@@ -1,4 +1,4 @@
-@import './components.css';
+@import "./components.css";
 
 :root {
   --webc-primary-color: var(--sl-color-gray-900);
@@ -43,16 +43,26 @@ dw-title {
   --color: var(--sl-color-gray-900);
 }
 
+.dw-data-grid {
+  --background: var(--sl-input-background-color);
+  --border-color: var(--sl-color-gray-200);
+}
+
 :root .sl-theme-dark {
-  --webc-primary-color: --sl-color-gray-50;
+  --webc-primary-color: var(--sl-color-gray-50);
+  --sl-input-label-color: var(--sl-color-gray-50);
 }
 
 .sl-theme-dark webc-app-container {
   --background: var(--sl-color-gray-950);
 }
 
-.sl-theme-dark webc-app-menu[mode='horizontal'] {
+.sl-theme-dark webc-app-menu[mode=horizontal] {
   --color: var(--sl-color-gray-300);
+}
+
+.sl-theme-dark dw-spinner {
+  --color: var(--sl-color-gray-100);
 }
 
 .sl-theme-dark dw-title {
@@ -61,4 +71,10 @@ dw-title {
 
 .sl-theme-dark dw-header {
   --border-color: var(--sl-color-gray-800);
+  --color: var(--sl-color-gray-300);
+}
+
+.sl-theme-dark .dw-data-grid {
+  --background: var(--sl-input-background-color);
+  --border-color: var(--sl-input-border-color);
 }

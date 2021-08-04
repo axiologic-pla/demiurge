@@ -4,6 +4,7 @@
   justify-content: center;
   padding: var(--sl-spacing-small);
   cursor: wait;
+  color: var(--color);
 }
 
 .dw-spinner sl-spinner {

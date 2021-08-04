@@ -9,23 +9,24 @@ dw-header webc-app-menu {
   align-items: center;
 }
 
-dw-header webc-app-menu[mode='horizontal'] {
+dw-header webc-app-menu[mode=horizontal] {
   --background: transparent;
   --box-shadow: none;
-  --color: inherit;
+  --color: var(--color);
   --height: 80px;
   --padding: 0 2rem;
 }
 
-dw-header webc-app-menu[mode='horizontal'] .app-menu webc-app-menu-item {
+dw-header webc-app-menu[mode=horizontal] .app-menu webc-app-menu-item {
   height: calc(var(--height) / 2);
+  --color: var(--color);
 }
 
-dw-header webc-app-menu[mode='horizontal'] .app-menu webc-app-menu-item[active] {
+dw-header webc-app-menu[mode=horizontal] .app-menu webc-app-menu-item[active] {
   font-weight: normal;
 }
 
-dw-header webc-app-menu[mode='horizontal'] .app-menu webc-app-menu-item[active]:after {
+dw-header webc-app-menu[mode=horizontal] .app-menu webc-app-menu-item[active]:after {
   position: absolute;
   content: '';
   left: 0;
@@ -36,7 +37,7 @@ dw-header webc-app-menu[mode='horizontal'] .app-menu webc-app-menu-item[active]:
   background: var(--sl-color-primary-500);
 }
 
-dw-header webc-app-menu[mode='horizontal'] .container div {
+dw-header webc-app-menu[mode=horizontal] .container div {
   display: flex;
   align-items: center;
   column-gap: 1.5rem;
@@ -48,23 +49,23 @@ dw-header .logo a {
   font-size: 1.25rem;
 }
 
-dw-header webc-app-menu[mode='horizontal'] [burger] {
+dw-header webc-app-menu[mode=horizontal] [burger] {
   display: none;
   font-size: 1.3rem;
 }
 
 @media screen and (max-width: 715px) {
-  dw-header webc-app-menu[mode='horizontal'] .app-menu.items {
+  dw-header webc-app-menu[mode=horizontal] .app-menu.items {
     display: none;
   }
 
-  dw-header webc-app-menu[mode='horizontal'] [burger] {
+  dw-header webc-app-menu[mode=horizontal] [burger] {
     display: block;
   }
 }
 
 @media screen and (max-width: 420px) {
-  dw-header webc-app-menu[mode='horizontal'] {
+  dw-header webc-app-menu[mode=horizontal] {
     --padding: 0 1rem;
   }
 }

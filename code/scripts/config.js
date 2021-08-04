@@ -1,29 +1,29 @@
 const { setConfig, getConfig, addControllers, addHook } = WebCardinal.preload;
 const { define } = WebCardinal.components;
 
-// function setTheme() {
-//   function applyDarkTheme() {
-//     const schemeElement = document.head.querySelector("[name=color-scheme]");
-//     schemeElement.setAttribute(
-//       "content",
-//       `${schemeElement.getAttribute("content")} dark`
-//     );
-//     document.body.classList.add("dark");
-//   }
-//
-//   const storedTheme = window.localStorage.getItem("mt-theme");
-//   if (storedTheme === "dark") {
-//     applyDarkTheme();
-//     return;
-//   }
-//   if (storedTheme === "light") {
-//     return;
-//   }
-//
-//   if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-//     applyDarkTheme();
-//   }
-// }
+function setInitialTheme() {
+  function applyDarkTheme() {
+    const schemeElement = document.head.querySelector("[name=color-scheme]");
+    schemeElement.setAttribute(
+        "content",
+        `${schemeElement.getAttribute("content")} dark`
+    );
+    document.body.classList.add("sl-theme-dark");
+  }
+
+  const storedTheme = window.localStorage.getItem("dw-theme");
+  if (storedTheme === "dark") {
+    applyDarkTheme();
+    return;
+  }
+  if (storedTheme === "light") {
+    return;
+  }
+
+  if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    applyDarkTheme();
+  }
+}
 
 addHook("beforeAppLoads", async () => {
   const { init: initServices } = await import("/scripts/hooks/initServices.js");
@@ -36,6 +36,8 @@ addHook("beforeAppLoads", async () => {
     messageProcessingService,
   };
   messageProcessingService.readMessage();
+
+  // setInitialTheme();
 
   await import("/components/dw-header/dw-header.js");
   await import("/components/dw-menu/dw-menu.js");
