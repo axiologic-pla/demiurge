@@ -1,4 +1,7 @@
-node_modules
+.idea/
+.vscode/
+
+node_modules/
 
 seed
 package-lock.json
