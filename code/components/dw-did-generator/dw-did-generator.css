@@ -5,6 +5,16 @@
     --sl-input-font-family: monospace;
 }
 
+:host sl-tag {
+    font-family: monospace;
+}
+
+:host sl-tag::part(base) {
+    background-color: white;
+    user-select: auto;
+    cursor: auto;
+}
+
 :host sl-input,
 :host sl-input::part(form-control) {
     width: 100%;
@@ -13,7 +23,7 @@
 
 :host > .base {
     display: grid;
-    grid-template-columns: 70px auto 1fr;
+    grid-template-columns: auto auto 1fr;
 }
 
 :host > .base > .content {
@@ -33,28 +43,17 @@
     grid-template-columns: auto auto 1fr;
 }
 
-:host .did-ssi-key > .content {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    width: 100%;
-}
-
-:host .did-ssi-key > .content > .input--version {
-    max-width: 50px;
-}
-
 :host .did-ssi-sread {
-    grid-template-columns: auto 1fr 1fr;
-}
-
-:host .did-ssi-sread > .input--domain,
-:host .did-ssi-sread > .content {
-    grid-column: 2 / -1;
+    grid-template-columns: auto auto 1fr;
 }
 
 :host .did-ssi-sread > .content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 55px;
     width: 100%;
     max-width: 100%;
+}
+
+:host [hidden] {
+    display: none;
 }

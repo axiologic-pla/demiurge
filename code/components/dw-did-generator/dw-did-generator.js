@@ -1,4 +1,8 @@
 import config from "./dw-did-generator.config.js";
+import constants from "../../scripts/constants.js";
+import utils from "../../scripts/utils.js";
+
+const { promisify } = utils;
 
 // helpers
 
@@ -125,18 +129,20 @@ function createDidGenerator(config) {
 
   const templates = {
     ["did:ssi"]: () => {
-      const domainElement = createElement("sl-input", {
+      const domainElement = createElement("sl-tag", {
         className: "input--domain",
-        value: "blockchain_domain",
+        innerHTML: "blockchain_domain",
+        size: "large",
+        hidden: true,
       });
       const ssiSelectElement = createElement("dw-select", {
         className: "select--did-ssi",
         placeholder: "SSI Type",
-        types: types.SSI.TYPES
+        types: types.SSI.TYPES,
       });
       const result = [ssiSelectElement, domainElement];
 
-      ssiSelectElement.addEventListener("dw-change", (event) => {
+      ssiSelectElement.addEventListener("dw-change", async (event) => {
         const { type } = event.detail;
 
         const baseElement = ssiSelectElement.parentElement;
@@ -151,8 +157,12 @@ function createDidGenerator(config) {
         if (ssiTypes.includes(type)) {
           removeClassesByPrefixFromElement(baseElement, "did-ssi");
 
+          const { payload } = await completeComponentWithDIDMethods("SSI", type);
+
+          domainElement.hidden = false;
+
           const lowerCaseType = type.toLowerCase();
-          newContentElement = templates[`did:ssi:${lowerCaseType}`]();
+          newContentElement = await templates[`did:ssi:${lowerCaseType}`](payload);
           baseElement.classList.add(`did-ssi-${lowerCaseType}`);
         }
 
@@ -175,34 +185,31 @@ function createDidGenerator(config) {
         placeholder: "Type group...",
       });
     },
-    ["did:ssi:key"]: () => {
-      const baseElement = createElement("div");
-      const keyElement = createElement("sl-input", {
+    ["did:ssi:key"]: async ({ publicKey }) => {
+      return createElement("sl-input", {
         className: "input--key",
-        value: "f828ebc0f9b5ac31651a9246d3e12b0e",
+        value: publicKey,
         readonly: true,
       });
-      const versionElement = createElement("sl-input", {
-        className: "input--version",
-        value: "v2",
-        readonly: true,
-      });
-      baseElement.append(keyElement, versionElement);
-      return baseElement;
     },
-    ["did:ssi:sread"]: () => {
+    ["did:ssi:sread"]: ({ hashPrivateKey, hashPublicKey, version }) => {
       const baseElement = createElement("div");
       const hashPrivateKeyElement = createElement("sl-input", {
         className: "input--private-key",
-        value: "f828ebc0f9b5ac31651a9246d3e12b0e",
+        value: hashPrivateKey,
         readonly: true,
       });
       const hashPublicKeyElement = createElement("sl-input", {
         className: "input--public-key",
-        value: "f828ebc0f9b5ac31651a9246d3e12b0e",
+        value: hashPublicKey,
         readonly: true,
       });
-      baseElement.append(hashPrivateKeyElement, hashPublicKeyElement);
+      const versionElement = createElement("sl-input", {
+        className: "input--version",
+        value: version,
+        readonly: true,
+      });
+      baseElement.append(hashPrivateKeyElement, hashPublicKeyElement, versionElement);
       return baseElement;
     },
     ["did:web"]: () => {
@@ -222,7 +229,57 @@ function createDidGenerator(config) {
     },
   };
 
-  const renderContent = (baseElement, type) => {
+  const completeComponentWithDIDMethods = async (type, subType) => {
+    const openDSU = require("opendsu");
+    const keySSI = openDSU.loadApi("keyssi");
+    const w3cDID = openDSU.loadAPI("w3cdid");
+
+    // TODO: configurable blockchain domains
+    const domain = constants.DOMAIN;
+
+    const didMethod = type.toLowerCase();
+    const didSubMethod = subType && subType.toLowerCase();
+
+    let didDocument;
+    const payload = {};
+
+    if (didMethod === "ssi") {
+      switch (didSubMethod) {
+        case "sread": {
+          const seedSSI = await promisify(keySSI.createSeedSSI)(domain);
+          didDocument = await promisify(w3cDID.createIdentity)("sread", seedSSI);
+
+          payload.identifier = didDocument.getIdentifier();
+          payload.hash = didDocument.getHash();
+
+          const [hashPrivateKey, hashPublicKey, version] = payload.identifier.split(":").slice(4);
+          payload.hashPrivateKey = hashPrivateKey;
+          payload.hashPublicKey = hashPublicKey;
+          payload.version = version;
+
+          break;
+        }
+
+        case "key": {
+          const seedSSI = await promisify(keySSI.createSeedSSI)(domain);
+          didDocument = await promisify(w3cDID.createIdentity)("key", seedSSI);
+
+          payload.identifier = didDocument.getIdentifier();
+          // payload.publicKey = await promisify(didDocument.getPublicKey)("pem");
+          payload.publicKey = payload.identifier.split(":").pop();
+
+          break;
+        }
+      }
+    }
+
+    console.log(didDocument);
+    console.log(payload);
+
+    return { didDocument, payload };
+  };
+
+  const renderContent = async (baseElement, type) => {
     let contentElement = baseElement.querySelector(":scope > .content");
     let content;
 
@@ -241,6 +298,8 @@ function createDidGenerator(config) {
         part: "content",
       });
     }
+
+    await completeComponentWithDIDMethods(type, null);
 
     removeClassesByPrefixFromElement(contentElement, "did");
     contentElement.innerHTML = "";
@@ -270,21 +329,20 @@ function createDidGenerator(config) {
         part: "base",
       });
 
-      const didInputElement = createElement("sl-input", {
+      const didInputElement = createElement("sl-tag", {
         className: "input--did",
-        // disabled: true,
-        readonly: true,
-        value: "did",
+        innerHTML: "did",
+        size: "large",
       });
       const didSelectElement = createElement("dw-select", {
         className: "select--did",
         placeholder,
-        types
+        types,
       });
 
-      didSelectElement.addEventListener("dw-change", (event) => {
+      didSelectElement.addEventListener("dw-change", async (event) => {
         const { type } = event.detail;
-        renderContent(baseElement, type);
+        await renderContent(baseElement, type);
       });
 
       baseElement.append(didInputElement, didSelectElement);
@@ -296,7 +354,6 @@ function createDidGenerator(config) {
     }
   };
 }
-
 
 customElements.define("dw-select", createSelect());
 customElements.define("dw-did-generator", createDidGenerator(config));
