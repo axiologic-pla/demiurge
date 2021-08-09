@@ -72,7 +72,7 @@ class MessageProcessingService {
           case constants.CONTENT_TYPE.DATABASE:
             const { name, keySSI } = JSON.parse(content);
             record = { issuer: senderDID, did: groupDID, name, keySSI };
-            await this.performTableOperation(operation, constants.TABLES.GROUP_DATABASES, groupDID, record);
+            await this.performTableOperation(operation, constants.TABLES.GROUP_DATABASES, keySSI, record);
             return;
           default:
             return console.error(`Invalid content type received ${message.getContentType()}`);
