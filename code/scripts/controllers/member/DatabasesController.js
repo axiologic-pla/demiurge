@@ -68,7 +68,7 @@ class DatabasesController extends DwController {
     const db = dbAPI.getWalletDB(seedSSI, database.name);
     return {
       name: database.name,
-      keySSI: seedSSI,
+      keySSI: seedSSI.getIdentifier(),
     };
   }
 

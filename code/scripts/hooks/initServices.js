@@ -9,7 +9,7 @@ const w3cDID = openDSU.loadAPI("w3cdid");
 const keySSISpace = openDSU.loadAPI("keyssi");
 const scAPI = openDSU.loadAPI("sc");
 
-const dsuStorage = new DSUStorage();
+const dsuStorage = DSUStorage.getDSUStorageInstance();
 
 function ensureStorageServiceIsInitialised(callback) {
   loadSecurityContext(async (err) => {

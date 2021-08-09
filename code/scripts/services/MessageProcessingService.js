@@ -61,7 +61,7 @@ class MessageProcessingService {
             await this.performTableOperation(operation, constants.TABLES.GROUPS, groupDID, record);
             return;
           case constants.CONTENT_TYPE.CREDENTIAL:
-            record = { issuer: senderDID, did: groupDID, credential: content };
+            record = { issuer: senderDID, did: groupDID, token: content };
             await this.performTableOperation(
               operation,
               constants.TABLES.GROUPS_CREDENTIALS,
@@ -82,7 +82,7 @@ class MessageProcessingService {
           case constants.CONTENT_TYPE.CREDENTIAL:
             record = {
               issuer: senderDID,
-              credential: content,
+              token: content,
               member: this.identity.did,
             };
             await this.performTableOperation(
@@ -93,7 +93,7 @@ class MessageProcessingService {
             );
             return;
           case constants.CONTENT_TYPE.DATABASE:
-            const { name, keySSI } = JSON.parse(content);
+            const { name, keySSI } = content;
             record = {
               owner: senderDID,
               name,
