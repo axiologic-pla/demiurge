@@ -1,13 +1,17 @@
 const { setConfig, getConfig, addControllers, addHook } = WebCardinal.preload;
 const { define } = WebCardinal.components;
 
+function getInitialConfig() {
+  const config = getConfig();
+  config.translations = false;
+  config.logLevel = "none";
+  return config;
+}
+
 function setInitialTheme() {
   function applyDarkTheme() {
     const schemeElement = document.head.querySelector("[name=color-scheme]");
-    schemeElement.setAttribute(
-        "content",
-        `${schemeElement.getAttribute("content")} dark`
-    );
+    schemeElement.setAttribute("content", `${schemeElement.getAttribute("content")} dark`);
     document.body.classList.add("sl-theme-dark");
   }
 
@@ -26,39 +30,39 @@ function setInitialTheme() {
 }
 
 addHook("beforeAppLoads", async () => {
-  const { init: initServices } = await import("/scripts/hooks/initServices.js");
-  const { dsuStorage, storageService, identity, messageProcessingService } = await initServices();
+  // get default identity
+  const { getIdentity } = await import("/scripts/hooks/getIdentity.js");
+  const identity = await getIdentity();
 
-  window.dwServices = {
-    dsuStorage,
-    storageService,
-    identity,
-    messageProcessingService,
-  };
-  messageProcessingService.readMessage();
+  // init MessageProcessingService
+  const { default: getMessageProcessingService } = await import("/scripts/services/MessageProcessingService.js");
+  const messageProcessingService = await getMessageProcessingService(identity);
+
+  WebCardinal.wallet = { identity, messageProcessingService };
 
   // setInitialTheme();
 
+  // load Custom Components
   await import("/components/dw-header/dw-header.js");
   await import("/components/dw-menu/dw-menu.js");
   await import("/components/dw-spinner/dw-spinner.js");
   await import("/components/dw-title/dw-title.js");
   await import("/components/dw-data-grid/dw-data-grid.js");
   await import("/components/dw-clipboard-input/dw-clipboard-input.js");
-  await import('/components/dw-did-generator/dw-did-generator.js');
+  await import("/components/dw-did-generator/dw-did-generator.js");
 
+  // load Demiurge base Controller
   const { default: DwController } = await import("/scripts/controllers/DwController.js");
   addControllers({ DwController });
+
+  try {
+    messageProcessingService.readMessage();
+  } catch (err) {
+    console.log(err);
+  }
 });
 
-setConfig(
-  (() => {
-    const config = getConfig();
-    config.translations = false;
-    config.logLevel = "none";
-    return config;
-  })()
-);
+setConfig(getInitialConfig());
 
 define("dw-page");
 define("dw-action");

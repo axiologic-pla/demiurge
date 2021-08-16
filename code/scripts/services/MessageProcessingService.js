@@ -5,8 +5,11 @@ import utils from "../utils.js";
 const promisify = utils.promisify;
 
 class MessageProcessingService {
-  constructor(storageService, identity) {
-    this.storageService = storageService;
+  constructor(identity) {
+    const openDSU = require('opendsu');
+    const persistence = openDSU.loadAPI('persistence');
+
+    this.storageService = persistence.getWalletStorage();
     this.identity = identity;
   }
 

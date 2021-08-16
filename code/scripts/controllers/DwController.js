@@ -2,6 +2,43 @@ import { escapeHTML, isHTMLElement } from "../../components/utils.js";
 
 const { WebcController } = WebCardinal.controllers;
 
+class DwController extends WebcController {
+  constructor(...props) {
+    super(...props);
+    this._ui = new DwUI(...props);
+
+    this.storageService = this.getWalletStorage();
+
+    for (const key of ["identity", "messageProcessingService"]) {
+      this[key] = WebCardinal.wallet[key];
+    }
+  }
+
+  get ui() {
+    return this._ui;
+  }
+
+  /**
+   * @param {string} key
+   * @param {object} value
+   */
+  updateState(key, value) {
+    this.setState({
+      ...(this.getState() || {}),
+      [key]: value,
+    });
+  }
+
+  /**
+   * @param {string} key
+   */
+  removeFromState(key) {
+    const state = this.getState();
+    delete state[key];
+    this.setState(state);
+  }
+}
+
 class DwUI {
   constructor(element) {
     this._element = element;
@@ -174,41 +211,6 @@ class DwUI {
 
   set page(page) {
     this._page = page;
-  }
-}
-
-class DwController extends WebcController {
-  constructor(...props) {
-    super(...props);
-    this._ui = new DwUI(...props);
-
-    for (const key of ["dsuStorage", "storageService", "identity", "messageProcessingService"]) {
-      this[key] = window.dwServices[key];
-    }
-  }
-
-  get ui() {
-    return this._ui;
-  }
-
-  /**
-   * @param {string} key
-   * @param {object} value
-   */
-  updateState(key, value) {
-    this.setState({
-      ...(this.getState() || {}),
-      [key]: value,
-    });
-  }
-
-  /**
-   * @param {string} key
-   */
-  removeFromState(key) {
-    const state = this.getState();
-    delete state[key];
-    this.setState(state);
   }
 }
 
