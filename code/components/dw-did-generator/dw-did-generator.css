@@ -30,6 +30,14 @@
     display: flex;
 }
 
+:host > .footer {
+    text-align: right;
+}
+
+:host > .footer > sl-button {
+    margin: var(--sl-spacing-medium) 0;
+}
+
 :host .did-ssi-key,
 :host .did-ssi-sread,
 :host .did-ssi-name,

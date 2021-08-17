@@ -8,6 +8,7 @@ export default {
                 NAME: { LABEL: "Name" },
                 GROUP: { LABEL: "Group" },
             },
+            PLACEHOLDER: "SSI Types",
         },
         WEB: {
             LABEL: "Web",

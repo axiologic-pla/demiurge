@@ -1,10 +1,8 @@
 import config from "./dw-did-generator.config.js";
-import constants from "../../scripts/constants.js";
-import utils from "../../scripts/utils.js";
 
-const { promisify } = utils;
+const { promisify } = $$;
 
-// helpers
+// DOM helpers
 
 function createElement(tagName, properties = {}) {
   return Object.assign(document.createElement(tagName), properties);
@@ -20,7 +18,82 @@ function removeClassesByPrefixFromElement(element, prefix) {
   element.className = classes.join(" ").trim();
 }
 
-// main
+// OpenDSU SDK
+
+/**
+ * @param {string} domain - blockchain domain
+ * @param {'SSI'|'KEY'|'WEB'} type - specifies did method
+ * @param {'SREAD'|'KEY'|'GROUP'|'NAME'|undefined} [subType] - only for 'SSI' type
+ */
+async function generateDidDocumentBeforeSubmission(domain, type, subType) {
+  const openDSU = require("opendsu");
+  const keySSI = openDSU.loadApi("keyssi");
+  const w3cDID = openDSU.loadAPI("w3cdid");
+
+  const didMethod = type.toLowerCase();
+  const didSubMethod = subType && subType.toLowerCase();
+
+  let didDocument;
+  let canBeSubmitted = false;
+  const payload = {};
+
+  switch (didMethod) {
+    case "ssi": {
+      switch (didSubMethod) {
+        case "sread": {
+          const seedSSI = await promisify(keySSI.createSeedSSI)(domain);
+
+          didDocument = await promisify(w3cDID.createIdentity)("sread", seedSSI);
+
+          const [hashPrivateKey, hashPublicKey, version] = didDocument.getIdentifier().split(":").slice(4);
+          payload.hashPrivateKey = hashPrivateKey;
+          payload.hashPublicKey = hashPublicKey;
+          payload.version = version;
+
+          canBeSubmitted = true;
+
+          break;
+        }
+        case "key": {
+          const seedSSI = await promisify(keySSI.createSeedSSI)(domain);
+
+          didDocument = await promisify(w3cDID.createIdentity)("key", seedSSI);
+
+          payload.publicKey = didDocument.getIdentifier().split(":").pop();
+
+          canBeSubmitted = true;
+
+          break;
+        }
+        case "group":
+        case "name": {
+          canBeSubmitted = true;
+          break;
+        }
+      }
+      break;
+    }
+
+    case "key": {
+      canBeSubmitted = true;
+      break;
+    }
+
+    case "web": {
+      canBeSubmitted = true;
+      break;
+    }
+  }
+
+  return { didDocument, canBeSubmitted, payload };
+}
+
+/**
+ * @see generateDidDocumentBeforeSubmission.
+ */
+async function generateDidDocumentAfterSubmission(domain, type, subType) {}
+
+// DOM Components
 
 function createSelect(types) {
   return class _ extends HTMLElement {
@@ -124,20 +197,25 @@ function createSelect(types) {
 }
 
 function createDidGenerator(config) {
+  let rootElement, submitElement;
+
   const types = config.TYPES;
   const placeholder = config.PLACEHOLDER;
 
   const templates = {
-    ["did:ssi"]: () => {
-      const domainElement = createElement("sl-tag", {
+    ["did:ssi"]: (payload) => {
+      const { domain } = payload;
+
+      submitElement.hidden = true;
+
+      const domainElement = createElement("sl-input", {
         className: "input--domain",
-        innerHTML: "blockchain_domain",
-        size: "large",
+        value: domain,
         hidden: true,
       });
       const ssiSelectElement = createElement("dw-select", {
         className: "select--did-ssi",
-        placeholder: "SSI Type",
+        placeholder: types.SSI.PLACEHOLDER,
         types: types.SSI.TYPES,
       });
       const result = [ssiSelectElement, domainElement];
@@ -157,13 +235,20 @@ function createDidGenerator(config) {
         if (ssiTypes.includes(type)) {
           removeClassesByPrefixFromElement(baseElement, "did-ssi");
 
-          const { payload } = await completeComponentWithDIDMethods("SSI", type);
+          const result = await generateDidDocumentBeforeSubmission(domain, "SSI", type);
 
           domainElement.hidden = false;
 
           const lowerCaseType = type.toLowerCase();
-          newContentElement = await templates[`did:ssi:${lowerCaseType}`](payload);
+          newContentElement = await templates[`did:ssi:${lowerCaseType}`](result.payload);
           baseElement.classList.add(`did-ssi-${lowerCaseType}`);
+
+          if (result.canBeSubmitted) {
+            submitElement.hidden = false;
+            const { didDocument, payload } = result;
+            const data = didDocument ? { didDocument } : { ...payload };
+            await submit(domain, "SSI", type, data);
+          }
         }
 
         if (newContentElement) {
@@ -173,26 +258,31 @@ function createDidGenerator(config) {
       });
       return result;
     },
-    ["did:ssi:name"]: () => {
-      return createElement("sl-input", {
+    ["did:ssi:name"]: (payload) => {
+      payload.inputElement = createElement("sl-input", {
         className: "input--name",
         placeholder: "Type name...",
       });
+      return payload.inputElement;
     },
-    ["did:ssi:group"]: () => {
-      return createElement("sl-input", {
+    ["did:ssi:group"]: (payload) => {
+      payload.inputElement = createElement("sl-input", {
         className: "input--group",
         placeholder: "Type group...",
       });
+      return payload.inputElement;
     },
-    ["did:ssi:key"]: async ({ publicKey }) => {
+    ["did:ssi:key"]: (payload) => {
+      const { publicKey } = payload;
       return createElement("sl-input", {
         className: "input--key",
         value: publicKey,
         readonly: true,
       });
     },
-    ["did:ssi:sread"]: ({ hashPrivateKey, hashPublicKey, version }) => {
+    ["did:ssi:sread"]: (payload) => {
+      const { hashPrivateKey, hashPublicKey, version } = payload;
+
       const baseElement = createElement("div");
       const hashPrivateKeyElement = createElement("sl-input", {
         className: "input--private-key",
@@ -213,78 +303,32 @@ function createDidGenerator(config) {
       return baseElement;
     },
     ["did:web"]: () => {
-      const inputElement = createElement("sl-input", {
-        className: "input--web",
-        value: "internet_domain",
-      });
-      return [inputElement];
+      submitElement.hidden = true;
+      return [
+        createElement("sl-input", {
+          className: "input--web",
+          value: "internet_domain",
+        }),
+      ];
     },
     ["did:key"]: () => {
-      const keyElement = createElement("sl-input", {
-        className: "input--key",
-        value: "0a528bfadc74417869ea4f1b400b0432",
-        readonly: true,
-      });
-      return [keyElement];
+      submitElement.hidden = true;
+      return [
+        createElement("sl-input", {
+          className: "input--key",
+          value: "0a528bfadc74417869ea4f1b400b0432",
+          readonly: true,
+        }),
+      ];
     },
   };
 
-  const completeComponentWithDIDMethods = async (type, subType) => {
-    const openDSU = require("opendsu");
-    const keySSI = openDSU.loadApi("keyssi");
-    const w3cDID = openDSU.loadAPI("w3cdid");
-
-    // TODO: configurable blockchain domains
-    const domain = constants.DOMAIN;
-
-    const didMethod = type.toLowerCase();
-    const didSubMethod = subType && subType.toLowerCase();
-
-    let didDocument;
-    const payload = {};
-
-    if (didMethod === "ssi") {
-      switch (didSubMethod) {
-        case "sread": {
-          const seedSSI = await promisify(keySSI.createSeedSSI)(domain);
-          didDocument = await promisify(w3cDID.createIdentity)("sread", seedSSI);
-
-          payload.identifier = didDocument.getIdentifier();
-          payload.hash = didDocument.getHash();
-
-          const [hashPrivateKey, hashPublicKey, version] = payload.identifier.split(":").slice(4);
-          payload.hashPrivateKey = hashPrivateKey;
-          payload.hashPublicKey = hashPublicKey;
-          payload.version = version;
-
-          break;
-        }
-
-        case "key": {
-          const seedSSI = await promisify(keySSI.createSeedSSI)(domain);
-          didDocument = await promisify(w3cDID.createIdentity)("key", seedSSI);
-
-          payload.identifier = didDocument.getIdentifier();
-          // payload.publicKey = await promisify(didDocument.getPublicKey)("pem");
-          payload.publicKey = payload.identifier.split(":").pop();
-
-          break;
-        }
-      }
-    }
-
-    console.log(didDocument);
-    console.log(payload);
-
-    return { didDocument, payload };
-  };
-
-  const renderContent = async (baseElement, type) => {
-    let contentElement = baseElement.querySelector(":scope > .content");
+  const renderContent = async (domain, type) => {
+    let contentElement = rootElement.querySelector(":scope > .content");
     let content;
 
     if (Object.keys(types).includes(type)) {
-      content = templates[`did:${type.toLowerCase()}`]();
+      content = templates[`did:${type.toLowerCase()}`]({ domain });
     }
 
     if (!content) {
@@ -299,15 +343,32 @@ function createDidGenerator(config) {
       });
     }
 
-    await completeComponentWithDIDMethods(type, null);
+    const result = await generateDidDocumentBeforeSubmission(domain, type, undefined);
+    if (result.canBeSubmitted) {
+      // delete result.canBeSubmitted;
+      // await submit(domain, type, null, result);
+    }
 
     removeClassesByPrefixFromElement(contentElement, "did");
     contentElement.innerHTML = "";
     contentElement.append(...content);
 
-    removeClassesByPrefixFromElement(baseElement, "did");
-    baseElement.classList.add(`did-${type.toLowerCase()}`);
-    baseElement.append(contentElement);
+    removeClassesByPrefixFromElement(rootElement, "did");
+    rootElement.classList.add(`did-${type.toLowerCase()}`);
+    rootElement.append(contentElement);
+  };
+
+  const submit = async (domain, type, subType, data) => {
+    submitElement.hidden = false;
+
+    console.log(rootElement);
+    console.log({ domain, type, subType, data });
+
+    // const baseElement = createElement("div");
+    // const buttonElement = createElement("sl-button");
+    //
+    // baseElement.append(buttonElement);
+    // rootElement.append(baseElement);
   };
 
   return class _ extends HTMLElement {
@@ -324,10 +385,26 @@ function createDidGenerator(config) {
         rel: "stylesheet",
         href: `./components/${component}/${component}.css`,
       });
-      const baseElement = createElement("div", {
+      rootElement = createElement("div", {
         className: "base",
         part: "base",
       });
+
+      submitElement = createElement("sl-button", {
+        className: "submit--did",
+        part: "submit",
+        type: "primary",
+        hidden: true,
+        innerHTML: `
+          <sl-icon slot="prefix" name="shield-fill-plus"></sl-icon>
+          Save identity
+        `,
+      });
+      const footerElement = createElement("div", {
+        className: "footer",
+        part: "base",
+      });
+      footerElement.append(submitElement);
 
       const didInputElement = createElement("sl-tag", {
         className: "input--did",
@@ -342,15 +419,23 @@ function createDidGenerator(config) {
 
       didSelectElement.addEventListener("dw-change", async (event) => {
         const { type } = event.detail;
-        await renderContent(baseElement, type);
+        await renderContent(this.domain, type);
       });
 
-      baseElement.append(didInputElement, didSelectElement);
-      this.shadowRoot.append(linkElement, baseElement);
+      rootElement.append(didInputElement, didSelectElement);
+      this.shadowRoot.append(linkElement, rootElement, footerElement);
     }
 
     disconnectedCallback() {
       this.shadowRoot.innerHTML = "";
+    }
+
+    get domain() {
+      return this.getAttribute("domain");
+    }
+
+    set domain(domain) {
+      this.setAttribute("domain", domain);
     }
   };
 }
