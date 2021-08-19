@@ -21,12 +21,12 @@
     min-width: 0;
 }
 
-:host > .base {
+:host > .main {
     display: grid;
     grid-template-columns: auto auto 1fr;
 }
 
-:host > .base > .content {
+:host > .main > .content {
     display: flex;
 }
 

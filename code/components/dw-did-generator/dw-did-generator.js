@@ -91,11 +91,34 @@ async function generateDidDocumentBeforeSubmission(domain, type, subType) {
 /**
  * @see generateDidDocumentBeforeSubmission.
  */
-async function generateDidDocumentAfterSubmission(domain, type, subType) {}
+async function generateDidDocumentAfterSubmission(domain, type, subType, payload) {
+  const openDSU = require("opendsu");
+  const w3cDID = openDSU.loadAPI("w3cdid");
+
+  const didMethod = type.toLowerCase();
+  const didSubMethod = subType && subType.toLowerCase();
+
+  let didDocument;
+
+  switch (didMethod) {
+    case "ssi": {
+      switch (didSubMethod) {
+        case "group":
+        case "name": {
+          didDocument = await promisify(w3cDID.createIdentity)(didSubMethod, domain, payload);
+          break;
+        }
+      }
+      break;
+    }
+  }
+
+  return { didDocument };
+}
 
 // DOM Components
 
-function createSelect(types) {
+function createDidGeneratorSelect(types) {
   return class _ extends HTMLElement {
     constructor() {
       super();
@@ -213,7 +236,7 @@ function createDidGenerator(config) {
         value: domain,
         hidden: true,
       });
-      const ssiSelectElement = createElement("dw-select", {
+      const ssiSelectElement = createElement("dw-did-generator-select", {
         className: "select--did-ssi",
         placeholder: types.SSI.PLACEHOLDER,
         types: types.SSI.TYPES,
@@ -247,7 +270,7 @@ function createDidGenerator(config) {
             submitElement.hidden = false;
             const { didDocument, payload } = result;
             const data = didDocument ? { didDocument } : { ...payload };
-            await submit(domain, "SSI", type, data);
+            await preSubmit(domain, "SSI", type, data);
           }
         }
 
@@ -346,7 +369,7 @@ function createDidGenerator(config) {
     const result = await generateDidDocumentBeforeSubmission(domain, type, undefined);
     if (result.canBeSubmitted) {
       // delete result.canBeSubmitted;
-      // await submit(domain, type, null, result);
+      // await preSubmit(domain, type, null, result);
     }
 
     removeClassesByPrefixFromElement(contentElement, "did");
@@ -358,17 +381,9 @@ function createDidGenerator(config) {
     rootElement.append(contentElement);
   };
 
-  const submit = async (domain, type, subType, data) => {
+  const preSubmit = async (domain, type, subType, data) => {
     submitElement.hidden = false;
-
-    console.log(rootElement);
-    console.log({ domain, type, subType, data });
-
-    // const baseElement = createElement("div");
-    // const buttonElement = createElement("sl-button");
-    //
-    // baseElement.append(buttonElement);
-    // rootElement.append(baseElement);
+    submitElement.data = { domain, type, subType, ...data };
   };
 
   return class _ extends HTMLElement {
@@ -376,6 +391,7 @@ function createDidGenerator(config) {
       super();
 
       this.attachShadow({ mode: "open" });
+      // this.setAttribute('shadow', '');
     }
 
     connectedCallback() {
@@ -386,10 +402,9 @@ function createDidGenerator(config) {
         href: `./components/${component}/${component}.css`,
       });
       rootElement = createElement("div", {
-        className: "base",
-        part: "base",
+        className: "main",
+        part: "main",
       });
-
       submitElement = createElement("sl-button", {
         className: "submit--did",
         part: "submit",
@@ -402,27 +417,58 @@ function createDidGenerator(config) {
       });
       const footerElement = createElement("div", {
         className: "footer",
-        part: "base",
+        part: "footer",
       });
-      footerElement.append(submitElement);
-
-      const didInputElement = createElement("sl-tag", {
+      const didTagElement = createElement("sl-tag", {
         className: "input--did",
         innerHTML: "did",
         size: "large",
       });
-      const didSelectElement = createElement("dw-select", {
+      const didSelectElement = createElement("dw-did-generator-select", {
         className: "select--did",
         placeholder,
         types,
       });
+
+      footerElement.append(submitElement);
+      rootElement.append(didTagElement, didSelectElement);
 
       didSelectElement.addEventListener("dw-change", async (event) => {
         const { type } = event.detail;
         await renderContent(this.domain, type);
       });
 
-      rootElement.append(didInputElement, didSelectElement);
+      submitElement.addEventListener("click", async () => {
+        let { didDocument } = submitElement.data;
+
+        if (!didDocument) {
+          const { domain, type, subType, inputElement } = submitElement.data;
+          const { didDocument: result } = await generateDidDocumentAfterSubmission(
+            domain,
+            type,
+            subType,
+            inputElement.value
+          );
+          didDocument = result;
+        }
+
+        if (didDocument) {
+          const model = this.getDataTagModel();
+          this.getDataTagModel = () => ({
+            ...model,
+            didDocument,
+          });
+
+          this.dispatchEvent(
+            new CustomEvent("did-generate", {
+              detail: { didDocument },
+              bubbles: true,
+              cancelable: true,
+            })
+          );
+        }
+      });
+
       this.shadowRoot.append(linkElement, rootElement, footerElement);
     }
 
@@ -440,5 +486,5 @@ function createDidGenerator(config) {
   };
 }
 
-customElements.define("dw-select", createSelect());
+customElements.define("dw-did-generator-select", createDidGeneratorSelect());
 customElements.define("dw-did-generator", createDidGenerator(config));
