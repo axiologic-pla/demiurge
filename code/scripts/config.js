@@ -1,4 +1,4 @@
-const { setConfig, getConfig, addControllers, addHook } = WebCardinal.preload;
+const { setConfig, getConfig, addControllers, addHook, navigateToPageTag } = WebCardinal.preload;
 const { define } = WebCardinal.components;
 
 function getInitialConfig() {
@@ -30,15 +30,24 @@ function setInitialTheme() {
 }
 
 addHook("beforeAppLoads", async () => {
+  WebCardinal.wallet = {};
+  const wallet = WebCardinal.wallet;
+
+  const { getVaultDomainAsync } = await import("/scripts/hooks/getVaultDomain.js");
+  wallet.vaultDomain = await getVaultDomainAsync();
+
+  const { getStoredDID } = await import("/scripts/services/BootingIdentityService.js");
+  wallet.did = await getStoredDID();
+
   // get default identity
-  const { getIdentity } = await import("/scripts/hooks/getIdentity.js");
-  const identity = await getIdentity();
+  // const { getIdentity } = await import("/scripts/hooks/getIdentity.js");
+  // const identity = await getIdentity();
 
   // init MessageProcessingService
   const { default: getMessageProcessingService } = await import("/scripts/services/MessageProcessingService.js");
-  const messageProcessingService = await getMessageProcessingService(identity);
+  const messageProcessingService = await getMessageProcessingService({ did: wallet.did });
 
-  WebCardinal.wallet = { identity, messageProcessingService };
+  WebCardinal.wallet.messageProcessingService = messageProcessingService;
 
   // setInitialTheme();
 
@@ -52,13 +61,20 @@ addHook("beforeAppLoads", async () => {
   await import("/components/dw-did-generator/dw-did-generator.js");
 
   // load Demiurge base Controller
-  const { default: DwController } = await import("/scripts/controllers/DwController.js");
+  const { DwController } = await import("/scripts/controllers/DwController.js");
   addControllers({ DwController });
 
   try {
     messageProcessingService.readMessage();
   } catch (err) {
     console.log(err);
+  }
+});
+
+addHook("beforePageLoads", "quick-actions", async () => {
+  const { wallet } = WebCardinal;
+  if (!wallet.did) {
+    await navigateToPageTag("my-identities");
   }
 });
 
@@ -74,3 +90,4 @@ define("dw-dialog-edit-member");
 define("dw-dialog-groups-fab");
 define("dw-dialog-view-credential");
 define("dw-dialog-new-group");
+define("dw-dialog-did-generator");

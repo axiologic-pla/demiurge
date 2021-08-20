@@ -2,20 +2,45 @@ import { escapeHTML, isHTMLElement } from "../../components/utils.js";
 
 const { WebcController } = WebCardinal.controllers;
 
+let wasDwDialogDidGeneratorShown = false;
+
 class DwController extends WebcController {
   constructor(...props) {
     super(...props);
     this._ui = new DwUI(...props);
 
-    this.storageService = this.getWalletStorage();
-
-    for (const key of ["identity", "messageProcessingService"]) {
-      this[key] = WebCardinal.wallet[key];
+    for (const item of ["did", "messageProcessingService"]) {
+      this[item] = WebCardinal.wallet[item];
     }
+    this.domain = WebCardinal.wallet.vaultDomain;
+
+    if (!this.did) {
+      if (WebCardinal.state.page.tag !== "my-identities") {
+        this.navigateToPageTag("my-identities");
+        return;
+      }
+
+      if (!wasDwDialogDidGeneratorShown) {
+        this.ui.showDialogFromComponent("dw-dialog-did-generator", [], {
+          disableClosing: true,
+        });
+        wasDwDialogDidGeneratorShown = true;
+      }
+    }
+
+    this.storageService = this.getWalletStorage();
   }
 
   get ui() {
     return this._ui;
+  }
+
+  get domain() {
+    return WebCardinal.wallet.blockchainDomain;
+  }
+
+  set domain(blockchainDomain) {
+    WebCardinal.wallet.blockchainDomain = blockchainDomain;
   }
 
   /**
@@ -98,9 +123,10 @@ class DwUI {
    * @param {object} [options]
    * @param {function} [options.onClose]
    * @param {HTMLElement} [options.parentElement]
+   * @param {boolean} [options.disableClosing]
    */
   async showDialogFromComponent(component, attributes = {}, options = {}) {
-    let { parentElement, onClose } = options;
+    let { parentElement, onClose, disableClosing } = options;
     if (typeof onClose !== "function") {
       onClose = () => {};
     }
@@ -123,6 +149,17 @@ class DwUI {
     await dialogElement.componentOnReady();
 
     const slElement = dialogElement.querySelector("sl-dialog");
+
+    if (disableClosing) {
+      slElement.addEventListener("sl-request-close", (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      });
+      slElement.addEventListener("sl-hide", (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      });
+    }
 
     const closeElement = slElement.querySelector("header > sl-icon-button[close]");
     if (closeElement) {
@@ -214,5 +251,4 @@ class DwUI {
   }
 }
 
-export default DwController;
-export { DwUI };
+export { DwController, DwUI };
