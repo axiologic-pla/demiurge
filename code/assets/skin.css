@@ -1,13 +1,18 @@
 @import "./components.css";
 
 :root {
-  --webc-primary-color: var(--sl-color-gray-900);
-  --webc-font-family: var(--sl-font-sans);
-  --dw-menu-width: 250px;
-  --dw-container-width: 1000px;
+    --webc-primary-color: var(--sl-color-gray-900);
+    --webc-font-family: var(--sl-font-sans);
+    --dw-menu-width: 250px;
+    --dw-container-width: 1000px;
 
-  --sl-z-index-dialog: 1000 !important;
-  --sl-z-index-toast: 1001 !important;
+    --sl-z-index-dialog: 1000 !important;
+    --sl-z-index-toast: 1001 !important;
+}
+
+[disable-menu] webc-app-menu > .content,
+[disable-menu] webc-app-menu > .after {
+    display: none;
 }
 
 /*::-moz-selection {*/
@@ -19,62 +24,62 @@
 /*}*/
 
 webc-app-root {
-  --mode: horizontal;
+    --mode: horizontal;
 }
 
 webc-app-menu {
-  --disable-identity: true;
+    --disable-identity: true;
 }
 
 webc-app-container {
-  --background: var(--sl-color-gray-50);
+    --background: var(--sl-color-gray-50);
 }
 
 webc-app-container > .container.before {
-  z-index: 999;
-  background: var(--background);
+    z-index: 999;
+    background: var(--background);
 }
 
 dw-header {
-  --border-color: var(--sl-color-gray-300);
+    --border-color: var(--sl-color-gray-300);
 }
 
 dw-title {
-  --color: var(--sl-color-gray-900);
+    --color: var(--sl-color-gray-900);
 }
 
 .dw-data-grid {
-  --background: var(--sl-input-background-color);
-  --border-color: var(--sl-color-gray-200);
+    --background: var(--sl-input-background-color);
+    --border-color: var(--sl-color-gray-200);
 }
 
 :root .sl-theme-dark {
-  --webc-primary-color: var(--sl-color-gray-50);
-  --sl-input-label-color: var(--sl-color-gray-50);
+    --webc-primary-color: var(--sl-color-gray-50);
+    --sl-input-label-color: var(--sl-color-gray-50);
 }
 
 .sl-theme-dark webc-app-container {
-  --background: var(--sl-color-gray-950);
+    --background: var(--sl-color-gray-950);
 }
 
 .sl-theme-dark webc-app-menu[mode=horizontal] {
-  --color: var(--sl-color-gray-300);
+    --color: var(--sl-color-gray-300);
 }
 
 .sl-theme-dark dw-spinner {
-  --color: var(--sl-color-gray-100);
+    --color: var(--sl-color-gray-100);
 }
 
 .sl-theme-dark dw-title {
-  --color: var(--sl-color-gray-300);
+    --color: var(--sl-color-gray-300);
 }
 
 .sl-theme-dark dw-header {
-  --border-color: var(--sl-color-gray-800);
-  --color: var(--sl-color-gray-300);
+    --border-color: var(--sl-color-gray-800);
+    --color: var(--sl-color-gray-300);
 }
 
 .sl-theme-dark .dw-data-grid {
-  --background: var(--sl-input-background-color);
-  --border-color: var(--sl-input-border-color);
+    --background: var(--sl-input-background-color);
+    --border-color: var(--sl-input-border-color);
 }

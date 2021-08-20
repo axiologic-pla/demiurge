@@ -1,4 +1,7 @@
-<div class="dw-container">
+<link rel="stylesheet" href="/assets/pages/booting-identity.css">
+
+<webc-container controller="BootingIdentityController" id="booting-page" class="dw-container">
+
   <dw-title>Booting Identity</dw-title>
 
   <sl-alert open>
@@ -7,7 +10,5 @@
     Please create a new one.
   </sl-alert>
 
-  <webc-container controller="BootingIdentityController">
-    <dw-did-generator domain="@domain" data-tag="did-component"></dw-did-generator>
-  </webc-container>
-</div>
+  <dw-did-generator domain="@domain" data-tag="did-component"></dw-did-generator>
+</webc-container>

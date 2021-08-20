@@ -34,20 +34,23 @@ addHook("beforeAppLoads", async () => {
   const wallet = WebCardinal.wallet;
 
   const { getVaultDomainAsync } = await import("/scripts/hooks/getVaultDomain.js");
-  wallet.vaultDomain = await getVaultDomainAsync();
-
+  const { getUserDetails } = await import("/scripts/hooks/getUserDetails.js");
   const { getStoredDID } = await import("/scripts/services/BootingIdentityService.js");
+
+  wallet.vaultDomain = await getVaultDomainAsync();
+  wallet.userDetails = await getUserDetails();
   wallet.did = await getStoredDID();
 
-  // get default identity
-  // const { getIdentity } = await import("/scripts/hooks/getIdentity.js");
-  // const identity = await getIdentity();
-
-  // init MessageProcessingService
-  const { default: getMessageProcessingService } = await import("/scripts/services/MessageProcessingService.js");
-  const messageProcessingService = await getMessageProcessingService({ did: wallet.did });
-
-  WebCardinal.wallet.messageProcessingService = messageProcessingService;
+  if (wallet.did) {
+    const { default: getMessageProcessingService } = await import("/scripts/services/MessageProcessingService.js");
+    const messageProcessingService = await getMessageProcessingService({ did: wallet.did });
+    WebCardinal.wallet.messageProcessingService = messageProcessingService;
+    try {
+      messageProcessingService.readMessage();
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
   // setInitialTheme();
 
@@ -63,18 +66,12 @@ addHook("beforeAppLoads", async () => {
   // load Demiurge base Controller
   const { DwController } = await import("/scripts/controllers/DwController.js");
   addControllers({ DwController });
-
-  try {
-    messageProcessingService.readMessage();
-  } catch (err) {
-    console.log(err);
-  }
 });
 
 addHook("beforePageLoads", "quick-actions", async () => {
   const { wallet } = WebCardinal;
   if (!wallet.did) {
-    await navigateToPageTag("my-identities");
+    await navigateToPageTag("booting-identity");
   }
 });
 
@@ -91,3 +88,4 @@ define("dw-dialog-groups-fab");
 define("dw-dialog-view-credential");
 define("dw-dialog-new-group");
 define("dw-dialog-did-generator");
+define('dw-dialog-booting-identity');

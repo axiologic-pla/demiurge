@@ -36,6 +36,11 @@
       "indexed": false
     },
     {
+      "name": "Booting Identity",
+      "tag": "booting-identity",
+      "indexed": false
+    },
+    {
       "name": "Contracts",
       "tag": "contracts",
       "indexed": false

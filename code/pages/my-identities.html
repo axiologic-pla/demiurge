@@ -1,22 +1,22 @@
-<link rel="stylesheet" href="/assets/pages/my-identities.css" />
+<link rel="stylesheet" href="/assets/pages/my-identities.css">
 
 <webc-container controller="MyIdentitiesController" class="dw-container">
-  <dw-title>DID</dw-title>
+    <dw-title>DID</dw-title>
 
-  <dw-clipboard-input value="@did" readonly></dw-clipboard-input>
+    <dw-clipboard-input value="@did" readonly></dw-clipboard-input>
 
-  <br><br>
+    <br><br>
 
-  <!--
-    did:ssi:key:blockchain_domain::publicKey:v2:
-    did:ssi:sread:blockchain_domain:hash_privateKey:hash_publicKey:
-    did:ssi:name:blockchain_domain:public-name:::
-    did:ssi:group:blockchain_domain:const_string
+    <!--
+      did:ssi:key:blockchain_domain::publicKey:v2:
+      did:ssi:sread:blockchain_domain:hash_privateKey:hash_publicKey:
+      did:ssi:name:blockchain_domain:public-name:::
+      did:ssi:group:blockchain_domain:const_string
 
-    did:web:internet_domain
+      did:web:internet_domain
 
-    did:key:public_key
-  -->
+      did:key:public_key
+    -->
 
-  <dw-did-generator domain="@domain" data-tag="did-component"></dw-did-generator>
+    <dw-did-generator domain="@domain" data-tag="did-component"></dw-did-generator>
 </webc-container>

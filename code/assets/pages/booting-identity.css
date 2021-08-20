@@ -1,0 +1,11 @@
+#booting-page {
+    gap: var(--sl-spacing-medium);
+}
+
+#booting-page sl-alert {
+    margin: var(--sl-spacing-large) 0;
+}
+
+#booting-page sl-alert::part(base) {
+    padding: 0 var(--sl-spacing-medium);
+}
