@@ -65,3 +65,7 @@
 :host [hidden] {
     display: none;
 }
+
+:host .input--domain {
+    width: 180px;
+}

@@ -1,4 +1,4 @@
-const { setConfig, getConfig, addControllers, addHook } = WebCardinal.preload;
+const { setConfig, getConfig, addControllers, addHook, navigateToPageTag } = WebCardinal.preload;
 const { define } = WebCardinal.components;
 
 function getInitialConfig() {
@@ -30,15 +30,27 @@ function setInitialTheme() {
 }
 
 addHook("beforeAppLoads", async () => {
-  // get default identity
-  const { getIdentity } = await import("/scripts/hooks/getIdentity.js");
-  const identity = await getIdentity();
+  WebCardinal.wallet = {};
+  const wallet = WebCardinal.wallet;
 
-  // init MessageProcessingService
-  const { default: getMessageProcessingService } = await import("/scripts/services/MessageProcessingService.js");
-  const messageProcessingService = await getMessageProcessingService(identity);
+  const { getVaultDomainAsync } = await import("/scripts/hooks/getVaultDomain.js");
+  const { getUserDetails } = await import("/scripts/hooks/getUserDetails.js");
+  const { getStoredDID } = await import("/scripts/services/BootingIdentityService.js");
 
-  WebCardinal.wallet = { identity, messageProcessingService };
+  wallet.vaultDomain = await getVaultDomainAsync();
+  wallet.userDetails = await getUserDetails();
+  wallet.did = await getStoredDID();
+
+  if (wallet.did) {
+    const { default: getMessageProcessingService } = await import("/scripts/services/MessageProcessingService.js");
+    const messageProcessingService = await getMessageProcessingService({ did: wallet.did });
+    WebCardinal.wallet.messageProcessingService = messageProcessingService;
+    try {
+      messageProcessingService.readMessage();
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
   // setInitialTheme();
 
@@ -52,13 +64,14 @@ addHook("beforeAppLoads", async () => {
   await import("/components/dw-did-generator/dw-did-generator.js");
 
   // load Demiurge base Controller
-  const { default: DwController } = await import("/scripts/controllers/DwController.js");
+  const { DwController } = await import("/scripts/controllers/DwController.js");
   addControllers({ DwController });
+});
 
-  try {
-    messageProcessingService.readMessage();
-  } catch (err) {
-    console.log(err);
+addHook("beforePageLoads", "quick-actions", async () => {
+  const { wallet } = WebCardinal;
+  if (!wallet.did) {
+    await navigateToPageTag("booting-identity");
   }
 });
 
@@ -74,3 +87,5 @@ define("dw-dialog-edit-member");
 define("dw-dialog-groups-fab");
 define("dw-dialog-view-credential");
 define("dw-dialog-new-group");
+define("dw-dialog-did-generator");
+define('dw-dialog-booting-identity');

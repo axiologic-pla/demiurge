@@ -1,0 +1,17 @@
+.dw-dialog-booting-identity header {
+    padding-bottom: var(--sl-spacing-medium);
+}
+
+.dw-dialog-booting-identity main {
+    padding: var(--sl-spacing-medium);
+    margin-bottom: var(--sl-spacing-medium);
+}
+
+.dw-dialog-booting-identity footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--sl-spacing-medium);
+    border-top: 1px solid var(--sl-color-gray-300);
+    padding: var(--sl-spacing-medium);
+    background-color: var(--sl-color-gray-50);
+}

@@ -4,16 +4,16 @@ class MyIdentitiesController extends DwController {
   constructor(...props) {
     super(...props);
 
-    console.log({ identity: this.identity });
-
     this.model = {
-      did: this.identity.did,
-      domain: this.identity.domain,
+      did: this.did,
+      domain: this.domain,
     };
+
+    console.log();
 
     this.onTagEvent("did-component", "did-generate", async (readOnlyModel) => {
       const { didDocument } = readOnlyModel;
-      console.log({ didDocument });
+      console.log('# new did', { didDocument });
       console.log(didDocument.getIdentifier());
     });
   }

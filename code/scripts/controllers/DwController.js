@@ -7,15 +7,48 @@ class DwController extends WebcController {
     super(...props);
     this._ui = new DwUI(...props);
 
-    this.storageService = this.getWalletStorage();
-
-    for (const key of ["identity", "messageProcessingService"]) {
-      this[key] = WebCardinal.wallet[key];
+    for (const item of ["did", "userDetails", "messageProcessingService"]) {
+      this[item] = WebCardinal.wallet[item];
     }
+    this.domain = WebCardinal.wallet.vaultDomain;
+
+    if (!this.did) {
+      if (WebCardinal.state.page.tag !== "booting-identity") {
+        this.navigateToPageTag("booting-identity");
+        return;
+      }
+    }
+
+    this.storageService = this.getWalletStorage();
   }
 
   get ui() {
     return this._ui;
+  }
+
+  /**
+   * @deprecated
+   */
+  get identity() {
+    return {
+      did: this.did,
+    }
+  }
+
+  get domain() {
+    return WebCardinal.wallet.blockchainDomain;
+  }
+
+  set domain(blockchainDomain) {
+    WebCardinal.wallet.blockchainDomain = blockchainDomain;
+  }
+
+  get did() {
+    return WebCardinal.wallet.did;
+  }
+
+  set did(did) {
+    WebCardinal.wallet.did = did;
   }
 
   /**
@@ -43,114 +76,6 @@ class DwUI {
   constructor(element) {
     this._element = element;
     this._page = undefined;
-  }
-
-  /**
-   * @param {string, object} message
-   * @param {number} [duration]
-   * @param [icon]
-   * @param {'primary' | 'success' | 'info' | 'warning' | 'danger'} [type]
-   * @param {boolean} [closable]
-   */
-  showToast(message, { duration, icon, type, closable } = {}) {
-    if (typeof message === "object") {
-      message = JSON.stringify(message, null, 4);
-    }
-
-    if (typeof message !== "string") {
-      return;
-    }
-
-    if (typeof type !== "string") {
-      type = "primary";
-    }
-
-    if (typeof icon !== "string") {
-      icon = undefined;
-    }
-
-    if (typeof duration !== "number") {
-      duration = 3000;
-    }
-
-    if (typeof closable !== "boolean") {
-      closable = true;
-    }
-
-    const alert = Object.assign(document.createElement("sl-alert"), {
-      type: type,
-      closable: closable,
-      duration: duration,
-      innerHTML: `
-            ${icon ? `<sl-icon name="${icon}" slot="icon"></sl-icon>` : ""}
-            ${escapeHTML(message)}
-        `,
-    });
-
-    document.body.append(alert);
-
-    return alert.toast();
-  }
-
-  /**
-   * @param {string} component
-   * @param {object | Proxy} [attributes]
-   * @param {object} [options]
-   * @param {function} [options.onClose]
-   * @param {HTMLElement} [options.parentElement]
-   */
-  async showDialogFromComponent(component, attributes = {}, options = {}) {
-    let { parentElement, onClose } = options;
-    if (typeof onClose !== "function") {
-      onClose = () => {};
-    }
-
-    if (!isHTMLElement(parentElement)) {
-      parentElement = undefined;
-    }
-
-    const dialogElement = document.createElement(component);
-    for (const attribute of Object.keys(attributes)) {
-      dialogElement.setAttribute(attribute, escapeHTML(attributes[attribute]));
-    }
-
-    if (parentElement) {
-      parentElement.append(dialogElement);
-    } else {
-      WebCardinal.state.page.loader.append(dialogElement);
-    }
-
-    await dialogElement.componentOnReady();
-
-    const slElement = dialogElement.querySelector("sl-dialog");
-
-    const closeElement = slElement.querySelector("header > sl-icon-button[close]");
-    if (closeElement) {
-      closeElement.addEventListener("click", async () => {
-        await slElement.hide();
-      });
-    }
-
-    WebCardinal.state.page.dialogs = {
-      ...WebCardinal.state.page.dialogs,
-      [component]: slElement,
-    };
-
-    slElement.addEventListener("sl-hide", async () => {
-      dialogElement.remove();
-      await onClose();
-    });
-
-    setTimeout(async () => {
-      await slElement.show();
-    });
-  }
-
-  /**
-   * @param {string} component
-   */
-  async hideDialogFromComponent(component) {
-    await WebCardinal.state.page.dialogs[component].hide();
   }
 
   async submitGenericForm(model, target) {
@@ -205,6 +130,134 @@ class DwUI {
     return promise;
   }
 
+  /**
+   * @param {string, object} message
+   * @param {number} [duration]
+   * @param [icon]
+   * @param {'primary' | 'success' | 'info' | 'warning' | 'danger'} [type]
+   * @param {boolean} [closable]
+   */
+  showToast(message, { duration, icon, type, closable } = {}) {
+    if (typeof message === "object") {
+      message = JSON.stringify(message, null, 4);
+    }
+
+    if (typeof message !== "string") {
+      return;
+    }
+
+    if (typeof type !== "string") {
+      type = "primary";
+    }
+
+    if (typeof icon !== "string") {
+      icon = undefined;
+    }
+
+    if (typeof duration !== "number") {
+      duration = 3000;
+    }
+
+    if (typeof closable !== "boolean") {
+      closable = true;
+    }
+
+    const alert = Object.assign(document.createElement("sl-alert"), {
+      type: type,
+      closable: closable,
+      duration: duration,
+      innerHTML: `
+            ${icon ? `<sl-icon name="${icon}" slot="icon"></sl-icon>` : ""}
+            ${escapeHTML(message)}
+        `,
+    });
+
+    document.body.append(alert);
+
+    return alert.toast();
+  }
+
+  disableMenu() {
+    document.body.setAttribute("disable-menu", "");
+  }
+
+  enableMenu() {
+    document.body.removeAttribute("disable-menu");
+  }
+
+  /**
+   * @param {string} component
+   * @param {object | Proxy} [attributes]
+   * @param {object} [options]
+   * @param {function} [options.onClose]
+   * @param {HTMLElement} [options.parentElement]
+   * @param {boolean} [options.disableClosing]
+   */
+  async showDialogFromComponent(component, attributes = {}, options = {}) {
+    let { parentElement, onClose, disableClosing } = options;
+    if (typeof onClose !== "function") {
+      onClose = () => {};
+    }
+
+    if (!isHTMLElement(parentElement)) {
+      parentElement = undefined;
+    }
+
+    const dialogElement = document.createElement(component);
+    for (const attribute of Object.keys(attributes)) {
+      dialogElement.setAttribute(attribute, escapeHTML(attributes[attribute]));
+    }
+
+    if (parentElement) {
+      parentElement.append(dialogElement);
+    } else {
+      WebCardinal.state.page.loader.append(dialogElement);
+    }
+
+    await dialogElement.componentOnReady();
+
+    const slElement = dialogElement.querySelector("sl-dialog");
+
+    if (disableClosing) {
+      slElement.addEventListener("sl-request-close", (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      });
+      slElement.addEventListener("sl-hide", (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      });
+    }
+
+    const closeElements = slElement.querySelectorAll("[close]");
+    closeElements.forEach((closeElement) => {
+      closeElement.addEventListener("click", async () => {
+        await slElement.hide();
+      });
+    });
+
+    WebCardinal.state.page.dialogs = {
+      ...WebCardinal.state.page.dialogs,
+      [component]: slElement,
+    };
+
+    slElement.addEventListener("sl-hide", async () => {
+      dialogElement.remove();
+      await onClose();
+    });
+
+    setTimeout(async () => {
+      await slElement.show();
+    });
+  }
+
+  /**
+   * @param {string} component
+   */
+  async hideDialogFromComponent(component) {
+    await WebCardinal.state.page.dialogs[component].hide();
+  }
+
   get page() {
     return this._page;
   }
@@ -214,5 +267,4 @@ class DwUI {
   }
 }
 
-export default DwController;
-export { DwUI };
+export { DwController, DwUI };
