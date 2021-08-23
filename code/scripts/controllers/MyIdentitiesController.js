@@ -9,7 +9,7 @@ class MyIdentitiesController extends DwController {
       domain: this.domain,
     };
 
-    console.log();
+    console.log(JSON.stringify(this.model, null, 1));
 
     this.onTagEvent("did-component", "did-generate", async (readOnlyModel) => {
       const { didDocument } = readOnlyModel;

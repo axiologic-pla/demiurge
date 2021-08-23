@@ -10,6 +10,7 @@ class BootingIdentityController extends DwController {
 
     this.model = {
       domain: this.domain,
+      username: this.userDetails.username
     };
 
     let didDocument;
@@ -29,10 +30,14 @@ class BootingIdentityController extends DwController {
 
     this.onTagClick("did-confirm", async () => {
       if (didDocument) {
+        const { setStoredDID } = await import("../services/BootingIdentityService.js");
+        const did = didDocument.getIdentifier();
+
         ui.enableMenu();
-        this.did = didDocument.getIdentifier();
+        await setStoredDID(did);
+        this.did = did;
         this.domain = didDocument.getDomain();
-        this.navigateToPageTag("my-identities");
+        this.navigateToPageTag("quick-actions");
       }
     });
   }

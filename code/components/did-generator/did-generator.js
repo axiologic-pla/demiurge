@@ -1,4 +1,4 @@
-import config from "./dw-did-generator.config.js";
+import config from "./did-generator.config.js";
 
 const { promisify } = $$;
 
@@ -42,6 +42,7 @@ async function generateDidDocumentBeforeSubmission(domain, type, subType) {
       switch (didSubMethod) {
         case "sread": {
           const seedSSI = await promisify(keySSI.createSeedSSI)(domain);
+          payload.domain = domain;
 
           didDocument = await promisify(w3cDID.createIdentity)("sread", seedSSI);
 
@@ -56,6 +57,7 @@ async function generateDidDocumentBeforeSubmission(domain, type, subType) {
         }
         case "key": {
           const seedSSI = await promisify(keySSI.createSeedSSI)(domain);
+          payload.domain = domain;
 
           didDocument = await promisify(w3cDID.createIdentity)("key", seedSSI);
 
@@ -67,6 +69,7 @@ async function generateDidDocumentBeforeSubmission(domain, type, subType) {
         }
         case "group":
         case "name": {
+          payload.domain = domain;
           canBeSubmitted = true;
           break;
         }
@@ -124,79 +127,83 @@ function createDidGeneratorSelect(types) {
       super();
 
       this._allTypes = types || {};
+      this._menuElement = undefined;
 
       this._setActiveType = (type) => {
-        Object.keys(this.buttonElements)
-          .filter((key) => key !== type)
-          .forEach((key) => (this.buttonElements[key].type = "default"));
-
-        this.buttonElements[type].type = "primary";
         this._activeType = type;
-        this.setAttribute("type", type.toLowerCase());
-        this.dispatchEvent(new CustomEvent("dw-change", { detail: { type } }));
+        this.setAttribute('type', type.toLowerCase());
+        this.dispatchEvent(new CustomEvent('dw-change', { detail: { type } }));
+
+        if (this.isConnected) {
+          this._menuElement.value = type;
+        }
       };
 
       this._unsetActiveType = () => {
-        Object.keys(this.buttonElements).forEach((key) => (this.buttonElements[key].type = "default"));
         this._activeType = undefined;
-        this.removeAttribute("type");
-        this.dispatchEvent(new CustomEvent("dw-change", { detail: { type: undefined } }));
+        this.removeAttribute('type');
+        this.dispatchEvent(new CustomEvent('dw-change', { detail: { type: undefined } }));
+
+        if (this.isConnected) {
+          this._menuElement.value = '';
+        }
       };
     }
 
     connectedCallback() {
-      this.buttonElements = {};
-      this.nthElements = [];
-
-      this._activeType = undefined;
-
-      const groupElement = document.createElement("sl-select");
-      groupElement.setAttribute("placeholder", this.placeholder);
+      this._menuElement = createElement('sl-select', {
+        placeholder: this.placeholder,
+        value: this.type ? this.type : ''
+      });
+      const menuElements = {};
       for (const type of this.types) {
-        this.buttonElements[type] = Object.assign(document.createElement("sl-menu-item"), {
-          size: "large",
+        menuElements[type] = createElement('sl-menu-item', {
+          size: 'large',
           innerText: this._allTypes[type].LABEL,
-          value: type,
+          value: type
         });
-        this.buttonElements[type].dataset.tag = type.toLowerCase();
-        groupElement.append(this.buttonElements[type]);
+        menuElements[type].dataset.tag = type.toLowerCase();
+        menuElements[type].addEventListener('click', () => {
+          this.type = type;
+        });
+        this._menuElement.append(menuElements[type]);
       }
-      for (const type of this.types) {
-        this.buttonElements[type].addEventListener("click", () => (this.type = type));
-      }
-
-      this.nthElements.push(groupElement);
-      this.append(...this.nthElements);
+      this.append(this._menuElement);
     }
 
     disconnectedCallback() {
-      this.innerHTML = "";
+      this._activeType = undefined;
+      this.innerHTML = '';
     }
 
     static get observedAttributes() {
-      return ["type"];
+      return ['type'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
       if (this.hasAttribute(name)) {
         switch (name) {
-          case "type":
+          case 'type':
             this.type = newValue;
         }
       }
     }
 
     set type(newType) {
-      if (typeof newType === "undefined") {
+      if (typeof newType === 'undefined') {
         this._unsetActiveType();
         return;
       }
 
-      if (typeof newType !== "string" || !this.types.includes(newType)) {
+      if (typeof newType !== 'string') {
         return;
       }
 
       newType = newType.toUpperCase();
+
+      if (!this.types.includes(newType)) {
+        return;
+      }
 
       if (this.type === newType) {
         return;
@@ -214,55 +221,52 @@ function createDidGeneratorSelect(types) {
     }
 
     get types() {
-      return Object.keys(this._allTypes);
+      return Object.keys(this._allTypes).map(type => type);
     }
   };
 }
 
 function createDidGenerator(config) {
-  let rootElement, submitElement;
-
-  const types = config.TYPES;
-  const placeholder = config.PLACEHOLDER;
+  let hostElement, rootElement, submitElement;
 
   const templates = {
     ["did:ssi"]: (payload) => {
-      const { domain } = payload;
-
       submitElement.hidden = true;
 
       const domainElement = createElement("sl-input", {
         className: "input--domain",
-        value: domain,
+        value: payload.domain,
+        placeholder: 'domain',
         hidden: true,
       });
-      const ssiSelectElement = createElement("dw-did-generator-select", {
+      const ssiSelectElement = createElement("did-generator-select", {
         className: "select--did-ssi",
-        placeholder: types.SSI.PLACEHOLDER,
-        types: types.SSI.TYPES,
+        placeholder: config.TYPES.SSI.PLACEHOLDER,
+        types: filterDisabledDIDs(config.TYPES.SSI.TYPES, "did:ssi:"),
       });
       const result = [ssiSelectElement, domainElement];
 
-      ssiSelectElement.addEventListener("dw-change", async (event) => {
-        const { type } = event.detail;
+      let ssiType = undefined;
+      let domain = payload.domain;
 
-        const baseElement = ssiSelectElement.parentElement;
+      const update = async () => {
+        let baseElement = ssiSelectElement.parentElement;
 
         const oldContentElement = baseElement.querySelector(":scope > .content");
         oldContentElement && oldContentElement.remove();
 
         let newContentElement;
 
-        const ssiTypes = Object.keys(types.SSI.TYPES);
+        const ssiTypes = Object.keys(config.TYPES.SSI.TYPES);
 
-        if (ssiTypes.includes(type)) {
+        if (ssiTypes.includes(ssiType)) {
           removeClassesByPrefixFromElement(baseElement, "did-ssi");
 
-          const result = await generateDidDocumentBeforeSubmission(domain, "SSI", type);
+          const result = await generateDidDocumentBeforeSubmission(domain, "SSI", ssiType);
 
           domainElement.hidden = false;
 
-          const lowerCaseType = type.toLowerCase();
+          const lowerCaseType = ssiType.toLowerCase();
           newContentElement = await templates[`did:ssi:${lowerCaseType}`](result.payload);
           baseElement.classList.add(`did-ssi-${lowerCaseType}`);
 
@@ -270,7 +274,7 @@ function createDidGenerator(config) {
             submitElement.hidden = false;
             const { didDocument, payload } = result;
             const data = didDocument ? { didDocument } : { ...payload };
-            await preSubmit(domain, "SSI", type, data);
+            await preSubmit(payload.domain, "SSI", ssiType, data);
           }
         }
 
@@ -278,14 +282,29 @@ function createDidGenerator(config) {
           newContentElement.classList.add("content");
           baseElement.append(newContentElement);
         }
+      };
+
+      domainElement.addEventListener("sl-change", async () => {
+        domain = domainElement.value;
+        await update();
       });
+
+      ssiSelectElement.addEventListener("dw-change", async (event) => {
+        ssiType = event.detail.type;
+        await update();
+      });
+
       return result;
     },
     ["did:ssi:name"]: (payload) => {
       payload.inputElement = createElement("sl-input", {
         className: "input--name",
         placeholder: "Type name...",
+        readonly: isReadOnlyDID("did:ssi:name"),
       });
+      if (hostElement.hasAttribute("name")) {
+        payload.inputElement.value = hostElement.getAttribute("name");
+      }
       return payload.inputElement;
     },
     ["did:ssi:group"]: (payload) => {
@@ -346,15 +365,41 @@ function createDidGenerator(config) {
     },
   };
 
+  const isReadOnlyDID = (item) => {
+    if (hostElement.hasAttribute("readonly")) {
+      const readOnlyAttribute = hostElement.getAttribute("readonly") || "";
+      const readOnlyDIDs = readOnlyAttribute.split(/[ ,]/).filter(String);
+      return readOnlyDIDs.includes(item);
+    }
+    return false;
+  };
+
+  const filterDisabledDIDs = (originalTypes, prefix = "") => {
+    const types = Object.assign({}, originalTypes);
+
+    if (hostElement.hasAttribute("disable")) {
+      const disabledAttribute = hostElement.getAttribute("disable") || "";
+      const disabledDIDs = disabledAttribute.split(/[ ,]/);
+      disabledDIDs.filter(String).map((item) => {
+        if (item.startsWith(prefix)) {
+          item = item.substr(prefix.length, item.length).toUpperCase();
+        }
+        delete types[item];
+      });
+      return types;
+    }
+    return types;
+  };
+
   const renderContent = async (domain, type) => {
     let contentElement = rootElement.querySelector(":scope > .content");
-    let content;
+    let generatedTemplate;
 
-    if (Object.keys(types).includes(type)) {
-      content = templates[`did:${type.toLowerCase()}`]({ domain });
+    if (Object.keys(config.TYPES).includes(type)) {
+      generatedTemplate = templates[`did:${type.toLowerCase()}`]({ domain });
     }
 
-    if (!content) {
+    if (!generatedTemplate) {
       contentElement && contentElement.remove();
       return;
     }
@@ -374,7 +419,7 @@ function createDidGenerator(config) {
 
     removeClassesByPrefixFromElement(contentElement, "did");
     contentElement.innerHTML = "";
-    contentElement.append(...content);
+    contentElement.append(...generatedTemplate);
 
     removeClassesByPrefixFromElement(rootElement, "did");
     rootElement.classList.add(`did-${type.toLowerCase()}`);
@@ -391,7 +436,7 @@ function createDidGenerator(config) {
       super();
 
       this.attachShadow({ mode: "open" });
-      // this.setAttribute('shadow', '');
+      hostElement = this;
     }
 
     connectedCallback() {
@@ -424,10 +469,10 @@ function createDidGenerator(config) {
         innerHTML: "did",
         size: "large",
       });
-      const didSelectElement = createElement("dw-did-generator-select", {
+      const didSelectElement = createElement("did-generator-select", {
         className: "select--did",
-        placeholder,
-        types,
+        placeholder: config.PLACEHOLDER,
+        types: filterDisabledDIDs(config.TYPES, "did:"),
       });
 
       footerElement.append(submitElement);
@@ -436,6 +481,12 @@ function createDidGenerator(config) {
       didSelectElement.addEventListener("dw-change", async (event) => {
         const { type } = event.detail;
         await renderContent(this.domain, type);
+        if (this.hasAttribute("default")) {
+          const attribute = this.getAttribute("default") || "";
+          const keywords = attribute.split(":");
+          const didSsiSelectElement = rootElement.querySelector('.select--did-ssi');
+          didSsiSelectElement.type = keywords[2];
+        }
       });
 
       submitElement.addEventListener("click", async () => {
@@ -469,6 +520,12 @@ function createDidGenerator(config) {
         }
       });
 
+      if (this.hasAttribute("default")) {
+        const attribute = this.getAttribute("default") || "";
+        const keywords = attribute.split(":");
+        didSelectElement.type = keywords[1];
+      }
+
       this.shadowRoot.append(linkElement, rootElement, footerElement);
     }
 
@@ -486,5 +543,5 @@ function createDidGenerator(config) {
   };
 }
 
-customElements.define("dw-did-generator-select", createDidGeneratorSelect());
-customElements.define("dw-did-generator", createDidGenerator(config));
+customElements.define("did-generator-select", createDidGeneratorSelect());
+customElements.define("did-generator", createDidGenerator(config));

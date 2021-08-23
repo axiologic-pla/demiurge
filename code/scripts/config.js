@@ -61,7 +61,7 @@ addHook("beforeAppLoads", async () => {
   await import("/components/dw-title/dw-title.js");
   await import("/components/dw-data-grid/dw-data-grid.js");
   await import("/components/dw-clipboard-input/dw-clipboard-input.js");
-  await import("/components/dw-did-generator/dw-did-generator.js");
+  await import("/components/did-generator/did-generator.js");
 
   // load Demiurge base Controller
   const { DwController } = await import("/scripts/controllers/DwController.js");
@@ -83,9 +83,8 @@ define("dw-groups");
 define("dw-subdomains");
 define("dw-dialog-configuration");
 define("dw-dialog-subdomain-delete");
-define("dw-dialog-edit-member");
-define("dw-dialog-groups-fab");
+// define("dw-dialog-edit-member");
+// define("dw-dialog-groups-fab");
 define("dw-dialog-view-credential");
-define("dw-dialog-new-group");
-define("dw-dialog-did-generator");
+// define("dw-dialog-new-group");
 define('dw-dialog-booting-identity');
