@@ -131,8 +131,8 @@ function createDidGeneratorSelect(types) {
 
       this._setActiveType = (type) => {
         this._activeType = type;
-        this.setAttribute('type', type.toLowerCase());
-        this.dispatchEvent(new CustomEvent('dw-change', { detail: { type } }));
+        this.setAttribute("type", type.toLowerCase());
+        this.dispatchEvent(new CustomEvent("dw-change", { detail: { type } }));
 
         if (this.isConnected) {
           this._menuElement.value = type;
@@ -141,29 +141,29 @@ function createDidGeneratorSelect(types) {
 
       this._unsetActiveType = () => {
         this._activeType = undefined;
-        this.removeAttribute('type');
-        this.dispatchEvent(new CustomEvent('dw-change', { detail: { type: undefined } }));
+        this.removeAttribute("type");
+        this.dispatchEvent(new CustomEvent("dw-change", { detail: { type: undefined } }));
 
         if (this.isConnected) {
-          this._menuElement.value = '';
+          this._menuElement.value = "";
         }
       };
     }
 
     connectedCallback() {
-      this._menuElement = createElement('sl-select', {
+      this._menuElement = createElement("sl-select", {
         placeholder: this.placeholder,
-        value: this.type ? this.type : ''
+        value: this.type ? this.type : "",
       });
       const menuElements = {};
       for (const type of this.types) {
-        menuElements[type] = createElement('sl-menu-item', {
-          size: 'large',
+        menuElements[type] = createElement("sl-menu-item", {
+          size: "large",
           innerText: this._allTypes[type].LABEL,
-          value: type
+          value: type,
         });
         menuElements[type].dataset.tag = type.toLowerCase();
-        menuElements[type].addEventListener('click', () => {
+        menuElements[type].addEventListener("click", () => {
           this.type = type;
         });
         this._menuElement.append(menuElements[type]);
@@ -173,29 +173,29 @@ function createDidGeneratorSelect(types) {
 
     disconnectedCallback() {
       this._activeType = undefined;
-      this.innerHTML = '';
+      this.innerHTML = "";
     }
 
     static get observedAttributes() {
-      return ['type'];
+      return ["type"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
       if (this.hasAttribute(name)) {
         switch (name) {
-          case 'type':
+          case "type":
             this.type = newValue;
         }
       }
     }
 
     set type(newType) {
-      if (typeof newType === 'undefined') {
+      if (typeof newType === "undefined") {
         this._unsetActiveType();
         return;
       }
 
-      if (typeof newType !== 'string') {
+      if (typeof newType !== "string") {
         return;
       }
 
@@ -221,7 +221,7 @@ function createDidGeneratorSelect(types) {
     }
 
     get types() {
-      return Object.keys(this._allTypes).map(type => type);
+      return Object.keys(this._allTypes).map((type) => type);
     }
   };
 }
@@ -236,7 +236,7 @@ function createDidGenerator(config) {
       const domainElement = createElement("sl-input", {
         className: "input--domain",
         value: payload.domain,
-        placeholder: 'domain',
+        placeholder: "domain",
         hidden: true,
       });
       const ssiSelectElement = createElement("did-generator-select", {
@@ -484,7 +484,7 @@ function createDidGenerator(config) {
         if (this.hasAttribute("default")) {
           const attribute = this.getAttribute("default") || "";
           const keywords = attribute.split(":");
-          const didSsiSelectElement = rootElement.querySelector('.select--did-ssi');
+          const didSsiSelectElement = rootElement.querySelector(".select--did-ssi");
           didSsiSelectElement.type = keywords[2];
         }
       });

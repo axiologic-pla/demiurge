@@ -1,0 +1,16 @@
+.dw-dialog-did-generator {
+    --body-spacing: 0 var(--sl-spacing-large);
+}
+
+.dw-dialog-did-generator sl-alert {
+    margin: var(--sl-spacing-large) 0;
+}
+
+.dw-dialog-did-generator sl-alert::part(base) {
+    padding: 0 var(--sl-spacing-medium);
+}
+
+.dw-dialog-did-generator::part(panel) {
+    min-width: calc(var(--dw-container-width) - 2 * var(--sl-spacing-medium));
+    min-height: 400px;
+}
