@@ -1,5 +1,10 @@
 .dw-did-generator-container {
-  padding: var(--sl-spacing-x-large);
-  border: 2px dashed var(--sl-color-gray-300);
-  border-radius: var(--sl-border-radius-medium);
+    padding: var(--sl-spacing-x-large);
+    border: 2px dashed var(--sl-color-gray-300);
+    border-radius: var(--sl-border-radius-medium);
+}
+
+#my-identities-page {
+    display: grid;
+    gap: var(--sl-spacing-medium);
 }

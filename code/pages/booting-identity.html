@@ -1,14 +1,19 @@
 <link rel="stylesheet" href="/assets/pages/booting-identity.css">
 
 <webc-container controller="BootingIdentityController" id="booting-page" class="dw-container">
+    <dw-title>Booting Identity</dw-title>
 
-  <dw-title>Booting Identity</dw-title>
+    <sl-alert open>
+        <sl-icon slot="icon" name="exclamation-triangle"></sl-icon>
+        <strong>There is no <code>DID</code> generated for this wallet!</strong><br>
+        Please create a new one.
+    </sl-alert>
 
-  <sl-alert open>
-    <sl-icon slot="icon" name="exclamation-triangle"></sl-icon>
-    <strong>There is no <code>DID</code> generated for this wallet!</strong><br>
-    Please create a new one.
-  </sl-alert>
-
-  <dw-did-generator domain="@domain" data-tag="did-component"></dw-did-generator>
+    <did-generator
+            domain="@domain" name="@username"
+            default="did:ssi:name"
+            readonly="did:ssi:name"
+            disable="did:ssi:group, did:web, did:key"
+            data-tag="did-component">
+    </did-generator>
 </webc-container>
