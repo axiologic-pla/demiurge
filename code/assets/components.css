@@ -3,7 +3,7 @@
 dw-clipboard-input > sl-input::part(suffix) {
   padding: var(--sl-spacing-small);
   cursor: pointer;
-  background-color: var(--sl-color-primary-200);
+  background-color: var(--icon-background);
 }
 
 dw-clipboard-input > sl-input::part(input) {
@@ -12,7 +12,7 @@ dw-clipboard-input > sl-input::part(input) {
 }
 
 dw-clipboard-input > sl-input > sl-icon::part(base) {
-  color: var(--sl-color-black);
+  color: var(--icon-color);
 }
 
 /* Classes */
@@ -49,7 +49,7 @@ dw-clipboard-input > sl-input > sl-icon::part(base) {
 
 .dw-data-grid {
   padding: var(--sl-spacing-small);
-  border: 1px solid var(--sl-panel-border-color);
+  border: var(--border);
   background: var(--background);
 }
 
@@ -90,7 +90,7 @@ dw-clipboard-input > sl-input > sl-icon::part(base) {
 
 .dw-data-grid .dw-data-grid-item sl-menu-item[checked]::part(base),
 .dw-data-grid .dw-data-grid-item sl-menu-item[checked] + sl-icon-button::part(base) {
-  background-color: var(--sl-color-gray-300);
+  background-color: var(--check-background);
   border-radius: 0;
 }
 
@@ -106,8 +106,8 @@ dw-clipboard-input > sl-input > sl-icon::part(base) {
 
 .dw-data-grid .dw-data-grid-item sl-icon-button:hover::part(base) {
   border-radius: 0;
-  color: var(--sl-color-primary-text);
-  background: var(--sl-color-primary-500);
+  color: var(--delete-color);
+  background: var(--delete-background);
 }
 
 @media screen and (max-width: 420px) {

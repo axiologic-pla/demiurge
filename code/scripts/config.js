@@ -72,19 +72,19 @@ addHook("beforePageLoads", "quick-actions", async () => {
   const { wallet } = WebCardinal;
   if (!wallet.did) {
     await navigateToPageTag("booting-identity");
+    return;
+  }
+
+  const activeElement = document.querySelector('webc-app-menu-item[active]');
+  if (activeElement) {
+    activeElement.removeAttribute('active');
   }
 });
 
 setConfig(getInitialConfig());
 
-define("dw-page");
 define("dw-action");
-define("dw-groups");
 define("dw-subdomains");
 define("dw-dialog-configuration");
-define("dw-dialog-subdomain-delete");
-// define("dw-dialog-edit-member");
-// define("dw-dialog-groups-fab");
 define("dw-dialog-view-credential");
-// define("dw-dialog-new-group");
 define('dw-dialog-booting-identity');

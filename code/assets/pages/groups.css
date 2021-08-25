@@ -1,4 +1,15 @@
 #groups-page {
+  --header-color: rgb(var(--sl-color-neutral-0));
+  --header-border: 3px solid rgb(var(--sl-color-primary-200));
+  --header-background: rgb(var(--sl-color-primary-50));
+  --subheader-color: rgb(var(--sl-color-gray-400));
+
+  --code-color: rgb(var(--sl-color-gray-800));
+  --code-background: rgb(var(--sl-color-gray-100));
+
+  --members-border: 1px solid rgb(var(--sl-panel-border-color));
+  --members-background: rgb(var(--sl-color-neutral-1000));
+
   padding-bottom: calc(2 * var(--sl-spacing-large));
 }
 
@@ -10,40 +21,40 @@
 
 /* Domain */
 
-#groups-page .dw-domain-input {
-  margin-top: var(--sl-spacing-large);
-}
+/*#groups-page .dw-domain-input {*/
+/*    margin-top: var(--sl-spacing-large);*/
+/*}*/
 
-#groups-page .dw-domain-input::part(suffix) {
-  cursor: pointer;
-  background-color: var(--sl-color-primary-200);
-  display: flex;
-}
+/*#groups-page .dw-domain-input::part(suffix) {*/
+/*    cursor: pointer;*/
+/*    background-color: var(--sl-color-primary-200);*/
+/*    display: flex;*/
+/*}*/
 
-#groups-page .dw-domain-input[disabled]::part(input) {
-  opacity: 0.5;
-}
+/*#groups-page .dw-domain-input[disabled]::part(input) {*/
+/*    opacity: 0.5;*/
+/*}*/
 
-#groups-page .dw-domain-input::part(input) {
-  font-family: "courier new", monospace;
-  padding-top: 5px;
-}
+/*#groups-page .dw-domain-input::part(input) {*/
+/*    font-family: "courier new", monospace;*/
+/*    padding-top: 5px;*/
+/*}*/
 
-#groups-page .dw-domain-input::part(base) {
-  opacity: 1;
-}
+/*#groups-page .dw-domain-input::part(base) {*/
+/*    opacity: 1;*/
+/*}*/
 
-#groups-page .dw-domain-input sl-button::part(base) {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  font-weight: bold;
-  font-size: 0.95em;
-}
+/*#groups-page .dw-domain-input sl-button::part(base) {*/
+/*    border-top-left-radius: 0;*/
+/*    border-bottom-left-radius: 0;*/
+/*    font-weight: bold;*/
+/*    font-size: 0.95em;*/
+/*}*/
 
-#groups-page .dw-domain-input sl-button sl-icon {
-  margin-right: var(--sl-spacing-xx-small);
-  font-size: 0.85em;
-}
+/*#groups-page .dw-domain-input sl-button sl-icon {*/
+/*    margin-right: var(--sl-spacing-xx-small);*/
+/*    font-size: 0.85em;*/
+/*}*/
 
 /* Groups */
 
@@ -64,7 +75,6 @@
 
 #groups-page .dw-groups--header sl-form::part(base) {
   display: flex;
-  /*align-items: flex-end;*/
   gap: var(--sl-spacing-large)
 }
 
@@ -92,7 +102,7 @@
   top: 0;
   width: 100%;
   height: calc(var(--dw-group-header-spaced-height));
-  background-color: var(--sl-color-primary-50);
+  background-color: var(--header-background);
 }
 
 #groups-page .dw-group:first-child .dw-group-data :nth-child(1):before,
@@ -106,8 +116,8 @@
   font-size: 1.1rem;
   font-weight: bold;
   font-family: var(--sl-font-sans);
-  color: var(--sl-color-black);
-  border-bottom: 3px solid var(--sl-color-primary-200);
+  color: var(--header-color);
+  border-bottom: var(--header-border);
 }
 
 #groups-page .dw-group:first-child .dw-group-data :first-child:before {
@@ -124,11 +134,11 @@
 }
 
 #groups-page .dw-group sl-menu-item .dw-group-data code {
-  background-color: var(--sl-color-gray-100);
+  color: var(--code-color);
+  background-color: var(--code-background);
   padding: 5px var(--sl-spacing-x-small) 0 var(--sl-spacing-x-small);
   border-radius: var(--sl-border-radius-medium);
   font-size: 0.75em;
-  color: var(--sl-color-info-700);
 }
 
 /* Group content */
@@ -197,8 +207,8 @@
 #groups-page .dw-members .no-data {
   display: block;
   padding: var(--sl-spacing-large);
-  border: 1px solid var(--sl-panel-border-color);
-  background: var(--sl-color-white);
+  border: var(--members-border);
+  background-color: var(--members-background);
   grid-column: 1 / -1;
 }
 
@@ -211,17 +221,13 @@
 }
 
 #groups-page .dw-members sl-menu-item {
-  background-color: var(--sl-color-white);
-  border: 1px solid var(--sl-panel-border-color);
+  border: var(--members-border);
+  background-color: var(--members-background);
 }
 
 #groups-page .dw-members sl-menu-item::part(base) {
   gap: var(--sl-spacing-small);
   padding: var(--sl-spacing-large);
-}
-
-#groups-page .dw-members sl-menu-item[checked] {
-  background-color: var(--sl-color-gray-300);
 }
 
 #groups-page .dw-members sl-menu-item.dw-multiple-selection::part(base) {
@@ -255,11 +261,11 @@
 }
 
 #groups-page .dw-members .dw-member > div > code {
-  background-color: var(--sl-color-gray-100);
+  color: var(--code-color);
+  background-color: var(--code-background);
   padding: 5px var(--sl-spacing-x-small);
   border-radius: var(--sl-border-radius-medium);
   font-size: 0.75rem;
-  color: var(--sl-color-info-700);
 }
 
 /* Credentials, Databases and Members */
@@ -277,14 +283,14 @@
 #groups-page .dw-credentials--header strong,
 #groups-page .dw-databases--header strong,
 #groups-page .dw-members--header strong {
-  background-color: var(--sl-color-primary-100);
-  padding: var(--sl-spacing-xx-small);
+  background-color: var(--header-background);
+  padding: var(--sl-spacing-x-small);
   border-radius: var(--sl-border-radius-medium);
 }
 
 #groups-page .dw-credentials--header dw-title > [slot=subheader]:last-child,
 #groups-page .dw-databases--header dw-title > [slot=subheader]:last-child {
-  color: var(--sl-color-gray-400);
+  color: var(--subheader-color);
   font-size: 90%;
 }
 
@@ -325,7 +331,7 @@
   }
 
   #groups-page .dw-members--header > div {
-    border: 1px solid var(--sl-color-gray-200);
+    border: var(--members-border);
     padding: var(--sl-spacing-medium);
   }
 

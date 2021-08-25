@@ -8,12 +8,10 @@
 }
 
 #dw-dialog-configuration .jsoneditor-menu {
-  background: var(--sl-color-primary-500);
+  background: var(--jsoneditor-background);
 }
 
-.jsoneditor-contextmenu .jsoneditor-menu li button.jsoneditor-selected,
-.jsoneditor-contextmenu .jsoneditor-menu li button.jsoneditor-selected:focus,
-.jsoneditor-contextmenu .jsoneditor-menu li button.jsoneditor-selected:hover {
-  color: var(--sl-color-primary-500);
-  background-color: var(--sl-color-primary-text);
+.jsoneditor-contextmenu .jsoneditor-menu li button.jsoneditor-selected, .jsoneditor-contextmenu .jsoneditor-menu li button.jsoneditor-selected:focus, .jsoneditor-contextmenu .jsoneditor-menu li button.jsoneditor-selected:hover {
+  color: var(--jsoneditor-dropdown-color);
+  background-color: var(--jsoneditor-dropdown-background);
 }

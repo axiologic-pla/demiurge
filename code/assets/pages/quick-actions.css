@@ -1,18 +1,18 @@
-#quick-actions-page .dw-domain {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  padding-bottom: 1rem;
-  column-gap: 1.5rem;
-}
+/*#quick-actions-page .dw-domain {*/
+/*    display: grid;*/
+/*    grid-template-columns: auto 1fr;*/
+/*    align-items: center;*/
+/*    padding-bottom: 1rem;*/
+/*    column-gap: 1.5rem;*/
+/*}*/
 
-#quick-actions-page .dw-domain dw-title {
-  grid-column: 1 / -1;
-}
+/*#quick-actions-page .dw-domain dw-title {*/
+/*    grid-column: 1 / -1;*/
+/*}*/
 
-#quick-actions-page .dw-domain span {
-  color: var(--sl-color-gray-500);
-}
+/*#quick-actions-page .dw-domain span {*/
+/*    color: var(--sl-color-gray-500);*/
+/*}*/
 
 #quick-actions-page .dw-actions {
   display: grid;
@@ -42,12 +42,12 @@
   font-size: 1.35rem;
 }
 
-#quick-actions-page .dw-actions .dw-action sl-icon[name='gear'] {
+#quick-actions-page .dw-actions .dw-action sl-icon[name=gear] {
   margin-top: 3px;
   font-size: 1.25rem;
 }
 
-#quick-actions-page .dw-actions .dw-action sl-icon[name='key'] {
+#quick-actions-page .dw-actions .dw-action sl-icon[name=key] {
   margin-top: 3px;
   font-size: 1.6rem;
 }

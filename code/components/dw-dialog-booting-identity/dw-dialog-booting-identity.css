@@ -11,7 +11,7 @@
     display: flex;
     justify-content: flex-end;
     gap: var(--sl-spacing-medium);
-    border-top: 1px solid var(--sl-color-gray-300);
+    border-top: var(--footer-border);
     padding: var(--sl-spacing-medium);
-    background-color: var(--sl-color-gray-50);
+    background-color: var(--footer-background);
 }

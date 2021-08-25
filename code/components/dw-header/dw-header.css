@@ -34,7 +34,7 @@ dw-header webc-app-menu[mode=horizontal] .app-menu webc-app-menu-item[active]:af
   right: 0;
   height: 2px;
   transform: translateY(100%);
-  background: var(--sl-color-primary-500);
+  background: var(--active-color);
 }
 
 dw-header webc-app-menu[mode=horizontal] .container div {
@@ -44,7 +44,7 @@ dw-header webc-app-menu[mode=horizontal] .container div {
 }
 
 dw-header .logo a {
-  color: var(--sl-color-primary-500);
+  color: var(--title-color);
   text-decoration: none;
   font-size: 1.25rem;
 }

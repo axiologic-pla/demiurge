@@ -1,4 +1,6 @@
 #member-page {
+  --header-background: rgb(var(--sl-color-primary-50));
+
   padding-bottom: calc(2 * var(--sl-spacing-large));
   overflow: hidden;
 }
@@ -53,8 +55,8 @@
 #member-page sl-details > [slot=summary] strong,
 #member-page .dw-credentials--header strong,
 #member-page .dw-databases--header strong {
-  background-color: var(--sl-color-primary-100);
-  padding: var(--sl-spacing-xx-small);
+  padding: var(--sl-spacing-x-small);
+  background-color: var(--header-background);
   border-radius: var(--sl-border-radius-medium);
 }
 

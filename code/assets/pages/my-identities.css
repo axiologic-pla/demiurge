@@ -1,6 +1,6 @@
 .dw-did-generator-container {
     padding: var(--sl-spacing-x-large);
-    border: 2px dashed var(--sl-color-gray-300);
+    border: 2px dashed rgb(var(--sl-color-gray-300));
     border-radius: var(--sl-border-radius-medium);
 }
 

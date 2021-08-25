@@ -1,7 +1,7 @@
 @import "./components.css";
 
 :root {
-    --webc-primary-color: var(--sl-color-gray-900);
+    --webc-primary-color: rgb(var(--sl-color-gray-900));
     --webc-font-family: var(--sl-font-sans);
     --dw-menu-width: 250px;
     --dw-container-width: 1000px;
@@ -15,14 +15,6 @@
     display: none;
 }
 
-/*::-moz-selection {*/
-/*    background: var(--sl-color-primary-600);*/
-/*}*/
-
-/*::selection {*/
-/*    background: var(--sl-color-primary-600);*/
-/*}*/
-
 webc-app-root {
     --mode: horizontal;
 }
@@ -32,7 +24,7 @@ webc-app-menu {
 }
 
 webc-app-container {
-    --background: var(--sl-color-gray-50);
+    --background: rgb(var(--sl-color-gray-50));
 }
 
 webc-app-container > .container.before {
@@ -41,45 +33,88 @@ webc-app-container > .container.before {
 }
 
 dw-header {
-    --border-color: var(--sl-color-gray-300);
+    --border-color: rgb(var(--sl-color-gray-300));
+    --active-color: rgb(var(--sl-color-primary-600));
+    --title-color: var(--active-color);
+}
+
+dw-menu {
+    --color: rgb(var(--sl-color-primary-600));
+    --border-color: rgb(var(--sl-color-gray-200));
+    --items-color: rgb(var(--sl-color-neutral-0));
+    --drawer-background: rgb(var(--sl-color-gray-50));
 }
 
 dw-title {
-    --color: var(--sl-color-gray-900);
+    --color: rgb(var(--sl-color-gray-900));
+}
+
+dw-clipboard-input {
+    --icon-color: rgb(var(--sl-color-neutral-0));
+    --icon-background: rgb(var(--sl-color-primary-200));
+}
+
+dw-dialog-booting-identity {
+    --footer-border: 1px solid rgb(var(--sl-color-gray-300));
+    --footer-background: rgb(var(--sl-color-gray-50));
+}
+
+dw-dialog-configuration {
+    --jsoneditor-background: rgb(var(--sl-color-primary-600));
+    --jsoneditor-dropdown-color: rgb(var(--sl-color-neutral-0));
+    --jsoneditor-dropdown-background: rgb(var(--sl-color-neutral-1000));
+}
+
+dw-subdomains {
+    --border: 1px solid rgb(var(--sl-panel-border-color));
+    --background: rgb(var(--sl-input-background-color));
 }
 
 .dw-data-grid {
-    --background: var(--sl-input-background-color);
-    --border-color: var(--sl-color-gray-200);
+    --border-color: rgb(var(--sl-color-gray-200));
+    --border: 1px solid var(--border-color);
+    --background: rgb(var(--sl-input-background-color));
+    --check-background: rgb(var(--sl-color-gray-300));
+
+    --delete-color: rgb(var(--sl-color-neutral-1000));
+    --delete-background: rgb(var(--sl-color-primary-600));
 }
 
 :root .sl-theme-dark {
-    --webc-primary-color: var(--sl-color-gray-50);
-    --sl-input-label-color: var(--sl-color-gray-50);
+    --webc-primary-color: rgb(var(--sl-color-gray-50));
+    --sl-input-label-color: rgb(var(--sl-color-gray-50));
 }
 
 .sl-theme-dark webc-app-container {
-    --background: var(--sl-color-gray-950);
+    --background: rgb(var(--sl-color-gray-950));
 }
 
 .sl-theme-dark webc-app-menu[mode=horizontal] {
-    --color: var(--sl-color-gray-300);
+    --color: rgb(var(--sl-color-gray-300));
 }
 
 .sl-theme-dark dw-spinner {
-    --color: var(--sl-color-gray-100);
+    --color: rgb(var(--sl-color-gray-100));
 }
 
 .sl-theme-dark dw-title {
-    --color: var(--sl-color-gray-300);
+    --color: rgb(var(--sl-color-gray-300));
 }
 
 .sl-theme-dark dw-header {
-    --border-color: var(--sl-color-gray-800);
-    --color: var(--sl-color-gray-300);
+    --border-color: rgb(var(--sl-color-gray-800));
+    --color: rgb(var(--sl-color-gray-300));
 }
 
 .sl-theme-dark .dw-data-grid {
-    --background: var(--sl-input-background-color);
-    --border-color: var(--sl-input-border-color);
+    --background: rgb(var(--sl-input-background-color));
+    --border-color: rgb(var(--sl-input-border-color));
 }
+
+/*::selection {*/
+/*    background: rgb(var(--sl-color-primary-600));*/
+/*}*/
+
+/*::-moz-selection {*/
+/*    background: rgb(var(--sl-color-primary-600));*/
+/*}*/
