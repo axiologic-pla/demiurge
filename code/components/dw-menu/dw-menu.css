@@ -1,7 +1,6 @@
 webc-app-menu[mode='vertical'] {
   --disable-identity: true;
 
-  --color: var(--color);
   --border-color: var(--border-color);
   --background: tranparent;
   --padding: 0 1rem 0 0;
@@ -10,11 +9,12 @@ webc-app-menu[mode='vertical'] {
 
 webc-app-menu[mode=vertical] .app-menu {
   margin-top: var(--sl-spacing-xxxx-large);
-  margin-left: var(--sl-spacing-xx-small)
+  margin-left: var(--sl-spacing-xx-small);
 }
 
-webc-app-menu-item {
-  --color: var(--items-color)
+webc-app-menu[mode=horizontal] .app-menu webc-app-menu-item,
+webc-app-menu[mode=horizontal] .app-menu webc-app-menu-item a {
+  --color: var(--items-color);
 }
 
 webc-app-menu-item[level='0']:first-child {

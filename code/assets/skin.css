@@ -33,13 +33,13 @@ webc-app-container > .container.before {
 }
 
 dw-header {
+    --items-color: rgb(var(--sl-color-gray-800));
     --border-color: rgb(var(--sl-color-gray-300));
     --active-color: rgb(var(--sl-color-primary-600));
     --title-color: var(--active-color);
 }
 
 dw-menu {
-    --color: rgb(var(--sl-color-primary-600));
     --border-color: rgb(var(--sl-color-gray-200));
     --items-color: rgb(var(--sl-color-neutral-0));
     --drawer-background: rgb(var(--sl-color-gray-50));
@@ -80,36 +80,32 @@ dw-subdomains {
     --delete-background: rgb(var(--sl-color-primary-600));
 }
 
-:root .sl-theme-dark {
-    --webc-primary-color: rgb(var(--sl-color-gray-50));
-    --sl-input-label-color: rgb(var(--sl-color-gray-50));
-}
+/*:root .sl-theme-dark {*/
+/*    --webc-primary-color: rgb(var(--sl-color-gray-50));*/
+/*    --sl-input-label-color: rgb(var(--sl-color-gray-50));*/
+/*}*/
 
-.sl-theme-dark webc-app-container {
-    --background: rgb(var(--sl-color-gray-950));
-}
+/*.sl-theme-dark webc-app-menu[mode=horizontal] {*/
+/*    --color: rgb(var(--sl-color-gray-300));*/
+/*}*/
 
-.sl-theme-dark webc-app-menu[mode=horizontal] {
-    --color: rgb(var(--sl-color-gray-300));
-}
+/*.sl-theme-dark dw-spinner {*/
+/*    --color: rgb(var(--sl-color-gray-100));*/
+/*}*/
 
-.sl-theme-dark dw-spinner {
-    --color: rgb(var(--sl-color-gray-100));
-}
+/*.sl-theme-dark dw-title {*/
+/*    --color: rgb(var(--sl-color-gray-300));*/
+/*}*/
 
-.sl-theme-dark dw-title {
-    --color: rgb(var(--sl-color-gray-300));
-}
+/*.sl-theme-dark dw-header {*/
+/*    --border-color: rgb(var(--sl-color-gray-800));*/
+/*    --color: rgb(var(--sl-color-gray-300));*/
+/*}*/
 
-.sl-theme-dark dw-header {
-    --border-color: rgb(var(--sl-color-gray-800));
-    --color: rgb(var(--sl-color-gray-300));
-}
-
-.sl-theme-dark .dw-data-grid {
-    --background: rgb(var(--sl-input-background-color));
-    --border-color: rgb(var(--sl-input-border-color));
-}
+/*.sl-theme-dark .dw-data-grid {*/
+/*    --background: rgb(var(--sl-input-background-color));*/
+/*    --border-color: rgb(var(--sl-input-border-color));*/
+/*}*/
 
 /*::selection {*/
 /*    background: rgb(var(--sl-color-primary-600));*/
