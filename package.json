@@ -14,7 +14,7 @@
     "url": "git+https://github.com/OpenDSU/demiurge.git"
   },
   "dependencies": {
-    "@shoelace-style/shoelace": "^2.0.0-beta.47",
+    "@shoelace-style/shoelace": "^2.0.0-beta.48",
     "jsoneditor": "^9.4.1",
     "octopus": "git+https://github.com/PrivateSky/octopus.git"
   },

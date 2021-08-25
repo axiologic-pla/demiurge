@@ -32,6 +32,7 @@ class DwController extends WebcController {
   get identity() {
     return {
       did: this.did,
+      username: this.userDetails.username
     }
   }
 
