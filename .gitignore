@@ -4,7 +4,6 @@
 node_modules/
 
 seed
-package-lock.json
 
 /code/jsoneditor/
 /code/constitution/
