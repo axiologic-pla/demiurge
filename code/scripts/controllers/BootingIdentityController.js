@@ -1,5 +1,6 @@
 const { DwController } = WebCardinal.controllers;
-
+import MessagesService from "../services/MessagesService.js";
+// import {createGroup} from "../mappings/createGroupMapping.js";
 class BootingIdentityController extends DwController {
   constructor(...props) {
     super(...props);
@@ -12,7 +13,6 @@ class BootingIdentityController extends DwController {
       domain: this.domain,
       username: this.userDetails.username
     };
-
     let didDocument;
 
     this.onTagEvent("did-component", "did-generate", async (readOnlyModel) => {
@@ -34,9 +34,15 @@ class BootingIdentityController extends DwController {
         const did = didDocument.getIdentifier();
 
         ui.enableMenu();
-        await setStoredDID(did);
+        await setStoredDID(did, this.model.username);
         this.did = did;
         this.domain = didDocument.getDomain();
+        const walletStorage = this.getWalletStorage();
+        walletStorage.getObject("/app/messages/createGroup.json", (err, data) => {
+          MessagesService.processMessages(data, () => {
+            console.log("Processed messages");
+          })
+        });
         this.navigateToPageTag("quick-actions");
       }
     });

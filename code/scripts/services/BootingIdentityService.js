@@ -9,11 +9,11 @@ const persistence = openDSU.loadAPI("persistence");
 /**
  * @param {string} did - identifier of DIDDocument
  */
-async function setStoredDID(did){
+async function setStoredDID(did, username){
   const walletStorage = persistence.getWalletStorage();
 
   try {
-    await walletStorage.insertRecordAsync(IDENTITY_TABLE, IDENTITY_PK, { did });
+    await walletStorage.insertRecordAsync(IDENTITY_TABLE, IDENTITY_PK, { did, username });
   } catch (err) {
     console.log(err);
   }

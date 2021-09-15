@@ -1,6 +1,7 @@
 import constants from "../../constants.js";
 import utils from "../../utils.js";
 import { cloneTemplate } from "../../../components/utils.js";
+import getStorageService from "../../services/StorageService.js";
 
 const { DwController } = WebCardinal.controllers;
 const { promisify } = utils;
@@ -168,7 +169,12 @@ class GroupsController extends DwController {
   }
 
   async fetchGroups() {
-    return await this.storageService.filterAsync(constants.TABLES.GROUPS);
+    // debugger
+    // const storageService = getStorageService();
+    // return await promisify(storageService.filter.bind(storageService))(constants.TABLES.GROUPS);
+    const persistence = require("opendsu").loadAPI("persistence");
+    const walletStorage = persistence.getWalletStorage();
+    return await walletStorage.filterAsync(constants.TABLES.GROUPS);
   }
 
   /**
@@ -177,7 +183,9 @@ class GroupsController extends DwController {
    **/
   async addGroup(group) {
     const w3cdid = require("opendsu").loadAPI("w3cdid");
-    const groupDIDDocument = await promisify(w3cdid.createIdentity)("group", constants.DOMAIN, group.name);
+    let groupName = group.name;
+    groupName = groupName.replaceAll(" ", "_");
+    const groupDIDDocument = await promisify(w3cdid.createIdentity)("group", constants.DOMAIN, groupName);
     group.did = groupDIDDocument.getIdentifier();
     await this.storageService.insertRecordAsync(constants.TABLES.GROUPS, group.did, group);
     await promisify(groupDIDDocument.addMember)(this.identity.did, {
