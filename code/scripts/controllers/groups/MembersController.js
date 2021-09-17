@@ -1,5 +1,6 @@
 import constants from "../../constants.js";
 import utils from "../../utils.js";
+import MessagesService from "../../services/MessagesService.js";
 
 const { DwController } = WebCardinal.controllers;
 const { promisify } = utils;
@@ -241,10 +242,14 @@ class MembersController extends DwController {
       const w3cDID = require("opendsu").loadAPI("w3cdid");
       const didDocument = await promisify(w3cDID.resolveDID)(member.did);
       member["username"] = didDocument.getName();
-
-      const groupDIDDocument = await promisify(w3cDID.resolveDID)(group.did);
-      await promisify(groupDIDDocument.addMember)(member.did, member);
-      await this.notifyMember(group, member);
+      const addMemberToGroupMessage = {
+        messageType: "AddMemberToGroup",
+        groupDID: group.did,
+        memberDID: member.did,
+        memberName: member.username,
+      };
+      await MessagesService.processMessages([addMemberToGroupMessage], () => {});
+      console.log("Processed messages");
       return member;
     } catch (err) {
       console.log(err);
@@ -257,9 +262,13 @@ class MembersController extends DwController {
    * @param {array<{did: string}>} members
    */
   async deleteMembers(group, members) {
-    const w3cDID = require("opendsu").loadAPI("w3cdid");
-    const groupDIDDocument = await promisify(w3cDID.resolveDID)(group.did);
-    await promisify(groupDIDDocument.removeMembers)(members);
+    const deleteMembersFromGroupMessage = {
+      messageType: "RemoveMembersFromGroup",
+      groupDID: group.did,
+      memberDIDs: members
+    }
+    MessagesService.processMessages(deleteMembersFromGroupMessage, ()=>{})
+    console.log("Processed messages");
   }
 
   async notifyMember(group, member) {

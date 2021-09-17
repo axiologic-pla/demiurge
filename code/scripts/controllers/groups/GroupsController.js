@@ -2,6 +2,7 @@ import constants from "../../constants.js";
 import utils from "../../utils.js";
 import { cloneTemplate } from "../../../components/utils.js";
 import getStorageService from "../../services/StorageService.js";
+import MessagesService from "../../services/MessagesService.js";
 
 const { DwController } = WebCardinal.controllers;
 const { promisify } = utils;
@@ -185,16 +186,16 @@ class GroupsController extends DwController {
    * @param {string} group.name
    **/
   async addGroup(group) {
-    const w3cdid = require("opendsu").loadAPI("w3cdid");
-    let groupName = group.name;
-    groupName = groupName.replaceAll(" ", "_");
-    const groupDIDDocument = await promisify(w3cdid.createIdentity)("group", constants.DOMAIN, groupName);
-    group.did = groupDIDDocument.getIdentifier();
-    await this.storageService.insertRecordAsync(constants.TABLES.GROUPS, group.did, group);
-    await promisify(groupDIDDocument.addMember)(this.identity.did, {
-      did: this.identity.did,
-      username: this.identity.username,
-    });
+    const createGroupMessage = {
+      messageType: "CreateGroup",
+      groupName: group.name
+    }
+    await MessagesService.processMessages([createGroupMessage], ()=>{});
+    const openDSU = require("opendsu");
+    const dbAPI = openDSU.loadAPI("db");
+    const enclaveDB = dbAPI.getMainEnclaveDB();
+    const groups = await promisify(enclaveDB.filter)(constants.TABLES.GROUPS);
+    group.did = groups.find(gr => gr.name === group.name).did;
     return group;
   }
 
@@ -203,7 +204,11 @@ class GroupsController extends DwController {
    * @param {string} group.did
    **/
   async deleteGroup(group) {
-    await this.storageService.deleteRecordAsync(constants.TABLES.GROUPS, group.did);
+    const deleteGroupMessage = {
+      messageType: "DeleteGroup",
+      groupDID: group.did
+    }
+    await MessagesService.processMessages([deleteGroupMessage], ()=>{});
   }
 }
 
