@@ -20,7 +20,6 @@ async function processMessages(messages, callback) {
             let digestedMessagesCounter = 0;
             let undigestedMessages = [];
             messagesPipe.onNewGroup(async (groupMessages) => {
-                debugger
                 undigestedMessages = [...undigestedMessages, ...await mappingEngine.digestMessages(groupMessages)];
                 digestedMessagesCounter += groupMessages.length;
                 if (digestedMessagesCounter >= messages.length) {

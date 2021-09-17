@@ -59,7 +59,7 @@ async function generateDidDocumentBeforeSubmission(domain, type, subType) {
           const seedSSI = await promisify(keySSI.createSeedSSI)(domain);
           payload.domain = domain;
 
-          didDocument = await promisify(w3cDID.createIdentity)("key", seedSSI);
+          didDocument = await promisify(w3cDID.createIdentity)("ssikey", seedSSI);
 
           payload.publicKey = didDocument.getIdentifier().split(":").pop();
 
@@ -79,6 +79,9 @@ async function generateDidDocumentBeforeSubmission(domain, type, subType) {
 
     case "key": {
       canBeSubmitted = true;
+      didDocument = await promisify(w3cDID.createIdentity)("key");
+      const splitDID = didDocument.getIdentifier().split(":");
+      payload.publicKey = splitDID.pop();
       break;
     }
 
@@ -353,12 +356,13 @@ function createDidGenerator(config) {
         }),
       ];
     },
-    ["did:key"]: () => {
-      submitElement.hidden = true;
+    ["did:key"]: (payload) => {
+      const {publicKey} = payload;
+      // submitElement.hidden = true;
       return [
         createElement("sl-input", {
           className: "input--key",
-          value: "0a528bfadc74417869ea4f1b400b0432",
+          value: publicKey,
           readonly: true,
         }),
       ];

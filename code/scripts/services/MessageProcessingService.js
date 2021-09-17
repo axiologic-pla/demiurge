@@ -7,7 +7,7 @@ const promisify = utils.promisify;
 class MessageProcessingService {
   constructor(identity) {
     const openDSU = require('opendsu');
-    const persistence = openDSU.loadAPI('persistence');
+    const persistence = openDSU.loadAPI('storage');
 
     this.storageService = persistence.getWalletStorage();
     this.identity = identity;

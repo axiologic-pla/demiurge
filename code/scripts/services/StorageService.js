@@ -2,13 +2,16 @@ const DB_NAME = "myDB";
 import constants from "../constants.js";
 
 class StorageService {
-  constructor(dsuStorage) {
+  constructor() {
     let openDSU = require("opendsu");
-    let db = openDSU.loadAPI("db");
-    let keySSIAPI = openDSU.loadAPI("keyssi");
-    dsuStorage.getObject(constants.DB_KEY_SSI_PATH, (err, keySSIObj) => {
-      this.mydb = db.getWalletDB(keySSIAPI.parse(keySSIObj.keySSI), DB_NAME);
-    });
+    let sc = openDSU.loadAPI("sc").getSecurityContext();
+    sc.getDB((err, db)=>{
+      if (err) {
+        return console.log(err);
+      }
+
+      this.mydb = db;
+    })
   }
 
   waitForDb(func, args) {

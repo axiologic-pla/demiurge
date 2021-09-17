@@ -169,12 +169,15 @@ class GroupsController extends DwController {
   }
 
   async fetchGroups() {
-    // debugger
-    // const storageService = getStorageService();
-    // return await promisify(storageService.filter.bind(storageService))(constants.TABLES.GROUPS);
-    const persistence = require("opendsu").loadAPI("persistence");
-    const walletStorage = persistence.getWalletStorage();
-    return await walletStorage.filterAsync(constants.TABLES.GROUPS);
+    const dbAPI = require("opendsu").loadAPI("db");
+    const enclaveDB = dbAPI.getMainEnclaveDB();
+    let groups
+    try{
+      groups = await promisify(enclaveDB.filter)(constants.TABLES.GROUPS);
+    }catch (e){
+      return console.log(e);
+    }
+    return groups;
   }
 
   /**
