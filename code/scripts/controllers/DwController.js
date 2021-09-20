@@ -19,7 +19,9 @@ class DwController extends WebcController {
       }
     }
 
-    this.storageService = this.getMainEnclaveDB();
+     this.getMainEnclaveDB((err, mainEnclaveDB)=>{
+       this.storageService = mainEnclaveDB;
+    });
   }
 
   get ui() {

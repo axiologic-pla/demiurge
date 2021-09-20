@@ -171,7 +171,7 @@ class GroupsController extends DwController {
 
   async fetchGroups() {
     const dbAPI = require("opendsu").loadAPI("db");
-    const enclaveDB = dbAPI.getMainEnclaveDB();
+    const enclaveDB = await $$.promisify(dbAPI.getMainEnclaveDB)();
     let groups
     try{
       groups = await promisify(enclaveDB.filter)(constants.TABLES.GROUPS);
@@ -193,10 +193,19 @@ class GroupsController extends DwController {
     await MessagesService.processMessages([createGroupMessage], ()=>{});
     const openDSU = require("opendsu");
     const dbAPI = openDSU.loadAPI("db");
-    const enclaveDB = dbAPI.getMainEnclaveDB();
+    const enclaveDB = await $$.promisify(dbAPI.getMainEnclaveDB)();
     const groups = await promisify(enclaveDB.filter)(constants.TABLES.GROUPS);
     group.did = groups.find(gr => gr.name === group.name).did;
+
+    const addMemberToGroupMessage = {
+      messageType: "AddMemberToGroup",
+      groupDID: group.did,
+      memberDID: this.identity.did,
+      memberName: this.identity.username,
+    };
+    await MessagesService.processMessages([addMemberToGroupMessage], () => {});
     return group;
+
   }
 
   /**
