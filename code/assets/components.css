@@ -24,6 +24,10 @@ dw-clipboard-input > sl-input > sl-icon::part(base) {
   margin: 0 auto;
 }
 
+.not-implemented {
+  font-size: 40px;
+  margin-top: 80px;
+}
 .dw-dialog {
   --body-spacing: 0;
 }

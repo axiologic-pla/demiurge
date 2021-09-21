@@ -1,21 +1,21 @@
 {
   "pages": [
     {
+      "name": "My Identities",
+      "tag": "my-identities"
+    },
+    {
+      "name": "Groups",
+      "tag": "groups"
+    },
+    {
       "name": "BDNS",
       "tag": "bdns",
       "src": "./blockchain-domains.html"
     },
     {
-      "name": "My Identities",
-      "tag": "my-identities"
-    },
-    {
       "name": "My Keys",
       "tag": "my-keys"
-    },
-    {
-      "name": "Groups",
-      "tag": "groups"
     },
     {
       "name": "Workspaces",
