@@ -57,24 +57,7 @@ class BootingIdentityController extends DwController {
         await setStoredDID(did, this.model.username);
         this.did = did;
         this.domain = didDocument.getDomain();
-        let groups;
-        try {
-          groups = await promisify(this.enclaveDB.filter)(constants.TABLES.GROUPS);
-        } catch (e) {
-          return console.log(e);
-        }
 
-        const openDSU = require("opendsu");
-        const w3cDID = openDSU.loadAPI("w3cdid");
-        for (let i = 0; i < groups.length; i++) {
-          let groupDID_Document;
-          try {
-            groupDID_Document = await promisify(w3cDID.resolveDID)(groups[i].did);
-            await promisify(groupDID_Document.addMember)(this.identity.did, this.identity);
-          } catch (e) {
-            return console.log(e);
-          }
-        }
         this.navigateToPageTag("quick-actions");
       }
     });
