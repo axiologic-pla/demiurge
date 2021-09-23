@@ -28,7 +28,7 @@ async function createGroup(message) {
     if (!enclaves || !enclaves.length) {
         const enclave = enclaveAPI.initialiseWalletDBEnclave();
         const enclaveDID = await $$.promisify(enclave.getDID)();
-        const enclaveKeySSI = await $$.promisify(enclave.getKeySSI)("someDID");
+        const enclaveKeySSI = await $$.promisify(enclave.getKeySSI)();
         const enclaveRecord = {
             enclaveType: openDSU.constants.ENCLAVE_TYPES.WALLET_DB_ENCLAVE,
             enclaveDID,
