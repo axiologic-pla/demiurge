@@ -7,9 +7,11 @@ const promisify = utils.promisify;
 class MessageProcessingService {
   constructor(identity) {
     const openDSU = require('opendsu');
-    const persistence = openDSU.loadAPI('storage');
+    const dbAPI = openDSU.loadAPI('db');
 
-    this.storageService = persistence.getWalletStorage();
+    dbAPI.getMainEnclaveDB((err, enclaveDB)=>{
+      this.storageService = enclaveDB;
+    });
     this.identity = identity;
   }
 
