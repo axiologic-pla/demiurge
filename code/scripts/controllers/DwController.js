@@ -232,12 +232,12 @@ class DwUI {
       });
     }
 
-    const closeElements = slElement.querySelectorAll("[close]");
-    closeElements.forEach((closeElement) => {
-      closeElement.addEventListener("click", async () => {
-        await slElement.hide();
-      });
-    });
+    // const closeElements = slElement.querySelectorAll("[close]");
+    // closeElements.forEach((closeElement) => {
+    //   closeElement.addEventListener("click", async () => {
+    //     await slElement.hide();
+    //   });
+    // });
 
     WebCardinal.state.page.dialogs = {
       ...WebCardinal.state.page.dialogs,
