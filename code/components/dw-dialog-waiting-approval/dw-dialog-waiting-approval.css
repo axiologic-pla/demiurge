@@ -1,0 +1,17 @@
+.dw-dialog-waiting-approval header {
+    padding-bottom: var(--sl-spacing-medium);
+}
+
+.dw-dialog-waiting-approval main {
+    padding: var(--sl-spacing-medium);
+    margin-bottom: var(--sl-spacing-medium);
+}
+
+.dw-dialog-waiting-approval footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--sl-spacing-medium);
+    border-top: var(--footer-border);
+    padding: var(--sl-spacing-medium);
+    background-color: var(--footer-background);
+}

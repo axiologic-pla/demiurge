@@ -252,6 +252,7 @@ class DwUI {
     setTimeout(async () => {
       await slElement.show();
     });
+    return slElement;
   }
 
   /**

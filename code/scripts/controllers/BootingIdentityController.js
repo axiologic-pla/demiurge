@@ -1,10 +1,5 @@
-import constants from "../constants.js";
-
 const { DwController } = WebCardinal.controllers;
 import MessagesService from "../services/MessagesService.js";
-import utils from "../utils.js";
-
-const promisify = utils.promisify;
 
 class BootingIdentityController extends DwController {
   constructor(...props) {
@@ -18,25 +13,6 @@ class BootingIdentityController extends DwController {
       domain: this.domain,
       username: this.userDetails.username,
     };
-
-    this.getMainEnclaveDB((err, mainEnclaveDB) => {
-      if (err) {
-        return console.log(err);
-      }
-      this.enclaveDB = mainEnclaveDB;
-      this.DSUStorage.getObject("/app/messages/createGroup.json", (err, data) => {
-        if (data) {
-          MessagesService.processMessages(data, () => {
-            console.log("Processed messages");
-            this.DSUStorage.getObject("/app/messages/createEnclave.json", (err, data) => {
-              MessagesService.processMessages(data, () => {
-                console.log("Processed messages");
-              });
-            });
-          });
-        }
-      });
-    });
 
     let didDocument;
 
@@ -57,15 +33,60 @@ class BootingIdentityController extends DwController {
       if (didDocument) {
         const { setStoredDID } = await import("../services/BootingIdentityService.js");
         const did = didDocument.getIdentifier();
-
-        ui.enableMenu();
         await setStoredDID(did, this.model.username);
         this.did = did;
         this.domain = didDocument.getDomain();
+        const openDSU = require("opendsu");
+        const scAPI = openDSU.loadAPI("sc");
+        ui.hideDialogFromComponent("dw-dialog-booting-identity");
+        this.waitForApproval(ui, didDocument);
 
-        this.navigateToPageTag("quick-actions");
+        const messages = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
+          "/app/messages/createGroup.json"
+        );
+        if (messages) {
+          MessagesService.processMessages(messages, async () => {
+            console.log("Processed messages");
+            const data = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))("/app/messages/createEnclave.json");
+            MessagesService.processMessages(data, () => {
+              console.log("Processed messages");
+
+              didDocument.readMessage(async (err, message) => {
+                message = JSON.parse(message);
+                if (message.sender === this.did) {
+                  ui.enableMenu();
+                  this.navigateToPageTag("quick-actions");
+                  return;
+                }
+                const mainDSU = await $$.promisify(scAPI.getMainDSU)();
+                let env = await $$.promisify(mainDSU.readFile)("/environment.json");
+                env = JSON.parse(env.toString());
+                env[openDSU.constants.ENCLAVE_TYPE] = message.enclave.enclaveType;
+                env[openDSU.constants.ENCLAVE_DID] = message.enclave.enclaveDID;
+                env[openDSU.constants.ENCLAVE_KEY_SSI] = message.enclave.enclaveKeySSI;
+                await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
+                scAPI.refreshSecurityContext();
+                ui.enableMenu();
+                this.navigateToPageTag("quick-actions");
+              });
+            });
+          });
+        }
       }
     });
+  }
+
+  async waitForApproval(ui, didDocument){
+    const dialog = await ui.showDialogFromComponent(
+        "dw-dialog-waiting-approval",
+        {
+          did: didDocument.getIdentifier(),
+        },
+        {
+          parentElement: this.element,
+        }
+    );
+    dialog.addEventListener('sl-request-close', event => event.preventDefault());
   }
 }
 
