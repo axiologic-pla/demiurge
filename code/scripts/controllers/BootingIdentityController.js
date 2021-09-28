@@ -31,9 +31,9 @@ class BootingIdentityController extends DwController {
             this.DSUStorage.getObject("/app/messages/createEnclave.json", (err, data) => {
               MessagesService.processMessages(data, () => {
                 console.log("Processed messages");
+              });
             });
-            });
-            });
+          });
         }
       });
     });
