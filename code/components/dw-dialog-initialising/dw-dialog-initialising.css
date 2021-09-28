@@ -1,8 +1,8 @@
-.dw-dialog-waiting-approval header {
+.dw-dialog-initialising header {
     padding-bottom: var(--sl-spacing-medium);
 }
 
-.dw-dialog-waiting-approval main {
+.dw-dialog-initialising main {
     padding: var(--sl-spacing-medium);
     margin-bottom: var(--sl-spacing-medium);
 }

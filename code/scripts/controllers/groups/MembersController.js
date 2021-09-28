@@ -186,7 +186,6 @@ class MembersController extends DwController {
       const { did } = await ui.page.addMember(...props);
       const member = await this.addMember(this.model.selectedGroup, { did });
       this.model.members.push(member);
-      await ui.showToast(member);
     });
 
     this.onTagClick("member.select", (selectedMember, ...props) => {

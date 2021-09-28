@@ -38,18 +38,51 @@ class BootingIdentityController extends DwController {
         this.domain = didDocument.getDomain();
         const openDSU = require("opendsu");
         const scAPI = openDSU.loadAPI("sc");
+        const w3cDID = openDSU.loadAPI("w3cdid");
         ui.hideDialogFromComponent("dw-dialog-booting-identity");
-        this.waitForApproval(ui, didDocument);
 
         const messages = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
           "/app/messages/createGroup.json"
         );
         if (messages) {
+          const vaultDomain = await $$.promisify(scAPI.getVaultDomain)();
+          let groupDIDDocument;
+          debugger;
+          try {
+            groupDIDDocument = await $$.promisify(w3cDID.resolveDID)(
+              `did:ssi:group:${vaultDomain}:${messages[0].groupName.replaceAll(" ", "_")}`
+            );
+          } catch (e) {}
+          if (!groupDIDDocument) {
+            await ui.showDialogFromComponent(
+              "dw-dialog-initialising",
+              {
+                did: didDocument.getIdentifier(),
+              },
+              {
+                parentElement: this.element,
+                disableClosing: true,
+              }
+            );
+          } else {
+            await ui.showDialogFromComponent(
+              "dw-dialog-waiting-approval",
+              {
+                did: didDocument.getIdentifier(),
+              },
+              {
+                parentElement: this.element,
+                disableClosing: true,
+              }
+            );
+          }
           MessagesService.processMessages(messages, async () => {
-            console.log("Processed messages");
-            const data = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))("/app/messages/createEnclave.json");
+            console.log("Processed create group messages");
+            const data = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
+              "/app/messages/createEnclave.json"
+            );
             MessagesService.processMessages(data, () => {
-              console.log("Processed messages");
+              console.log("Processed create enclave messages");
 
               didDocument.readMessage(async (err, message) => {
                 message = JSON.parse(message);
@@ -74,19 +107,6 @@ class BootingIdentityController extends DwController {
         }
       }
     });
-  }
-
-  async waitForApproval(ui, didDocument){
-    const dialog = await ui.showDialogFromComponent(
-        "dw-dialog-waiting-approval",
-        {
-          did: didDocument.getIdentifier(),
-        },
-        {
-          parentElement: this.element,
-        }
-    );
-    dialog.addEventListener('sl-request-close', event => event.preventDefault());
   }
 }
 
