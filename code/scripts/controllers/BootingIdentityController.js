@@ -45,11 +45,11 @@ class BootingIdentityController extends DwController {
           "/app/messages/createGroup.json"
         );
         if (messages) {
-          const vaultDomain = await $$.promisify(scAPI.getVaultDomain)();
+          const didDomain = await $$.promisify(scAPI.getDIDDomain)();
           let groupDIDDocument;
           try {
             groupDIDDocument = await $$.promisify(w3cDID.resolveDID)(
-              `did:ssi:group:${vaultDomain}:${messages[0].groupName.replaceAll(" ", "_")}`
+              `did:ssi:group:${didDomain}:${messages[0].groupName.replaceAll(" ", "_")}`
             );
           } catch (e) {}
           if (!groupDIDDocument) {

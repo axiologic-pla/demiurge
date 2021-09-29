@@ -17,6 +17,7 @@ async function createGroup(message) {
   const enclaveDB = await $$.promisify(dbAPI.getMainEnclaveDB)();
   const scAPI = openDSU.loadAPI("sc");
   const vaultDomain = await promisify(scAPI.getVaultDomain)();
+  const didDomain = await promisify(scAPI.getDIDDomain)();
   const dsu = await this.createDSU(vaultDomain, "seed");
 
   const group = {};
@@ -24,10 +25,10 @@ async function createGroup(message) {
   let groupName = message.groupName.replaceAll(" ", "_");
   let groupDIDDocument;
   try {
-    groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(`did:ssi:group:${vaultDomain}:${groupName}`);
+    groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(`did:ssi:group:${didDomain}:${groupName}`);
   } catch (e) {}
   if (typeof groupDIDDocument === "undefined") {
-    groupDIDDocument = await promisify(w3cdid.createIdentity)("group", vaultDomain, groupName);
+    groupDIDDocument = await promisify(w3cdid.createIdentity)("group", didDomain, groupName);
     group.did = groupDIDDocument.getIdentifier();
 
     await enclaveDB.insertRecordAsync(constants.TABLES.GROUPS, group.did, group);
