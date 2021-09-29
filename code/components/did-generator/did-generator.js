@@ -461,7 +461,7 @@ function createDidGenerator(config) {
         hidden: true,
         innerHTML: `
           <sl-icon slot="prefix" name="shield-fill-plus"></sl-icon>
-          Save identity
+          Create identity
         `,
       });
       const footerElement = createElement("div", {
