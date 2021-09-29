@@ -140,7 +140,7 @@ class GroupsController extends DwController {
         const group = await this.addGroup({ name });
         this.model.selectedGroup = undefined;
         this.model.groups.push(group);
-        await ui.showToast(group);
+        // await ui.showToast(group);
       } catch (err) {
         console.log(err);
       }
@@ -149,7 +149,7 @@ class GroupsController extends DwController {
     this.onTagClick("group.select", async (...props) => {
       const selectedGroup = await ui.page.selectGroup(...props);
       this.model.selectedGroup = selectedGroup;
-      await ui.showToast(selectedGroup);
+      // await ui.showToast(selectedGroup);
     });
 
     this.onTagClick("group.delete", async (deletedGroup) => {
@@ -157,7 +157,7 @@ class GroupsController extends DwController {
         await this.deleteGroup(deletedGroup);
         this.model.selectedGroup = undefined;
         this.model.groups = this.model.groups.filter((group) => group.did !== deletedGroup.did);
-        await ui.showToast(deletedGroup);
+        // await ui.showToast(deletedGroup);
       } catch (err) {
         console.log(err);
       }
