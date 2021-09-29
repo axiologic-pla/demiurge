@@ -47,7 +47,6 @@ class BootingIdentityController extends DwController {
         if (messages) {
           const vaultDomain = await $$.promisify(scAPI.getVaultDomain)();
           let groupDIDDocument;
-          debugger;
           try {
             groupDIDDocument = await $$.promisify(w3cDID.resolveDID)(
               `did:ssi:group:${vaultDomain}:${messages[0].groupName.replaceAll(" ", "_")}`
