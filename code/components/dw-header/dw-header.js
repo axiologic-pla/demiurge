@@ -5,7 +5,7 @@ customElements.define(
       super();
 
       this.innerHTML = `
-            <link rel="stylesheet" href="/components/dw-header/dw-header.css">
+            <link rel="stylesheet" href="./components/dw-header/dw-header.css">
             <header>
                 <webc-app-menu mode="horizontal">
                     <div slot="before">

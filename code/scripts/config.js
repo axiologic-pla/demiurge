@@ -33,16 +33,16 @@ addHook("beforeAppLoads", async () => {
   WebCardinal.wallet = {};
   const wallet = WebCardinal.wallet;
 
-  const { getVaultDomainAsync } = await import("/scripts/hooks/getVaultDomain.js");
-  const { getUserDetails } = await import("/scripts/hooks/getUserDetails.js");
-  const { getStoredDID } = await import("/scripts/services/BootingIdentityService.js");
+  const { getVaultDomainAsync } = await import("./hooks/getVaultDomain.js");
+  const { getUserDetails } = await import("./hooks/getUserDetails.js");
+  const { getStoredDID } = await import("./services/BootingIdentityService.js");
 
   wallet.vaultDomain = await getVaultDomainAsync();
   wallet.userDetails = await getUserDetails();
   wallet.did = await getStoredDID();
 
   if (wallet.did) {
-    const { default: getMessageProcessingService } = await import("/scripts/services/MessageProcessingService.js");
+    const { default: getMessageProcessingService } = await import("./services/MessageProcessingService.js");
     const messageProcessingService = await getMessageProcessingService({ did: wallet.did });
     WebCardinal.wallet.messageProcessingService = messageProcessingService;
     try {
@@ -55,16 +55,16 @@ addHook("beforeAppLoads", async () => {
   // setInitialTheme();
 
   // load Custom Components
-  await import("/components/dw-header/dw-header.js");
-  await import("/components/dw-menu/dw-menu.js");
-  await import("/components/dw-spinner/dw-spinner.js");
-  await import("/components/dw-title/dw-title.js");
-  await import("/components/dw-data-grid/dw-data-grid.js");
-  await import("/components/dw-clipboard-input/dw-clipboard-input.js");
-  await import("/components/did-generator/did-generator.js");
+  await import("../components/dw-header/dw-header.js");
+  await import("../components/dw-menu/dw-menu.js");
+  await import("../components/dw-spinner/dw-spinner.js");
+  await import("../components/dw-title/dw-title.js");
+  await import("../components/dw-data-grid/dw-data-grid.js");
+  await import("../components/dw-clipboard-input/dw-clipboard-input.js");
+  await import("../components/did-generator/did-generator.js");
 
   // load Demiurge base Controller
-  const { DwController } = await import("/scripts/controllers/DwController.js");
+  const { DwController } = await import("./controllers/DwController.js");
   addControllers({ DwController });
 });
 
