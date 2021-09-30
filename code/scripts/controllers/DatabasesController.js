@@ -30,7 +30,7 @@ class DatabasesController extends DwController {
 
       await this.storageService.deleteRecordAsync(constants.TABLES.GROUP_DATABASES, deletedDatabase.keySSI);
 
-      await ui.showToast(deletedDatabase);
+      // await ui.showToast(deletedDatabase);
     });
   }
 

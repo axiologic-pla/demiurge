@@ -18,9 +18,9 @@ class CredentialsUI {
     await slInputElement.select();
     await slInputElement.setSelectionRange(0, value.length);
     document.execCommand("copy");
-    await this.ui.showToast(`Credential copied to clipboard!`, {
-      duration: 1500,
-    });
+    // await this.ui.showToast(`Credential copied to clipboard!`, {
+    //   duration: 1500,
+    // });
     await slInputElement.setSelectionRange(0, 0);
     await slInputElement.blur();
   }
@@ -47,7 +47,7 @@ class CredentialsController extends DwController {
         await this.storeCredential(group, credential);
         this.model.credentials.push({ token: credential });
         await this.shareCredentialWithMembers(group, credential);
-        await ui.showToast(credential);
+        // await ui.showToast(credential);
       } catch (err) {
         console.log(err);
       }

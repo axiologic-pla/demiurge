@@ -14,9 +14,9 @@ class MyIdentitiesController extends DwController {
 
     this.onTagEvent("did-component", "did-generate", async (readOnlyModel) => {
       const { didDocument } = readOnlyModel;
-      console.log('# new did', { didDocument });
+      // console.log('# new did', { didDocument });
       console.log(didDocument.getIdentifier());
-      await ui.showToast(`New DID created: '${didDocument.getIdentifier()}'`);
+      // await ui.showToast(`New DID created: '${didDocument.getIdentifier()}'`);
     });
   }
 }

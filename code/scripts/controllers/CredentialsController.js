@@ -18,9 +18,9 @@ class CredentialsUI {
     await slInputElement.select();
     await slInputElement.setSelectionRange(0, value.length);
     document.execCommand("copy");
-    await this.ui.showToast(`Credential copied to clipboard!`, {
-      duration: 1500,
-    });
+    // await this.ui.showToast(`Credential copied to clipboard!`, {
+    //   duration: 1500,
+    // });
     await slInputElement.setSelectionRange(0, 0);
     await slInputElement.blur();
   }
@@ -74,7 +74,7 @@ class CredentialsController extends DwController {
         utils.getPKFromCredential(deletedCredential.credential)
       );
 
-      await ui.showToast(deletedCredential);
+      // await ui.showToast(deletedCredential);
     });
   }
 }

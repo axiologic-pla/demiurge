@@ -36,7 +36,7 @@ class DatabasesController extends DwController {
         await this.storeDatabase(database);
         this.model.databases.push(database);
         await this.shareDatabaseWithMembers(group, database);
-        await ui.showToast(database);
+        // await ui.showToast(database);
       } catch (err) {
         console.log(err);
       }
@@ -47,7 +47,7 @@ class DatabasesController extends DwController {
         console.log({ deletedDatabase, props });
         this.model.databases = this.model.databases.filter((database) => database.keySSI !== deletedDatabase.keySSI);
         await this.deleteDatabase(deletedDatabase);
-        await ui.showToast(deletedDatabase);
+        // await ui.showToast(deletedDatabase);
       } catch (err) {
         console.log(err);
       }
