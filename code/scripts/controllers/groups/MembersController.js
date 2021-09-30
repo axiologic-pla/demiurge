@@ -182,13 +182,12 @@ class MembersController extends DwController {
     ui.page.addMultipleSelectionListeners();
     ui.page.addPasteMemberDIDFromClipboardListener();
 
-    this.onTagClick("member.add", async (...props) => {
-      const { did } = await ui.page.addMember(...props);
-      const element = props[1];
-      element.loading = true;
+    this.onTagClick("member.add", async (model, button) => {
+      const { did } = await ui.page.addMember(model, button);
+      button.loading = true;
       const member = await this.addMember(this.model.selectedGroup, { did });
-      element.loading = false;
       this.model.members.push(member);
+      button.loading = false;
     });
 
     this.onTagClick("member.select", (selectedMember, ...props) => {
