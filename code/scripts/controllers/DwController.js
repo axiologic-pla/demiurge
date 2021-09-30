@@ -94,14 +94,15 @@ class DwUI {
       }
     }
 
-    const promise = new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (!slFormElement) {
         return reject("'sl-form' element not found!");
       }
 
-      slFormElement.addEventListener("sl-submit", (event) => {
-        const { formControls } = event.detail;
+      function listener (event) {
         const result = {};
+        const { formControls } = event.detail;
+
         for (const element of formControls) {
           const { name } = element;
           if (!name) {
@@ -109,9 +110,14 @@ class DwUI {
           }
           result[name] = element.value;
           if (element.tagName === "SL-INPUT") {
-            const inputElement = element.shadowRoot.querySelector("[part=input]");
-            const baseElement = element.shadowRoot.querySelector("[part=clear-button]");
+            const inputElement = element.shadowRoot.querySelector(
+                "[part=input]"
+            );
+            const baseElement = element.shadowRoot.querySelector(
+                "[part=clear-button]"
+            );
             if (inputElement) {
+              element.value = "";
               inputElement.value = "";
             }
             if (baseElement) {
@@ -120,17 +126,12 @@ class DwUI {
           }
           return resolve({ ...result, event });
         }
-      });
+      }
 
-      const cloneElement = slFormElement.cloneNode(true);
-      slFormElement.parentElement.replaceChild(cloneElement, slFormElement);
-    });
-
-    if (slFormElement) {
+      slFormElement.addEventListener("sl-submit", listener);
       await slFormElement.submit();
-    }
-
-    return promise;
+      slFormElement.removeEventListener("sl-submit", listener);
+    });
   }
 
   /**
