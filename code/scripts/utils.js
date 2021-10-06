@@ -54,9 +54,29 @@ async function sendUserMessage(sender, group, member, content, contentType, reci
   await promisify(didDocument.sendMessage)(message, receiverDIDDocument);
 }
 
+async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
+  const openDSU = require("opendsu");
+  const scAPI = openDSU.loadAPI("sc");
+  const resolver = openDSU.loadAPI("resolver");
+  const mainDSU = await $$.promisify(scAPI.getMainDSU)();
+  const keySSI = await $$.promisify(mainDSU.getKeySSIAsString)();
+  resolver.invalidateDSUCache(keySSI);
+  let env = await $$.promisify(mainDSU.readFile)("/environment.json");
+  env = JSON.parse(env.toString());
+  env[openDSU.constants.SHARED_ENCLAVE.TYPE] = enclaveType;
+  env[openDSU.constants.SHARED_ENCLAVE.DID] = enclaveDID;
+  env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = enclaveKeySSI;
+  await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
+  // await $$.promisify(mainDSU.refresh)();
+  env = await $$.promisify(mainDSU.readFile)("/environment.json");
+  env = JSON.parse(env.toString());
+  scAPI.refreshSecurityContext();
+}
+
 export default {
   promisify,
   getPKFromCredential,
   sendGroupMessage,
   sendUserMessage,
+  addSharedEnclaveToEnv
 };

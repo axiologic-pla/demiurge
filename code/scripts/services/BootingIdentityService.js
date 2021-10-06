@@ -16,7 +16,7 @@ async function setStoredDID(did, username){
   const walletStorage = await $$.promisify(dbAPI.getMainEnclaveDB)();
 
   try {
-    await promisify(walletStorage.insertRecord)(IDENTITY_TABLE, IDENTITY_PK, { did, username });
+    await walletStorage.writeKeyAsync(constants.IDENTITY, { did, username });
   } catch (err) {
     console.log(err);
   }
@@ -28,7 +28,7 @@ async function getStoredDID() {
   let record;
 
   try {
-    record = await promisify(walletStorage.getRecord)(IDENTITY_TABLE, IDENTITY_PK);
+    record = await walletStorage.readKeyAsync(constants.IDENTITY);
   } catch (err) {
     // TODO: wait for a future improvement of db from OpenDSU SDK
   }

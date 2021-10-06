@@ -23,14 +23,13 @@ async function addMemberToGroupMapping(message) {
   };
   const groupDIDDocument = await promisify(w3cdid.resolveDID)(message.groupDID);
   await promisify(groupDIDDocument.addMember)(member.did, member);
-  const adminDIDs = await enclaveDB.filterAsync(constants.TABLES.IDENTITY);
-  const adminDID = adminDIDs[0].did;
+  let adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
+  adminDID = adminDID.did;
   const adminDID_Document = await $$.promisify(w3cdid.resolveDID)(adminDID);
   const memberDID_Document = await $$.promisify(w3cdid.resolveDID)(member.did);
   const credential = await promisify(crypto.createCredentialForDID)(adminDID, message.groupDID);
 
-  const enclaves = await enclaveDB.filterAsync(constants.TABLES.GROUP_DATABASES);
-  const enclave = enclaves[0];
+  const enclave = await enclaveDB.readKeyAsync(constants.SHARED_ENCLAVE);
   const enclaveRecord = {
     enclaveType: openDSU.constants.ENCLAVE_TYPES.WALLET_DB_ENCLAVE,
     enclaveDID: enclave.enclaveDID,

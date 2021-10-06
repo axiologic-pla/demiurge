@@ -13,11 +13,11 @@ async function createGroup(message) {
   const w3cdid = openDSU.loadAPI("w3cdid");
   const dbAPI = openDSU.loadAPI("db");
   const enclaveAPI = openDSU.loadAPI("enclave");
-
   const enclaveDB = await $$.promisify(dbAPI.getMainEnclaveDB)();
   const scAPI = openDSU.loadAPI("sc");
   const vaultDomain = await promisify(scAPI.getVaultDomain)();
   const didDomain = await promisify(scAPI.getDIDDomain)();
+  const mainDSU = await promisify(scAPI.getMainDSU)();
   const dsu = await this.createDSU(vaultDomain, "seed");
 
   const group = {};
@@ -31,13 +31,18 @@ async function createGroup(message) {
     groupDIDDocument = await promisify(w3cdid.createIdentity)("group", didDomain, groupName);
     group.did = groupDIDDocument.getIdentifier();
 
-    await enclaveDB.insertRecordAsync(constants.TABLES.GROUPS, group.did, group);
-    const adminDIDs = await enclaveDB.filterAsync(constants.TABLES.IDENTITY);
-    const adminDID = adminDIDs[0].did;
-    const adminDID_Document = await $$.promisify(w3cdid.resolveDID)(adminDID);
+    const enclaveRecord = await enclaveDB.readKeyAsync(constants.SHARED_ENCLAVE);
+    await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
+
+    const sharedEnclaveDB = await $$.promisify(dbAPI.getSharedEnclaveDB)();
+    await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS, group.did, group);
+
+    const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
+    const adminDID_Document = await $$.promisify(w3cdid.resolveDID)(adminDID.did);
     const msg = {
-      sender: adminDID,
+      sender: adminDID.did,
     };
+    await $$.promisify(mainDSU.refresh)();
     await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), adminDID_Document);
   }
 }

@@ -1,5 +1,6 @@
 const { DwController } = WebCardinal.controllers;
 import MessagesService from "../services/MessagesService.js";
+import utils from "../utils.js";
 
 class BootingIdentityController extends DwController {
   constructor(...props) {
@@ -40,20 +41,33 @@ class BootingIdentityController extends DwController {
         const scAPI = openDSU.loadAPI("sc");
         const w3cDID = openDSU.loadAPI("w3cdid");
         ui.hideDialogFromComponent("dw-dialog-booting-identity");
+        const didDomain = await $$.promisify(scAPI.getDIDDomain)();
+        const publicName = "first_demiurge_identity";
 
-        const messages = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
-          "/app/messages/createGroup.json"
-        );
-        if (messages) {
-          const didDomain = await $$.promisify(scAPI.getDIDDomain)();
-          let groupDIDDocument;
-          try {
-            groupDIDDocument = await $$.promisify(w3cDID.resolveDID)(
-              `did:ssi:group:${didDomain}:${messages[0].groupName.replaceAll(" ", "_")}`
-            );
-          } catch (e) {}
-          if (!groupDIDDocument) {
-            await ui.showDialogFromComponent(
+        const __waitForMessage = ()=>{
+          didDocument.readMessage(async (err, message) => {
+            message = JSON.parse(message);
+            console.log("Message =============", message);
+            if (message.sender === this.did) {
+              ui.enableMenu();
+              this.navigateToPageTag("quick-actions");
+              return;
+            }
+
+            await utils.addSharedEnclaveToEnv(message.enclave.enclaveType, message.enclave.enclaveDID, message.enclave.enclaveKeySSI);
+            ui.enableMenu();
+            this.navigateToPageTag("quick-actions");
+          });
+        }
+
+        let firstDIDDocument;
+        try {
+          firstDIDDocument = await $$.promisify(w3cDID.resolveDID)(`did:ssi:name:${didDomain}:${publicName}`);
+        }catch (e) {
+
+        }
+        if(!firstDIDDocument){
+          await ui.showDialogFromComponent(
               "dw-dialog-initialising",
               {
                 did: didDocument.getIdentifier(),
@@ -62,9 +76,27 @@ class BootingIdentityController extends DwController {
                 parentElement: this.element,
                 disableClosing: true,
               }
+          );
+          await $$.promisify(w3cDID.createIdentity)("name", didDomain, publicName);
+          const data = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
+              "/app/messages/createEnclave.json"
+          );
+
+          MessagesService.processMessages(data, async () => {
+            console.log("Processed create enclave messages");
+
+            const messages = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
+                "/app/messages/createGroup.json"
             );
-          } else {
-            await ui.showDialogFromComponent(
+            if (messages) {
+              MessagesService.processMessages(messages, async () => {
+                console.log("Processed create group messages");
+                __waitForMessage();
+              });
+            }
+          });
+        }else{
+          await ui.showDialogFromComponent(
               "dw-dialog-waiting-approval",
               {
                 did: didDocument.getIdentifier(),
@@ -73,36 +105,8 @@ class BootingIdentityController extends DwController {
                 parentElement: this.element,
                 disableClosing: true,
               }
-            );
-          }
-          MessagesService.processMessages(messages, async () => {
-            console.log("Processed create group messages");
-            const data = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
-              "/app/messages/createEnclave.json"
-            );
-            MessagesService.processMessages(data, () => {
-              console.log("Processed create enclave messages");
-
-              didDocument.readMessage(async (err, message) => {
-                message = JSON.parse(message);
-                if (message.sender === this.did) {
-                  ui.enableMenu();
-                  this.navigateToPageTag("quick-actions");
-                  return;
-                }
-                const mainDSU = await $$.promisify(scAPI.getMainDSU)();
-                let env = await $$.promisify(mainDSU.readFile)("/environment.json");
-                env = JSON.parse(env.toString());
-                env[openDSU.constants.ENCLAVE_TYPE] = message.enclave.enclaveType;
-                env[openDSU.constants.ENCLAVE_DID] = message.enclave.enclaveDID;
-                env[openDSU.constants.ENCLAVE_KEY_SSI] = message.enclave.enclaveKeySSI;
-                await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
-                scAPI.refreshSecurityContext();
-                ui.enableMenu();
-                this.navigateToPageTag("quick-actions");
-              });
-            });
-          });
+          );
+          __waitForMessage();
         }
       }
     });

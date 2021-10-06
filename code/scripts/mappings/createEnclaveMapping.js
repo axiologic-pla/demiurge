@@ -17,8 +17,9 @@ async function createEnclave(message) {
   const scAPI = openDSU.loadAPI("sc");
   const vaultDomain = await promisify(scAPI.getVaultDomain)();
   const dsu = await this.createDSU(vaultDomain, "seed");
-
-  const enclave = enclaveAPI.initialiseWalletDBEnclave();
+  const keySSI = await $$.promisify(dsu.getKeySSIAsString)();
+  const enclave = enclaveAPI.initialiseWalletDBEnclave(keySSI);
+  debugger
   const enclaveDID = await $$.promisify(enclave.getDID)();
   const enclaveKeySSI = await $$.promisify(enclave.getKeySSI)();
   const enclaveRecord = {
@@ -28,7 +29,7 @@ async function createEnclave(message) {
     enclaveName: message.enclaveName,
   };
 
-  await enclaveDB.insertRecordAsync(constants.TABLES.GROUP_DATABASES, enclaveDID, enclaveRecord);
+  await enclaveDB.writeKeyAsync(constants.SHARED_ENCLAVE, enclaveRecord);
 }
 
 require("opendsu").loadAPI("m2dsu").defineMapping(checkIfCreateEnclaveMessage, createEnclave);

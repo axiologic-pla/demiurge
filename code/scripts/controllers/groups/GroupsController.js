@@ -171,7 +171,7 @@ class GroupsController extends DwController {
 
   async fetchGroups() {
     const dbAPI = require("opendsu").loadAPI("db");
-    const enclaveDB = await $$.promisify(dbAPI.getMainEnclaveDB)();
+    const enclaveDB = await $$.promisify(dbAPI.getSharedEnclaveDB)();
     let groups
     try{
       groups = await promisify(enclaveDB.filter)(constants.TABLES.GROUPS);

@@ -16,7 +16,9 @@ export default {
   },
   DB_KEY_SSI_PATH: "/dbKeySSI",
   SECURITY_CONTEXT_KEY_SSI_PATH: "security-context",
-  IDENTITY_PK: "identity",
+  IDENTITY_PK: "identity_pk",
+  SHARED_ENCLAVE: "sharedEnclave",
+  IDENTITY: "identity",
   RECIPIENT_TYPES: {
     USER_RECIPIENT: "user",
     GROUP_RECIPIENT: "group",
