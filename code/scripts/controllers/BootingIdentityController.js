@@ -30,7 +30,8 @@ class BootingIdentityController extends DwController {
       );
     });
 
-    this.onTagClick("did-confirm", async () => {
+    this.onTagClick("did-confirm", async (model, button) => {
+      button.loading = true;
       if (didDocument) {
         const { setStoredDID } = await import("../services/BootingIdentityService.js");
         const did = didDocument.getIdentifier();
@@ -47,7 +48,6 @@ class BootingIdentityController extends DwController {
         const __waitForMessage = ()=>{
           didDocument.readMessage(async (err, message) => {
             message = JSON.parse(message);
-            console.log("Message =============", message);
             if (message.sender === this.did) {
               ui.enableMenu();
               this.navigateToPageTag("quick-actions");
@@ -64,9 +64,7 @@ class BootingIdentityController extends DwController {
         try {
           firstDIDDocument = await $$.promisify(w3cDID.resolveDID)(`did:ssi:name:${didDomain}:${publicName}`);
         }catch (e) {
-
-        }
-        if(!firstDIDDocument){
+          button.loading = false;
           await ui.showDialogFromComponent(
               "dw-dialog-initialising",
               {
@@ -95,19 +93,21 @@ class BootingIdentityController extends DwController {
               });
             }
           });
-        }else{
-          await ui.showDialogFromComponent(
-              "dw-dialog-waiting-approval",
-              {
-                did: didDocument.getIdentifier(),
-              },
-              {
-                parentElement: this.element,
-                disableClosing: true,
-              }
-          );
-          __waitForMessage();
+          return;
         }
+
+        button.loading = false;
+        await ui.showDialogFromComponent(
+            "dw-dialog-waiting-approval",
+            {
+              did: didDocument.getIdentifier(),
+            },
+            {
+              parentElement: this.element,
+              disableClosing: true,
+            }
+        );
+        __waitForMessage();
       }
     });
   }

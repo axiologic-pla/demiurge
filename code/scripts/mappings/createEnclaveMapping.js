@@ -19,7 +19,6 @@ async function createEnclave(message) {
   const dsu = await this.createDSU(vaultDomain, "seed");
   const keySSI = await $$.promisify(dsu.getKeySSIAsString)();
   const enclave = enclaveAPI.initialiseWalletDBEnclave(keySSI);
-  debugger
   const enclaveDID = await $$.promisify(enclave.getDID)();
   const enclaveKeySSI = await $$.promisify(enclave.getKeySSI)();
   const enclaveRecord = {
