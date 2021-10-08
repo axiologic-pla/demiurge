@@ -249,8 +249,9 @@ class MembersController extends DwController {
         memberDID: member.did,
         memberName: member.username,
       };
-      await MessagesService.processMessages([addMemberToGroupMessage], () => {});
-      console.log("Processed messages");
+      MessagesService.processMessages([addMemberToGroupMessage], () => {
+        console.log("Processed messages");
+      });
       return member;
     } catch (err) {
       console.log(err);

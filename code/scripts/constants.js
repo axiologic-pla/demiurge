@@ -6,7 +6,7 @@ export default {
     USER_CREDENTIALS: "user_credentials_table",
     GROUPS_CREDENTIALS: "groups_credentials_table",
     IDENTITY: "identity_table",
-    GROUP_DATABASES: "group_databases_table",
+    GROUP_ENCLAVES: "group_databases_table",
     USER_DATABASES: "user_databases_table",
   },
   CONTENT_TYPE: {
@@ -17,8 +17,11 @@ export default {
   DB_KEY_SSI_PATH: "/dbKeySSI",
   SECURITY_CONTEXT_KEY_SSI_PATH: "security-context",
   IDENTITY_PK: "identity_pk",
-  SHARED_ENCLAVE: "sharedEnclave",
+  SHARED_ENCLAVE: "demiurgeSharedEnclave",
+  EPI_SHARED_ENCLAVE: "epiEnclave",
   IDENTITY: "identity",
+  EPI_ADMIN_GROUP: "ePI_Administration_Group",
+  EPI_WRITE_GROUP: "ePI_Write_Group",
   RECIPIENT_TYPES: {
     USER_RECIPIENT: "user",
     GROUP_RECIPIENT: "group",

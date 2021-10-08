@@ -28,7 +28,7 @@ async function createEnclave(message) {
     enclaveName: message.enclaveName,
   };
 
-  await enclaveDB.writeKeyAsync(constants.SHARED_ENCLAVE, enclaveRecord);
+  await enclaveDB.writeKeyAsync(message.enclaveName, enclaveRecord);
 }
 
 require("opendsu").loadAPI("m2dsu").defineMapping(checkIfCreateEnclaveMessage, createEnclave);

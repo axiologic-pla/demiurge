@@ -14,9 +14,12 @@ async function addMemberToGroupMapping(message) {
   const crypto = openDSU.loadAPI("crypto");
   const dbAPI = openDSU.loadAPI("db");
   const enclaveAPI = openDSU.loadAPI("enclave");
+  const mainDSU = await $$.promisify(scAPI.getMainDSU)();
+  await $$.promisify(mainDSU.refresh)();
   const enclaveDB = await $$.promisify(dbAPI.getMainEnclaveDB)();
   const vaultDomain = await promisify(scAPI.getVaultDomain)();
   const dsu = await this.createDSU(vaultDomain, "seed");
+
   const member = {
     username: message.memberName,
     did: message.memberDID,
@@ -29,9 +32,14 @@ async function addMemberToGroupMapping(message) {
   const memberDID_Document = await $$.promisify(w3cdid.resolveDID)(member.did);
   const credential = await promisify(crypto.createCredentialForDID)(adminDID, message.groupDID);
 
-  const enclave = await enclaveDB.readKeyAsync(constants.SHARED_ENCLAVE);
+  let enclave;
+  if (groupDIDDocument.getGroupName() === constants.EPI_ADMIN_GROUP) {
+    enclave = await enclaveDB.readKeyAsync(constants.SHARED_ENCLAVE);
+  } else {
+    enclave = await enclaveDB.readKeyAsync(constants.EPI_SHARED_ENCLAVE);
+  }
   const enclaveRecord = {
-    enclaveType: openDSU.constants.ENCLAVE_TYPES.WALLET_DB_ENCLAVE,
+    enclaveType: enclave.enclaveType,
     enclaveDID: enclave.enclaveDID,
     enclaveKeySSI: enclave.enclaveKeySSI,
   };

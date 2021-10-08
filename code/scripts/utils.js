@@ -60,16 +60,14 @@ async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
   const resolver = openDSU.loadAPI("resolver");
   const mainDSU = await $$.promisify(scAPI.getMainDSU)();
   const keySSI = await $$.promisify(mainDSU.getKeySSIAsString)();
-  resolver.invalidateDSUCache(keySSI);
+  // await $$.promisify(mainDSU.refresh)();
   let env = await $$.promisify(mainDSU.readFile)("/environment.json");
   env = JSON.parse(env.toString());
   env[openDSU.constants.SHARED_ENCLAVE.TYPE] = enclaveType;
   env[openDSU.constants.SHARED_ENCLAVE.DID] = enclaveDID;
   env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = enclaveKeySSI;
-  await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
   // await $$.promisify(mainDSU.refresh)();
-  env = await $$.promisify(mainDSU.readFile)("/environment.json");
-  env = JSON.parse(env.toString());
+  await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
   scAPI.refreshSecurityContext();
 }
 

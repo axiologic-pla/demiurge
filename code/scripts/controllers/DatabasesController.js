@@ -28,14 +28,14 @@ class DatabasesController extends DwController {
 
       this.model.databases = this.model.databases.filter((database) => database.id !== deletedDatabase.id);
 
-      await this.storageService.deleteRecordAsync(constants.TABLES.GROUP_DATABASES, deletedDatabase.keySSI);
+      await this.storageService.deleteRecordAsync(constants.TABLES.GROUP_ENCLAVES, deletedDatabase.keySSI);
 
       // await ui.showToast(deletedDatabase);
     });
   }
 
   async fetchGroupDatabases() {
-    return await this.storageService.filterAsync(constants.TABLES.GROUP_DATABASES);
+    return await this.storageService.filterAsync(constants.TABLES.GROUP_ENCLAVES);
   }
 }
 

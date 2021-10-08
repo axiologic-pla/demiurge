@@ -60,7 +60,7 @@ class DatabasesController extends DwController {
   }
 
   async fetchDatabases() {
-    return await this.storageService.filterAsync(constants.TABLES.GROUP_DATABASES);
+    return await this.storageService.filterAsync(constants.TABLES.GROUP_ENCLAVES);
   }
 
   /**
@@ -84,7 +84,7 @@ class DatabasesController extends DwController {
    * @param {string} database.keySSI
    */
   async storeDatabase(database) {
-    await this.storageService.insertRecordAsync(constants.TABLES.GROUP_DATABASES, database.keySSI, database);
+    await this.storageService.insertRecordAsync(constants.TABLES.GROUP_ENCLAVES, database.keySSI, database);
   }
 
   /**
@@ -108,7 +108,7 @@ class DatabasesController extends DwController {
    * @param {string} database.keySSI
    */
   async deleteDatabase(database) {
-    await this.storageService.deleteRecordAsync(constants.TABLES.GROUP_DATABASES, database.keySSI);
+    await this.storageService.deleteRecordAsync(constants.TABLES.GROUP_ENCLAVES, database.keySSI);
   }
 }
 

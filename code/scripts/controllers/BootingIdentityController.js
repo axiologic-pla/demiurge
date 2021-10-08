@@ -1,3 +1,5 @@
+import constants from "../constants.js";
+
 const { DwController } = WebCardinal.controllers;
 import MessagesService from "../services/MessagesService.js";
 import utils from "../utils.js";
@@ -40,7 +42,9 @@ class BootingIdentityController extends DwController {
         this.domain = didDocument.getDomain();
         const openDSU = require("opendsu");
         const scAPI = openDSU.loadAPI("sc");
+        const dbAPI = openDSU.loadAPI("db");
         const w3cDID = openDSU.loadAPI("w3cdid");
+        const enclaveDB = await $$.promisify(dbAPI.getMainEnclaveDB)()
         ui.hideDialogFromComponent("dw-dialog-booting-identity");
         const didDomain = await $$.promisify(scAPI.getDIDDomain)();
         const publicName = "first_demiurge_identity";
@@ -80,19 +84,36 @@ class BootingIdentityController extends DwController {
               "/app/messages/createEnclave.json"
           );
 
-          MessagesService.processMessages(data, async () => {
+          this.processMessages(data, async ()=>{
             console.log("Processed create enclave messages");
-
+            const enclaveRecord = await enclaveDB.readKeyAsync(constants.SHARED_ENCLAVE);
+            await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
             const messages = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
                 "/app/messages/createGroup.json"
             );
-            if (messages) {
-              MessagesService.processMessages(messages, async () => {
+
+              this.processMessages(messages, async () => {
                 console.log("Processed create group messages");
                 __waitForMessage();
               });
-            }
-          });
+
+          })
+          // MessagesService.processMessages(data, async () => {
+          //   console.log("Processed create enclave messages");
+          //   const enclaveRecord = await enclaveDB.readKeyAsync(constants.SHARED_ENCLAVE);
+          //   await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
+          //   const records = await enclaveDB.getAllRecordsAsync("KeyValueTable");
+          //   console.log("records", records);
+          //   const messages = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
+          //       "/app/messages/createGroup.json"
+          //   );
+          //   if (messages) {
+          //     MessagesService.processMessages(messages, async () => {
+          //       console.log("Processed create group messages");
+          //       __waitForMessage();
+          //     });
+          //   }
+          // });
           return;
         }
 
@@ -110,6 +131,25 @@ class BootingIdentityController extends DwController {
         __waitForMessage();
       }
     });
+  }
+
+  processMessages(messages, callback){
+    if(!messages){
+      return callback();
+    }
+    const __processMessagesRecursively = (index)=>{
+      const message = messages[index];
+      if (typeof message === "undefined") {
+        callback();
+      }else{
+        MessagesService.processMessages([message], async () => {
+          console.log("Processed create group message");
+          __processMessagesRecursively(index + 1);
+        });
+      }
+    }
+
+    __processMessagesRecursively(0);
   }
 }
 
