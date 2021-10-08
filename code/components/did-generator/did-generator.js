@@ -494,6 +494,7 @@ function createDidGenerator(config) {
       });
 
       submitElement.addEventListener("click", async () => {
+        submitElement.loading = true;
         let { didDocument } = submitElement.data;
 
         if (!didDocument) {
@@ -512,6 +513,7 @@ function createDidGenerator(config) {
           this.getDataTagModel = () => ({
             ...model,
             didDocument,
+            submitElement
           });
 
           this.dispatchEvent(

@@ -19,8 +19,10 @@ class BootingIdentityController extends DwController {
 
     let didDocument;
 
-    this.onTagEvent("did-component", "did-generate", async (readOnlyModel) => {
-      didDocument = readOnlyModel.didDocument;
+    this.onTagEvent("did-component", "did-generate", async (model) => {
+      didDocument = model.didDocument;
+      let button = model.submitElement;
+      button.loading = false;
       await ui.showDialogFromComponent(
         "dw-dialog-booting-identity",
         {
