@@ -55,26 +55,6 @@
           }
         }
       ]
-    },
-    {
-      "name": "Shoelace dependency",
-      "actions": [
-        {
-          "type": "copy",
-          "src": "./node_modules/@shoelace-style/shoelace/dist",
-          "target": "./code/shoelace/dist"
-        }
-      ]
-    },
-    {
-      "name": "JSONEditor dependency",
-      "actions": [
-        {
-          "type": "copy",
-          "src": "./node_modules/jsoneditor/dist",
-          "target": "./code/jsoneditor/dist"
-        }
-      ]
     }
   ],
   "postbuild": [
