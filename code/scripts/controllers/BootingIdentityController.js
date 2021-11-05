@@ -70,6 +70,7 @@ class BootingIdentityController extends DwController {
         try {
           firstDIDDocument = await $$.promisify(w3cDID.resolveDID)(`did:ssi:name:${didDomain}:${publicName}`);
         }catch (e) {
+          console.log("Failed to resolve DID document");
           button.loading = false;
           await ui.showDialogFromComponent(
               "dw-dialog-initialising",
@@ -98,8 +99,8 @@ class BootingIdentityController extends DwController {
                 console.log("Processed create group messages");
                 __waitForMessage();
               });
-
           })
+          return;
         }
 
         button.loading = false;
