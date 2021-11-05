@@ -100,23 +100,6 @@ class BootingIdentityController extends DwController {
               });
 
           })
-          // MessagesService.processMessages(data, async () => {
-          //   console.log("Processed create enclave messages");
-          //   const enclaveRecord = await enclaveDB.readKeyAsync(constants.SHARED_ENCLAVE);
-          //   await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
-          //   const records = await enclaveDB.getAllRecordsAsync("KeyValueTable");
-          //   console.log("records", records);
-          //   const messages = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
-          //       "/app/messages/createGroup.json"
-          //   );
-          //   if (messages) {
-          //     MessagesService.processMessages(messages, async () => {
-          //       console.log("Processed create group messages");
-          //       __waitForMessage();
-          //     });
-          //   }
-          // });
-          return;
         }
 
         button.loading = false;
@@ -139,19 +122,10 @@ class BootingIdentityController extends DwController {
     if(!messages){
       return callback();
     }
-    const __processMessagesRecursively = (index)=>{
-      const message = messages[index];
-      if (typeof message === "undefined") {
+    MessagesService.processMessages(messages, () => {
+        console.log("Processed create group message");
         callback();
-      }else{
-        MessagesService.processMessages([message], async () => {
-          console.log("Processed create group message");
-          __processMessagesRecursively(index + 1);
-        });
-      }
-    }
-
-    __processMessagesRecursively(0);
+    });
   }
 }
 
