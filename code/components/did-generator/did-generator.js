@@ -38,6 +38,8 @@ async function generateDidDocumentBeforeSubmission(domain, type, subType) {
   const payload = {};
 
   switch (didMethod) {
+    case "ssi": {
+      switch (didSubMethod) {
         case "sread": {
           const seedSSI = await promisify(keySSI.createSeedSSI)(domain);
           payload.domain = domain;
@@ -71,8 +73,9 @@ async function generateDidDocumentBeforeSubmission(domain, type, subType) {
           canBeSubmitted = true;
           break;
         }
-
+      }
       break;
+    }
 
     case "key": {
       canBeSubmitted = true;
