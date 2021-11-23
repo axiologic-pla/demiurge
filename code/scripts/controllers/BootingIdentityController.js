@@ -82,7 +82,7 @@ class BootingIdentityController extends DwController {
                 disableClosing: true,
               }
           );
-          await $$.promisify(w3cDID.createIdentity)("name", didDomain, publicName);
+          await $$.promisify(w3cDID.createIdentity)("ssi:name", didDomain, publicName);
           const data = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
               "/app/messages/createEnclave.json"
           );

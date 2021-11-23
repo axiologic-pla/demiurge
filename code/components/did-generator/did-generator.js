@@ -38,13 +38,11 @@ async function generateDidDocumentBeforeSubmission(domain, type, subType) {
   const payload = {};
 
   switch (didMethod) {
-    case "ssi": {
-      switch (didSubMethod) {
         case "sread": {
           const seedSSI = await promisify(keySSI.createSeedSSI)(domain);
           payload.domain = domain;
 
-          didDocument = await promisify(w3cDID.createIdentity)("sread", seedSSI);
+          didDocument = await promisify(w3cDID.createIdentity)("ssi:sread", seedSSI);
 
           const [hashPrivateKey, hashPublicKey, version] = didDocument.getIdentifier().split(":").slice(4);
           payload.hashPrivateKey = hashPrivateKey;
@@ -59,7 +57,7 @@ async function generateDidDocumentBeforeSubmission(domain, type, subType) {
           const seedSSI = await promisify(keySSI.createSeedSSI)(domain);
           payload.domain = domain;
 
-          didDocument = await promisify(w3cDID.createIdentity)("ssikey", seedSSI);
+          didDocument = await promisify(w3cDID.createIdentity)("ssi:key", seedSSI);
 
           payload.publicKey = didDocument.getIdentifier().split(":").pop();
 
@@ -73,9 +71,8 @@ async function generateDidDocumentBeforeSubmission(domain, type, subType) {
           canBeSubmitted = true;
           break;
         }
-      }
+
       break;
-    }
 
     case "key": {
       canBeSubmitted = true;
@@ -111,7 +108,7 @@ async function generateDidDocumentAfterSubmission(domain, type, subType, payload
       switch (didSubMethod) {
         case "group":
         case "name": {
-          didDocument = await promisify(w3cDID.createIdentity)(didSubMethod, domain, payload);
+          didDocument = await promisify(w3cDID.createIdentity)(`ssi:${didSubMethod}`, domain, payload);
           break;
         }
       }

@@ -27,7 +27,7 @@ async function createGroup(message) {
     groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(`did:ssi:group:${didDomain}:${groupName}`);
   } catch (e) {}
   if (typeof groupDIDDocument === "undefined") {
-    groupDIDDocument = await promisify(w3cdid.createIdentity)("group", didDomain, groupName);
+    groupDIDDocument = await promisify(w3cdid.createIdentity)("ssi:group", didDomain, groupName);
     group.did = groupDIDDocument.getIdentifier();
 
     const sharedEnclaveDB = await $$.promisify(dbAPI.getSharedEnclaveDB)();
