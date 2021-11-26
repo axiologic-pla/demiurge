@@ -137,7 +137,7 @@ class GroupsController extends DwController {
     this.onTagClick("group.add", async (...props) => {
       try {
         const { name } = await ui.page.addGroup(...props);
-        const group = await this.addGroup({ name });
+        const group = await $$.promisify(this.addGroup)({ name });
         this.model.selectedGroup = undefined;
         this.model.groups.push(group);
         // await ui.showToast(group);
@@ -175,7 +175,7 @@ class GroupsController extends DwController {
     let groups
     try{
       groups = await promisify(enclaveDB.filter)(constants.TABLES.GROUPS);
-    }catch (e){
+    } catch (e) {
       return console.log(e);
     }
     return groups;
@@ -185,27 +185,30 @@ class GroupsController extends DwController {
    * @param {object} group
    * @param {string} group.name
    **/
-  async addGroup(group) {
+  addGroup(group, callback) {
     const createGroupMessage = {
       messageType: "CreateGroup",
-      groupName: group.name
-    }
-    await MessagesService.processMessages([createGroupMessage], ()=>{});
-    const openDSU = require("opendsu");
-    const dbAPI = openDSU.loadAPI("db");
-    const enclaveDB = await $$.promisify(dbAPI.getMainEnclaveDB)();
-    const groups = await promisify(enclaveDB.filter)(constants.TABLES.GROUPS);
-    group.did = groups.find(gr => gr.name === group.name).did;
-
-    const addMemberToGroupMessage = {
-      messageType: "AddMemberToGroup",
-      groupDID: group.did,
-      memberDID: this.identity.did,
-      memberName: this.identity.username,
+      groupName: group.name,
     };
-    await MessagesService.processMessages([addMemberToGroupMessage], () => {});
-    return group;
+    MessagesService.processMessages([createGroupMessage], async () => {
+      const openDSU = require("opendsu");
+      const dbAPI = openDSU.loadAPI("db");
+      const enclaveDB = await $$.promisify(dbAPI.getMainEnclave)();
+      const sharedEnclaveDB = await $$.promisify(dbAPI.getSharedEnclaveDB)();
+      const groups = await promisify(sharedEnclaveDB.getAllRecords)(constants.TABLES.GROUPS);
+      group.did = groups.find((gr) => gr.name === group.name).did;
+      const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
 
+      const addMemberToGroupMessage = {
+        messageType: "AddMemberToGroup",
+        groupDID: group.did,
+        memberDID: adminDID.did,
+        memberName: adminDID.username,
+      };
+      await MessagesService.processMessages([addMemberToGroupMessage], () => {
+        callback(undefined, group);
+      });
+    });
   }
 
   /**
@@ -215,9 +218,9 @@ class GroupsController extends DwController {
   async deleteGroup(group) {
     const deleteGroupMessage = {
       messageType: "DeleteGroup",
-      groupDID: group.did
-    }
-    await MessagesService.processMessages([deleteGroupMessage], ()=>{});
+      groupDID: group.did,
+    };
+    await MessagesService.processMessages([deleteGroupMessage], () => {});
   }
 }
 
