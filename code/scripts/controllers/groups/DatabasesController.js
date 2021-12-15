@@ -60,7 +60,9 @@ class DatabasesController extends DwController {
   }
 
   async fetchDatabases() {
-    return await this.storageService.filterAsync(constants.TABLES.GROUP_ENCLAVES);
+    const scAPI = require("opendsu").loadAPI("sc");
+    const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+    return await sharedEnclave.filterAsync(constants.TABLES.GROUP_ENCLAVES);
   }
 
   /**

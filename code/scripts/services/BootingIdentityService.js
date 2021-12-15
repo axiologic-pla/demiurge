@@ -13,7 +13,7 @@ const dbAPI = openDSU.loadAPI("db");
  * @param {string} did - identifier of DIDDocument
  */
 async function setStoredDID(did, username){
-  const walletStorage = await $$.promisify(dbAPI.getMainEnclaveDB)();
+  const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
 
   try {
     await walletStorage.writeKeyAsync(constants.IDENTITY, { did, username });
@@ -23,7 +23,7 @@ async function setStoredDID(did, username){
 }
 
 async function getStoredDID() {
-  let walletStorage = await $$.promisify(dbAPI.getMainEnclaveDB)();
+  let walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
 
   let record;
 

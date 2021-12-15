@@ -4,17 +4,20 @@ import {addMemberToGroupMapping} from "../mappings/addMemberToGroupMapping.js";
 import {createEnclave} from "../mappings/createEnclaveMapping.js";
 import {getMessageQueuingServiceInstance} from "./MessageQueuingService.js";
 
-async function processMessages(messages, callback) {
+async function processMessages(storageService, messages, callback) {
+    const openDSU = require("opendsu");
+    const scAPI = openDSU.loadAPI("sc");
+    if (typeof messages === "function") {
+        callback = messages;
+        messages = storageService;
+        storageService = await $$.promisify(scAPI.getMainEnclave)();
+    }
     if (!messages || messages.length === 0) {
         return;
     }
-    const openDSU = require("opendsu");
-    const scAPI = openDSU.loadAPI("sc");
     const m2dsu = openDSU.loadAPI("m2dsu");
     const MessagesPipe = m2dsu.getMessagesPipe();
-    const sc = scAPI.getSecurityContext();
-    const mainDSU = await $$.promisify(scAPI.getMainDSU)();
-    let mappingEngine = m2dsu.getMappingEngine(mainDSU);
+    let mappingEngine = m2dsu.getMappingEngine(storageService);
 
     return new Promise(function (resolve, reject) {
         try {

@@ -12,11 +12,10 @@ async function addMemberToGroupMapping(message) {
   const w3cdid = openDSU.loadAPI("w3cdid");
   const scAPI = openDSU.loadAPI("sc");
   const crypto = openDSU.loadAPI("crypto");
-  const dbAPI = openDSU.loadAPI("db");
-  const enclaveAPI = openDSU.loadAPI("enclave");
   const mainDSU = await $$.promisify(scAPI.getMainDSU)();
   await $$.promisify(mainDSU.refresh)();
-  const enclaveDB = await $$.promisify(dbAPI.getMainEnclaveDB)();
+  const mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
+  const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
   const vaultDomain = await promisify(scAPI.getVaultDomain)();
   const dsu = await this.createDSU(vaultDomain, "seed");
 
@@ -26,7 +25,7 @@ async function addMemberToGroupMapping(message) {
   };
   const groupDIDDocument = await promisify(w3cdid.resolveDID)(message.groupDID);
   await promisify(groupDIDDocument.addMember)(member.did, member);
-  let adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
+  let adminDID = await mainEnclave.readKeyAsync(constants.IDENTITY);
   adminDID = adminDID.did;
   const adminDID_Document = await $$.promisify(w3cdid.resolveDID)(adminDID);
   const memberDID_Document = await $$.promisify(w3cdid.resolveDID)(member.did);
@@ -34,9 +33,9 @@ async function addMemberToGroupMapping(message) {
 
   let enclave;
   if (groupDIDDocument.getGroupName() === constants.EPI_ADMIN_GROUP) {
-    enclave = await enclaveDB.readKeyAsync(constants.SHARED_ENCLAVE);
+    enclave = await sharedEnclave.readKeyAsync(constants.SHARED_ENCLAVE);
   } else {
-    enclave = await enclaveDB.readKeyAsync(constants.EPI_SHARED_ENCLAVE);
+    enclave = await sharedEnclave.readKeyAsync(constants.EPI_SHARED_ENCLAVE);
   }
   const enclaveRecord = {
     enclaveType: enclave.enclaveType,

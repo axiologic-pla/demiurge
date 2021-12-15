@@ -9,7 +9,7 @@ class MessageProcessingService {
     const openDSU = require('opendsu');
     const dbAPI = openDSU.loadAPI('db');
 
-    dbAPI.getMainEnclaveDB((err, enclaveDB)=>{
+    dbAPI.getMainEnclave((err, enclaveDB)=>{
       this.storageService = enclaveDB;
     });
     this.identity = identity;

@@ -10,10 +10,9 @@ function checkIfCreateGroupMessage(message) {
 async function createGroup(message) {
   const openDSU = require("opendsu");
   const w3cdid = openDSU.loadAPI("w3cdid");
-  const dbAPI = openDSU.loadAPI("db");
-  const enclaveAPI = openDSU.loadAPI("enclave");
-  const enclaveDB = await $$.promisify(dbAPI.getMainEnclaveDB)();
   const scAPI = openDSU.loadAPI("sc");
+  const enclaveAPI = openDSU.loadAPI("enclave");
+  const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
   const vaultDomain = await promisify(scAPI.getVaultDomain)();
   const didDomain = await promisify(scAPI.getDIDDomain)();
   const mainDSU = await promisify(scAPI.getMainDSU)();
@@ -30,7 +29,7 @@ async function createGroup(message) {
     groupDIDDocument = await promisify(w3cdid.createIdentity)("ssi:group", didDomain, groupName);
     group.did = groupDIDDocument.getIdentifier();
 
-    const sharedEnclaveDB = await $$.promisify(dbAPI.getSharedEnclaveDB)();
+    const sharedEnclaveDB = await $$.promisify(scAPI.getSharedEnclave)();
     await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS, group.did, group);
 
     const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);

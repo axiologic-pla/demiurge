@@ -170,8 +170,8 @@ class GroupsController extends DwController {
   }
 
   async fetchGroups() {
-    const dbAPI = require("opendsu").loadAPI("db");
-    const enclaveDB = await $$.promisify(dbAPI.getSharedEnclaveDB)();
+    const scAPI = require("opendsu").loadAPI("sc");
+    const enclaveDB = await $$.promisify(scAPI.getSharedEnclave)();
     let groups
     try{
       groups = await promisify(enclaveDB.filter)(constants.TABLES.GROUPS);
@@ -185,30 +185,49 @@ class GroupsController extends DwController {
    * @param {object} group
    * @param {string} group.name
    **/
-  addGroup(group, callback) {
+  async addGroup(group, callback) {
     const createGroupMessage = {
       messageType: "CreateGroup",
       groupName: group.name,
     };
-    MessagesService.processMessages([createGroupMessage], async () => {
-      const openDSU = require("opendsu");
-      const dbAPI = openDSU.loadAPI("db");
-      const enclaveDB = await $$.promisify(dbAPI.getMainEnclave)();
-      const sharedEnclaveDB = await $$.promisify(dbAPI.getSharedEnclaveDB)();
-      const groups = await promisify(sharedEnclaveDB.getAllRecords)(constants.TABLES.GROUPS);
-      group.did = groups.find((gr) => gr.name === group.name).did;
-      const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
 
-      const addMemberToGroupMessage = {
-        messageType: "AddMemberToGroup",
-        groupDID: group.did,
-        memberDID: adminDID.did,
-        memberName: adminDID.username,
-      };
-      await MessagesService.processMessages([addMemberToGroupMessage], () => {
-        callback(undefined, group);
+    const scAPI = require("opendsu").loadAPI("sc");
+    if (group.name === constants.EPI_ADMIN_GROUP) {
+      scAPI.getMainEnclave((err, mainEnclave)=>{
+        if (err) {
+          return callback(err);
+        }
+        return processMessages(mainEnclave, callback);
+      })
+    } else {
+      scAPI.getSharedEnclave((err, sharedEnclave)=>{
+        if (err) {
+          return callback(err);
+        }
+        processMessages(sharedEnclave, callback);
+      })
+    }
+    const processMessages = (storageService, callback) => {
+      MessagesService.processMessages(storageService,[createGroupMessage], async () => {
+        const openDSU = require("opendsu");
+        const scAPI = openDSU.loadAPI("sc");
+        const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
+        const sharedEnclaveDB = await $$.promisify(scAPI.getSharedEnclave)();
+        const groups = await promisify(sharedEnclaveDB.getAllRecords)(constants.TABLES.GROUPS);
+        group.did = groups.find((gr) => gr.name === group.name).did;
+        const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
+
+        const addMemberToGroupMessage = {
+          messageType: "AddMemberToGroup",
+          groupDID: group.did,
+          memberDID: adminDID.did,
+          memberName: adminDID.username,
+        };
+        await MessagesService.processMessages([addMemberToGroupMessage], () => {
+          callback(undefined, group);
+        });
       });
-    });
+    }
   }
 
   /**
