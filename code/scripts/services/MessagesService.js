@@ -2,6 +2,7 @@ import {createGroup} from "../mappings/createGroupMapping.js";
 import {deleteGroup} from "../mappings/deleteGroupMapping.js";
 import {addMemberToGroupMapping} from "../mappings/addMemberToGroupMapping.js";
 import {createEnclave} from "../mappings/createEnclaveMapping.js";
+import {removeMembersFromGroup} from "../mappings/removeMembersFromGroupMapping.js";
 import {getMessageQueuingServiceInstance} from "./MessageQueuingService.js";
 
 async function processMessages(storageService, messages, callback) {
