@@ -40,7 +40,6 @@ class BootingIdentityController extends DwController {
         const { setStoredDID } = await import("../services/BootingIdentityService.js");
         const did = didDocument.getIdentifier();
         await setStoredDID(did, this.model.username);
-        debugger
         this.did = did;
         this.domain = didDocument.getDomain();
         const openDSU = require("opendsu");
