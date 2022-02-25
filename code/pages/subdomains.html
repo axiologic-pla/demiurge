@@ -1,25 +1,56 @@
-<link rel="stylesheet" href="./assets/pages/subdomains.css" />
+<link href="./assets/pages/subdomains.css" rel="stylesheet"/>
 
-<webc-container controller="SubdomainsController" id="subdomains-page" class="dw-container">
-  <dw-title shadow>Domain</dw-title>
-  <div class="dw-domain">
-    <span>Current location:</span>
-    <sl-tag size="large" type="info">{{ @domain }}</sl-tag>
-  </div>
-
-  <dw-title shadow>Subdomains</dw-title>
-  <p>List of available subdomains</p>
-  <dw-subdomains shadow content="You can select a subdomain from this list" data-for="@subdomains" data-for="optimistic">
-    <div class="dw-subdomain">
-      <sl-menu-item value="@value" data-tag="subdomain.select">{{ @name }}</sl-menu-item>
-      <sl-icon-button data-tag="subdomain.delete" name="trash-fill"></sl-icon-button>
+<webc-container class="dw-container" controller="SubdomainsController" id="subdomains-page">
+    <dw-title shadow>Domain</dw-title>
+    <div class="dw-domain">
+        <span>Current location:</span>
+        <sl-tag size="large" type="info">{{ @domain }}</sl-tag>
     </div>
-    <dw-spinner slot="no-data" content="Subdomains are loading"></dw-spinner>
-  </dw-subdomains>
-  <section class="dw-subdomain-addition" hidden>
-    <sl-input label="New subdomain" placeholder="subdomain" data-tag="subdomain.input">
-      <div slot="help-text">Type your new subdomain of domain "{{ @domain }}"</div>
-    </sl-input>
-    <sl-button type="primary" data-tag="subdomain.add"> Add <sl-icon slot="suffix" name="plus-square-fill"></sl-icon> </sl-button>
-  </section>
+    <div class="subdomains-container">
+        <div class="domains-tree-container">
+            <div class="tree-header">Domains <span data-tag="add-domain">+</span></div>
+            <div id="domains-panel">
+            </div>
+        </div>
+
+        <div id="subdomains-info">
+            <div class="selected-title">{{@treeDataSource.selectedTreeNode}}</div>
+            <webc-datatable datasource="@domainsDataSource" hide-pagination>
+
+                <div slot="header">Type</div>
+                <div slot="header">Name</div>
+                <div slot="header">Valid From</div>
+                <div slot="header">Expire At</div>
+                <div class="last-table-header" slot="header">Controllers</div>
+
+                <div class="data-item">{{@type}}</div>
+                <div class="data-item">{{@name}}</div>
+                <div class="data-item">{{@validFrom}}</div>
+                <div class="data-item">{{@expireAt}}</div>
+                <div class="data-item">{{@controllers}}</div>
+                <div class="no-data-container" slot="no-data">
+                    no data ...
+                </div>
+            </webc-datatable>
+            <div class="pagination-container">
+                <button class="prev-page-btn page-action-btn" data-tag="prev-page" disabled> <<</button>
+                <button class="next-page-btn page-action-btn" data-tag="next-page"> >></button>
+            </div>
+            <div class="actions-container">
+                <sl-button variant="primary">Edit</sl-button>
+                <sl-button variant="primary">Add</sl-button>
+                <sl-button variant="primary">Share</sl-button>
+                <sl-button variant="primary">Give</sl-button>
+                <sl-button variant="primary">Get</sl-button>
+            </div>
+        </div>
+    </div>
+    <!--    <section class="dw-subdomain-addition">
+            <sl-input data-tag="subdomain.input" label="New subdomain" placeholder="subdomain">
+                <div slot="help-text">Type your new subdomain of domain "{{ @domain }}"</div>
+            </sl-input>
+            <sl-button data-tag="subdomain.add" type="primary"> Add
+                <sl-icon name="plus-square-fill" slot="suffix"></sl-icon>
+            </sl-button>
+        </section>-->
 </webc-container>

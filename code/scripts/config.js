@@ -88,5 +88,6 @@ define("dw-subdomains");
 define("dw-dialog-configuration");
 define("dw-dialog-view-credential");
 define('dw-dialog-booting-identity');
+define('dw-dialog-add-domain');
 define('dw-dialog-waiting-approval');
 define('dw-dialog-initialising');

@@ -52,8 +52,7 @@
     },
     {
       "name": "Subdomains",
-      "tag": "subdomains",
-      "indexed": false
+      "tag": "subdomains"
     },
     {
       "name": "Keys",
