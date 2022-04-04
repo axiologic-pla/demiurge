@@ -1,6 +1,6 @@
 import config from "./did-generator.config.js";
 
-const { promisify } = $$;
+const {promisify} = $$;
 
 // DOM helpers
 
@@ -91,7 +91,7 @@ async function generateDidDocumentBeforeSubmission(domain, type, subType) {
     }
   }
 
-  return { didDocument, canBeSubmitted, payload };
+  return {didDocument, canBeSubmitted, payload};
 }
 
 /**
@@ -119,7 +119,7 @@ async function generateDidDocumentAfterSubmission(domain, type, subType, payload
     }
   }
 
-  return { didDocument };
+  return {didDocument};
 }
 
 // DOM Components
@@ -135,7 +135,7 @@ function createDidGeneratorSelect(types) {
       this._setActiveType = (type) => {
         this._activeType = type;
         this.setAttribute("type", type.toLowerCase());
-        this.dispatchEvent(new CustomEvent("dw-change", { detail: { type } }));
+        this.dispatchEvent(new CustomEvent("dw-change", {detail: {type}}));
 
         if (this.isConnected) {
           this._menuElement.value = type;
@@ -145,12 +145,51 @@ function createDidGeneratorSelect(types) {
       this._unsetActiveType = () => {
         this._activeType = undefined;
         this.removeAttribute("type");
-        this.dispatchEvent(new CustomEvent("dw-change", { detail: { type: undefined } }));
+        this.dispatchEvent(new CustomEvent("dw-change", {detail: {type: undefined}}));
 
         if (this.isConnected) {
           this._menuElement.value = "";
         }
       };
+    }
+
+    static get observedAttributes() {
+      return ["type"];
+    }
+
+    get type() {
+      return this._activeType;
+    }
+
+    set type(newType) {
+      if (typeof newType === "undefined") {
+        this._unsetActiveType();
+        return;
+      }
+
+      if (typeof newType !== "string") {
+        return;
+      }
+
+      newType = newType.toUpperCase();
+
+      if (!this.types.includes(newType)) {
+        return;
+      }
+
+      if (this.type === newType) {
+        return;
+      }
+
+      this._setActiveType(newType);
+    }
+
+    get types() {
+      return Object.keys(this._allTypes).map((type) => type);
+    }
+
+    set types(types) {
+      this._allTypes = types;
     }
 
     connectedCallback() {
@@ -179,10 +218,6 @@ function createDidGeneratorSelect(types) {
       this.innerHTML = "";
     }
 
-    static get observedAttributes() {
-      return ["type"];
-    }
-
     attributeChangedCallback(name, oldValue, newValue) {
       if (this.hasAttribute(name)) {
         switch (name) {
@@ -190,41 +225,6 @@ function createDidGeneratorSelect(types) {
             this.type = newValue;
         }
       }
-    }
-
-    set type(newType) {
-      if (typeof newType === "undefined") {
-        this._unsetActiveType();
-        return;
-      }
-
-      if (typeof newType !== "string") {
-        return;
-      }
-
-      newType = newType.toUpperCase();
-
-      if (!this.types.includes(newType)) {
-        return;
-      }
-
-      if (this.type === newType) {
-        return;
-      }
-
-      this._setActiveType(newType);
-    }
-
-    get type() {
-      return this._activeType;
-    }
-
-    set types(types) {
-      this._allTypes = types;
-    }
-
-    get types() {
-      return Object.keys(this._allTypes).map((type) => type);
     }
   };
 }
@@ -275,8 +275,8 @@ function createDidGenerator(config) {
 
           if (result.canBeSubmitted) {
             submitElement.hidden = false;
-            const { didDocument, payload } = result;
-            const data = didDocument ? { didDocument } : { ...payload };
+            const {didDocument, payload} = result;
+            const data = didDocument ? {didDocument} : {...payload};
             await preSubmit(payload.domain, "SSI", ssiType, data);
           }
         }
@@ -318,7 +318,7 @@ function createDidGenerator(config) {
       return payload.inputElement;
     },
     ["did:ssi:key"]: (payload) => {
-      const { publicKey } = payload;
+      const {publicKey} = payload;
       return createElement("sl-input", {
         className: "input--key",
         value: publicKey,
@@ -326,7 +326,7 @@ function createDidGenerator(config) {
       });
     },
     ["did:ssi:sread"]: (payload) => {
-      const { hashPrivateKey, hashPublicKey, version } = payload;
+      const {hashPrivateKey, hashPublicKey, version} = payload;
 
       const baseElement = createElement("div");
       const hashPrivateKeyElement = createElement("sl-input", {
@@ -400,7 +400,7 @@ function createDidGenerator(config) {
     let generatedTemplate;
 
     if (Object.keys(config.TYPES).includes(type)) {
-      generatedTemplate = templates[`did:${type.toLowerCase()}`]({ domain });
+      generatedTemplate = templates[`did:${type.toLowerCase()}`]({domain});
     }
 
     if (!generatedTemplate) {
@@ -432,15 +432,45 @@ function createDidGenerator(config) {
 
   const preSubmit = async (domain, type, subType, data) => {
     submitElement.hidden = false;
-    submitElement.data = { domain, type, subType, ...data };
+    submitElement.data = {domain, type, subType, ...data};
+    //verify if did already exists
+    let did = null;
+    let userId = data.inputElement.value;
+    if (userId !== "@username") {
+      const openDSU = require("opendsu");
+      const w3cDID = openDSU.loadAPI("w3cdid");
+      let i = 1;
+      do {
+        try {
+          did = await $$.promisify(w3cDID.resolveDID)(
+            `did:${type.toLowerCase()}:${subType.toLowerCase()}:${domain}:${userId}`
+          );
+        } catch (e) {
+          did = null;
+        }
+        if (did) {
+          userId = data.inputElement.value + i++;
+        }
+      } while (did)
+      data.inputElement.value = userId;
+    }
+
   };
 
   return class _ extends HTMLElement {
     constructor() {
       super();
 
-      this.attachShadow({ mode: "open" });
+      this.attachShadow({mode: "open"});
       hostElement = this;
+    }
+
+    get domain() {
+      return this.getAttribute("domain");
+    }
+
+    set domain(domain) {
+      this.setAttribute("domain", domain);
     }
 
     connectedCallback() {
@@ -483,7 +513,7 @@ function createDidGenerator(config) {
       rootElement.append(didTagElement, didSelectElement);
 
       didSelectElement.addEventListener("dw-change", async (event) => {
-        const { type } = event.detail;
+        const {type} = event.detail;
         await renderContent(this.domain, type);
         if (this.hasAttribute("default")) {
           const attribute = this.getAttribute("default") || "";
@@ -495,11 +525,11 @@ function createDidGenerator(config) {
 
       submitElement.addEventListener("click", async () => {
         submitElement.loading = true;
-        let { didDocument } = submitElement.data;
+        let {didDocument} = submitElement.data;
 
         if (!didDocument) {
-          const { domain, type, subType, inputElement } = submitElement.data;
-          const { didDocument: result } = await generateDidDocumentAfterSubmission(
+          const {domain, type, subType, inputElement} = submitElement.data;
+          const {didDocument: result} = await generateDidDocumentAfterSubmission(
             domain,
             type,
             subType,
@@ -518,7 +548,7 @@ function createDidGenerator(config) {
 
           this.dispatchEvent(
             new CustomEvent("did-generate", {
-              detail: { didDocument },
+              detail: {didDocument},
               bubbles: true,
               cancelable: true,
             })
@@ -537,14 +567,6 @@ function createDidGenerator(config) {
 
     disconnectedCallback() {
       this.shadowRoot.innerHTML = "";
-    }
-
-    get domain() {
-      return this.getAttribute("domain");
-    }
-
-    set domain(domain) {
-      this.setAttribute("domain", domain);
     }
   };
 }
