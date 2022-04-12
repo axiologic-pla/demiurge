@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "postinstall": "node ./node_modules/octopus/scripts/run dependencies devmode",
-    "prebuild": "node ./node_modules/octopus/scripts/run prebuild devmode",
-    "build": "node ./node_modules/octopus/scripts/buildDSU.js",
-    "postbuild": "node ./node_modules/octopus/scripts/run postbuild devmode",
+    "build": "node ./../node_modules/octopus/scripts/buildDSU.js",
     "update": "npm install"
   },
   "repository": {
@@ -15,8 +12,7 @@
   },
   "dependencies": {
     "@shoelace-style/shoelace": "^2.0.0-beta.48",
-    "jsoneditor": "^9.4.1",
-    "octopus": "git+https://github.com/PrivateSky/octopus.git"
+    "jsoneditor": "^9.4.1"
   },
   "keywords": [
     "ssapp"
