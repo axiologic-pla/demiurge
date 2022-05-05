@@ -1,31 +1,31 @@
 {
-  "name": "demiurge",
-  "version": "1.0.0",
-  "description": "",
-  "scripts": {
-    "build": "node ./../node_modules/octopus/scripts/buildDSU.js",
-    "update": "npm install"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/OpenDSU/demiurge.git"
-  },
-  "dependencies": {
-    "@shoelace-style/shoelace": "^2.0.0-beta.48",
-    "jsoneditor": "^9.4.1"
-  },
-  "keywords": [
-    "ssapp"
-  ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/OpenDSU/demiurge/issues"
-  },
-  "homepage": "https://github.com/OpenDSU/demiurge#readme",
-  "prettier": {
-    "semi": true,
-    "singleQuote": false,
-    "tabWidth": 2,
-    "printWidth": 120
-  }
+    "name": "demiurge",
+    "version": "v1.0.1",
+    "description": "",
+    "scripts": {
+        "build": "node ./../node_modules/octopus/scripts/buildDSU.js",
+        "update": "npm install"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/OpenDSU/demiurge.git"
+    },
+    "dependencies": {
+        "@shoelace-style/shoelace": "^2.0.0-beta.48",
+        "jsoneditor": "^9.4.1"
+    },
+    "keywords": [
+        "ssapp"
+    ],
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/OpenDSU/demiurge/issues"
+    },
+    "homepage": "https://github.com/OpenDSU/demiurge#readme",
+    "prettier": {
+        "semi": true,
+        "singleQuote": false,
+        "tabWidth": 2,
+        "printWidth": 120
+    }
 }
