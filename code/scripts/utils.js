@@ -71,10 +71,29 @@ async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
   scAPI.refreshSecurityContext();
 }
 
+async function getDisabledFeatures() {
+  const openDSU = require("opendsu");
+  const config = openDSU.loadAPI("config");
+  let disabledFeaturesArr = [];
+  try {
+    let disabledFeaturesList = await $$.promisify(config.getEnv)("disabledFeatures");
+    if (disabledFeaturesList) {
+      let disabledCodesArr = disabledFeaturesList.split(",");
+      disabledCodesArr.forEach(item => {
+        disabledFeaturesArr.push(item.trim());
+      })
+    }
+  } catch (e) {
+    console.log("Couldn't load disabledFeatures")
+  }
+  return disabledFeaturesArr;
+}
+
 export default {
   promisify,
   getPKFromCredential,
   sendGroupMessage,
   sendUserMessage,
-  addSharedEnclaveToEnv
+  addSharedEnclaveToEnv,
+  getDisabledFeatures
 };

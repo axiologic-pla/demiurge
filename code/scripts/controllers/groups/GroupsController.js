@@ -122,7 +122,14 @@ class GroupsController extends DwController {
   constructor(...props) {
     super(...props);
     const { ui } = this;
+    utils.getDisabledFeatures().then((disabledFeatures) => {
+          this.model.disabledFeatures = disabledFeatures;
+          disabledFeatures.forEach(disabledFeature => {
+            let selector = ".feature-" + disabledFeature;
+            this.querySelector(selector).hidden = true;
+          })
 
+        })
     this.model = {
       // blockchainDomain: "example.domain",
       groups: [],
