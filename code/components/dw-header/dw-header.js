@@ -3,13 +3,18 @@ customElements.define(
   class _ extends HTMLElement {
     constructor() {
       super();
-
+      /*
+      * TO DO:
+      * check how to reload iframe on click.
+      *  <stencil-route-link class="logo" url="/"> doesn't work
+      *
+      * */
       this.innerHTML = `
             <link rel="stylesheet" href="./components/dw-header/dw-header.css">
             <header>
                 <webc-app-menu mode="horizontal">
                     <div slot="before">
-                        <stencil-route-link class="logo" url="/">
+                        <stencil-route-link class="logo">
                             <strong>Demiurge</strong>
                             <span>Wallet</span>
                         </stencil-route-link>

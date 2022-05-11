@@ -1,22 +1,30 @@
-<link rel="stylesheet" href="./assets/pages/quick-actions.css" />
-<webc-container controller="QuickActionsController" id="quick-actions-page" class="dw-container">
-<!--  <dw-title shadow>Domain</dw-title>-->
-<!--  <div class="dw-domain">-->
-<!--    <span>Current location:</span>-->
-<!--    <sl-tag size="large" type="info">{{ @domain }}</sl-tag>-->
-<!--  </div>-->
+<link href="./assets/pages/quick-actions.css" rel="stylesheet"/>
+<webc-container class="dw-container" controller="QuickActionsController" id="quick-actions-page">
+    <!--  <dw-title shadow>Domain</dw-title>-->
+    <!--  <div class="dw-domain">-->
+    <!--    <span>Current location:</span>-->
+    <!--    <sl-tag size="large" type="info">{{ @domain }}</sl-tag>-->
+    <!--  </div>-->
 
-  <dw-title shadow>Quick actions</dw-title>
-  <main class="dw-actions">
-        <dw-action tag="my-identities" action="My Identities" icon="person" tooltip="My Identities"></dw-action>
-        <dw-action tag="groups" action="Groups" icon="people" tooltip="Groups"></dw-action>
-        <dw-action tag="bdns" action="BDNS" icon="diagram-3" tooltip="BDNS"></dw-action>
-        <dw-action tag="my-keys" action="My Keys" icon="key" tooltip="My Keys"></dw-action>
-        <dw-action tag="workspaces" action="Workspaces" icon="collection" tooltip="Workspaces"></dw-action>
-    <dw-action tag="contracts" action="Contracts" icon="journal-code" tooltip="Contracts"></dw-action>
-    <!--    <dw-action data-tag="configuration.show" action="Configuration" icon="gear" tooltip="Configuration"></dw-action>-->
-    <dw-action tag="subdomains" action="Subdomains" icon="diagram-3" tooltip="Subdomains"></dw-action>
-<!--    <dw-action tag="tokens" action="Tokens" icon="coin" tooltip="Tokens"></dw-action>-->
-<!--    <dw-action tag="keys" action="Keys" icon="lock" tooltip="Keys"></dw-action>-->
-  </main>
+    <dw-title shadow>Quick actions</dw-title>
+    <main class="dw-actions">
+        <dw-action action="My Identities" icon="person" tag="my-identities" tooltip="My Identities"></dw-action>
+        <dw-action action="Groups" icon="people" tag="groups" tooltip="Groups"></dw-action>
+
+
+        <!--hide because not implemented yet -->
+        <!--*******************-->
+        <dw-action action="BDNS" hidden icon="diagram-3" tag="bdns" tooltip="BDNS"></dw-action>
+        <dw-action action="My Keys" hidden icon="key" tag="my-keys" tooltip="My Keys"></dw-action>
+        <dw-action action="Workspaces" hidden icon="collection" tag="workspaces" tooltip="Workspaces"></dw-action>
+        <dw-action action="Contracts" hidden icon="journal-code" tag="contracts" tooltip="Contracts"></dw-action>
+        <dw-action action="Subdomains" hidden icon="diagram-3" tag="subdomains" tooltip="Subdomains"></dw-action>
+        <!--*******************-->
+
+
+        <!--    <dw-action data-tag="configuration.show" action="Configuration" icon="gear" tooltip="Configuration"></dw-action>-->
+
+        <!--    <dw-action tag="tokens" action="Tokens" icon="coin" tooltip="Tokens"></dw-action>-->
+        <!--    <dw-action tag="keys" action="Keys" icon="lock" tooltip="Keys"></dw-action>-->
+    </main>
 </webc-container>

@@ -11,15 +11,18 @@
     {
       "name": "BDNS",
       "tag": "bdns",
-      "src": "./blockchain-domains.html"
+      "src": "./blockchain-domains.html",
+      "indexed": false
     },
     {
       "name": "My Keys",
-      "tag": "my-keys"
+      "tag": "my-keys",
+      "indexed": false
     },
     {
       "name": "Workspaces",
-      "tag": "workspaces"
+      "tag": "workspaces",
+      "indexed": false
     },
 
     {
@@ -52,7 +55,8 @@
     },
     {
       "name": "Subdomains",
-      "tag": "subdomains"
+      "tag": "subdomains",
+      "indexed": false
     },
     {
       "name": "Keys",
