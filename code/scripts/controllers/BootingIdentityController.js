@@ -14,7 +14,7 @@ class BootingIdentityController extends DwController {
 
     this.model = {
       domain: this.domain,
-      username: this.userDetails.username,
+      username: this.userDetails
     };
 
     let didDocument;

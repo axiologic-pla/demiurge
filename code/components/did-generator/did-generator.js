@@ -157,6 +157,20 @@ function createDidGeneratorSelect(types) {
       return ["type"];
     }
 
+    // A getter/setter for a disabled property.
+    get disabled() {
+      return this.hasAttribute('disabled');
+    }
+
+    set disabled(val) {
+      // Reflect the value of the disabled property as an HTML attribute.
+      if (val) {
+        this.setAttribute('disabled', '');
+      } else {
+        this.removeAttribute('disabled');
+      }
+    }
+
     get type() {
       return this._activeType;
     }
@@ -196,6 +210,7 @@ function createDidGeneratorSelect(types) {
       this._menuElement = createElement("sl-select", {
         placeholder: this.placeholder,
         value: this.type ? this.type : "",
+        disabled: this.disabled
       });
       const menuElements = {};
       for (const type of this.types) {
@@ -203,6 +218,7 @@ function createDidGeneratorSelect(types) {
           size: "large",
           innerText: this._allTypes[type].LABEL,
           value: type,
+          disabled: true
         });
         menuElements[type].dataset.tag = type.toLowerCase();
         menuElements[type].addEventListener("click", () => {
@@ -241,11 +257,13 @@ function createDidGenerator(config) {
         value: payload.domain,
         placeholder: "domain",
         hidden: true,
+        disabled: true
       });
       const ssiSelectElement = createElement("did-generator-select", {
         className: "select--did-ssi",
         placeholder: config.TYPES.SSI.PLACEHOLDER,
         types: filterDisabledDIDs(config.TYPES.SSI.TYPES, "did:ssi:"),
+        disabled: true
       });
       const result = [ssiSelectElement, domainElement];
 
@@ -304,6 +322,7 @@ function createDidGenerator(config) {
         className: "input--name",
         placeholder: "Type name...",
         readonly: isReadOnlyDID("did:ssi:name"),
+        disabled: true
       });
       if (hostElement.hasAttribute("name")) {
         payload.inputElement.value = hostElement.getAttribute("name");
@@ -323,6 +342,7 @@ function createDidGenerator(config) {
         className: "input--key",
         value: publicKey,
         readonly: true,
+        disabled: true
       });
     },
     ["did:ssi:sread"]: (payload) => {
@@ -364,6 +384,7 @@ function createDidGenerator(config) {
           className: "input--key",
           value: publicKey,
           readonly: true,
+          disabled: true
         }),
       ];
     },
@@ -501,12 +522,13 @@ function createDidGenerator(config) {
       const didTagElement = createElement("sl-tag", {
         className: "input--did",
         innerHTML: "did",
-        size: "large",
+        size: "large"
       });
       const didSelectElement = createElement("did-generator-select", {
         className: "select--did",
         placeholder: config.PLACEHOLDER,
         types: filterDisabledDIDs(config.TYPES, "did:"),
+        disabled: true
       });
 
       footerElement.append(submitElement);

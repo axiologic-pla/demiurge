@@ -10,9 +10,12 @@
 }
 
 :host sl-tag::part(base) {
-    background-color: white;
     user-select: auto;
     cursor: auto;
+    background-color: rgb(var(--sl-input-background-color-disabled));
+    border-color: rgb(var(--sl-input-border-color-disabled));
+    color: rgb(var(--sl-input-color-disabled));
+    opacity: 0.5;
 }
 
 :host sl-input,
@@ -40,7 +43,6 @@
 
 :host .did-ssi-key,
 :host .did-ssi-sread,
-:host .did-ssi-name,
 :host .did-ssi-group {
     display: grid !important;
 }
