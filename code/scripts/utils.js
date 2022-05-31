@@ -1,4 +1,5 @@
 import Message from "./utils/Message.js";
+import constants from "./constants.js";
 
 function promisify(fun) {
   return function (...args) {
@@ -89,11 +90,24 @@ async function getDisabledFeatures() {
   return disabledFeaturesArr;
 }
 
+async function fetchGroups() {
+  const scAPI = require("opendsu").loadAPI("sc");
+  const enclaveDB = await $$.promisify(scAPI.getSharedEnclave)();
+  let groups
+  try {
+    groups = await promisify(enclaveDB.filter)(constants.TABLES.GROUPS);
+  } catch (e) {
+    return console.log(e);
+  }
+  return groups;
+}
+
 export default {
   promisify,
   getPKFromCredential,
   sendGroupMessage,
   sendUserMessage,
   addSharedEnclaveToEnv,
-  getDisabledFeatures
+  getDisabledFeatures,
+  fetchGroups
 };

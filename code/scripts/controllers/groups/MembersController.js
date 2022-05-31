@@ -2,8 +2,8 @@ import constants from "../../constants.js";
 import utils from "../../utils.js";
 import MessagesService from "../../services/MessagesService.js";
 
-const { DwController } = WebCardinal.controllers;
-const { promisify } = utils;
+const {DwController} = WebCardinal.controllers;
+const {promisify} = utils;
 
 class MembersUI extends DwController {
   constructor(...props) {
@@ -31,7 +31,7 @@ class MembersUI extends DwController {
   // listeners
 
   addMultipleSelectionListeners() {
-    const { openButtonElement, closeButtonElement } = this.selectionElements;
+    const {openButtonElement, closeButtonElement} = this.selectionElements;
 
     openButtonElement.addEventListener("click", () => {
       this.openMultipleSelection();
@@ -51,7 +51,7 @@ class MembersUI extends DwController {
         if (result.state === "granted" || result.state === "prompt") {
           const did = await navigator.clipboard.readText();
           target.parentElement.value = did;
-          return { did };
+          return {did};
         }
         throw Error("Coping from clipboard is not possible!");
       } catch (err) {
@@ -151,7 +151,7 @@ class MembersUI extends DwController {
     newElement.src = `.${src}`;
     newElement.basePath = WebCardinal.basePath;
 
-    const { loader: oldElement } = WebCardinal.state.page;
+    const {loader: oldElement} = WebCardinal.state.page;
 
     WebCardinal.state.loaders = {
       newElement,
@@ -168,8 +168,8 @@ class MembersUI extends DwController {
 class MembersController extends DwController {
   constructor(...props) {
     super(...props);
-    const { ui } = this;
-    const { selectedGroup } = this.getState();
+    const {ui} = this;
+    const {selectedGroup} = this.getState();
 
     this.model = {
       selectedGroup,
@@ -183,17 +183,24 @@ class MembersController extends DwController {
     ui.page.addPasteMemberDIDFromClipboardListener();
 
     this.onTagClick("member.add", async (model, button) => {
-      const { did } = await ui.page.addMember(model, button);
+      let inputElement = document.querySelector("#add-member-input");
+
       button.loading = true;
-      const member = await this.addMember(this.model.selectedGroup, { did });
-      this.model.members.push(member);
+      try {
+        const member = await this.addMember(this.model.selectedGroup, {did: inputElement.value});
+        this.model.members.push(member);
+      } catch (e) {
+        throw Error("Member already exists in a group!!!!");
+      }
+
+      const {did} = await ui.page.addMember(model, button);
       button.loading = false;
     });
 
     this.onTagClick("member.select", (selectedMember, ...props) => {
       if (!ui.page.isMultipleSelectionActive(...props)) {
         this.model.selectedMember = selectedMember;
-        ui.page.loadMemberPage({ selectedGroup, selectedMember });
+        ui.page.loadMemberPage({selectedGroup, selectedMember});
       }
     });
 
@@ -213,10 +220,13 @@ class MembersController extends DwController {
     });
   }
 
-  async fetchMembers() {
+  async fetchMembers(group) {
+    if (!group) {
+      group = this.model.selectedGroup;
+    }
     return new Promise((resolve, reject) => {
       const w3cDID = require("opendsu").loadAPI("w3cdid");
-      w3cDID.resolveDID(this.model.selectedGroup.did, (err, groupDIDDocument) => {
+      w3cDID.resolveDID(group.did, (err, groupDIDDocument) => {
         if (err) {
           return reject(err);
         }
@@ -243,6 +253,17 @@ class MembersController extends DwController {
       const w3cDID = require("opendsu").loadAPI("w3cdid");
       const didDocument = await promisify(w3cDID.resolveDID)(member.did);
       member["username"] = didDocument.getName();
+      let groups = await utils.fetchGroups();
+      let allMembers = [];
+      for (let i = 0; i < groups.length - 1; i++) {
+        let groupMembers = await this.fetchMembers(groups[i]);
+        allMembers = [...allMembers, ...groupMembers]
+      }
+      let alreadyExists = allMembers.find(arrMember => arrMember.did === member.did)
+      if (alreadyExists) {
+        throw new Error("Member already registered in a group!");
+        return;
+      }
       const addMemberToGroupMessage = {
         messageType: "AddMemberToGroup",
         groupDID: group.did,
@@ -269,7 +290,7 @@ class MembersController extends DwController {
       groupDID: group.did,
       memberDIDs: members
     }
-    MessagesService.processMessages(deleteMembersFromGroupMessage, ()=>{
+    MessagesService.processMessages(deleteMembersFromGroupMessage, () => {
       console.log("Processed messages");
     })
   }
