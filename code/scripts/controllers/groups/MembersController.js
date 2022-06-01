@@ -185,12 +185,28 @@ class MembersController extends DwController {
     this.onTagClick("member.add", async (model, button) => {
       let inputElement = document.querySelector("#add-member-input");
 
-      button.loading = true;
+
       try {
+        if (!inputElement.value) {
+          throw new Error("DID is empty.");
+        }
+        button.loading = true;
+        let groups = await utils.fetchGroups();
+        let allMembers = [];
+        for (let i = 0; i < groups.length; i++) {
+          let groupMembers = await this.fetchMembers(groups[i]);
+          allMembers = [...allMembers, ...groupMembers]
+        }
+        let alreadyExists = allMembers.find(arrMember => arrMember.did === inputElement.value)
+        if (alreadyExists) {
+          button.loading = false;
+          throw new Error("Member already registered in a group!");
+        }
         const member = await this.addMember(this.model.selectedGroup, {did: inputElement.value});
         this.model.members.push(member);
+        button.loading = false;
       } catch (e) {
-        throw Error("Member already exists in a group!!!!");
+        await ui.showToast("Could not add user to the group because: " + e.message);
       }
 
       const {did} = await ui.page.addMember(model, button);
@@ -253,17 +269,6 @@ class MembersController extends DwController {
       const w3cDID = require("opendsu").loadAPI("w3cdid");
       const didDocument = await promisify(w3cDID.resolveDID)(member.did);
       member["username"] = didDocument.getName();
-      let groups = await utils.fetchGroups();
-      let allMembers = [];
-      for (let i = 0; i < groups.length - 1; i++) {
-        let groupMembers = await this.fetchMembers(groups[i]);
-        allMembers = [...allMembers, ...groupMembers]
-      }
-      let alreadyExists = allMembers.find(arrMember => arrMember.did === member.did)
-      if (alreadyExists) {
-        throw new Error("Member already registered in a group!");
-        return;
-      }
       const addMemberToGroupMessage = {
         messageType: "AddMemberToGroup",
         groupDID: group.did,
@@ -276,6 +281,7 @@ class MembersController extends DwController {
       return member;
     } catch (err) {
       console.log(err);
+      throw err;
     }
   }
 
