@@ -1,3 +1,4 @@
+import {DwController} from "./DwController.js";
 export default class QuickActionsController extends DwController {
   constructor(...props) {
     super(...props);

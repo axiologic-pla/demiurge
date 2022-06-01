@@ -37,15 +37,27 @@ async function addMemberToGroupMapping(message) {
   } else {
     enclave = await sharedEnclave.readKeyAsync(constants.EPI_SHARED_ENCLAVE);
   }
+
   const enclaveRecord = {
     enclaveType: enclave.enclaveType,
     enclaveDID: enclave.enclaveDID,
     enclaveKeySSI: enclave.enclaveKeySSI,
   };
+
+  if (groupDIDDocument.getGroupName() === constants.EPI_READ_GROUP) {
+    const keySSISpace = openDSU.loadAPI("keyssi");
+    if (typeof enclaveRecord.enclaveKeySSI === "string") {
+      enclaveRecord.enclaveKeySSI = keySSISpace.parse(enclaveRecord.enclaveKeySSI);
+      enclaveRecord.enclaveKeySSI = enclaveRecord.enclaveKeySSI.derive().getIdentifier();
+    }
+  }
+
   const msg = {
     credential,
     enclave: enclaveRecord,
   };
+
+  console.log("Message ===================", msg);
   await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), memberDID_Document);
 }
 
