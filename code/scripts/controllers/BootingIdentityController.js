@@ -2,6 +2,7 @@ import constants from "../constants.js";
 
 const { DwController } = WebCardinal.controllers;
 import MessagesService from "../services/MessagesService.js";
+import {getCommunicationService} from "../services/CommunicationService.js";
 import utils from "../utils.js";
 
 class BootingIdentityController extends DwController {
@@ -50,22 +51,6 @@ class BootingIdentityController extends DwController {
         const didDomain = await $$.promisify(scAPI.getDIDDomain)();
         const publicName = "first_demiurge_identity";
 
-        const __waitForMessage = ()=>{
-          didDocument.readMessage(async (err, message) => {
-            message = JSON.parse(message);
-            if (message.sender === this.did) {
-              ui.enableMenu();
-              this.navigateToPageTag("quick-actions");
-              return;
-            }
-
-            await utils.addSharedEnclaveToEnv(message.enclave.enclaveType, message.enclave.enclaveDID, message.enclave.enclaveKeySSI);
-
-            ui.enableMenu();
-            this.navigateToPageTag("quick-actions");
-          });
-        }
-
         let firstDIDDocument;
         try {
           firstDIDDocument = await $$.promisify(w3cDID.resolveDID)(`did:ssi:name:${didDomain}:${publicName}`);
@@ -101,9 +86,11 @@ class BootingIdentityController extends DwController {
               await sharedEnclave.insertRecordAsync(constants.TABLES.GROUP_ENCLAVES, enclaves[i].enclaveDID, enclaves[i]);
             }
             this.processMessages(sharedEnclave, messages, async () => {
-                console.log("Processed create group messages");
-                __waitForMessage();
-              });
+              console.log("Processed create group messages");
+              getCommunicationService().waitForMessage(this.did, ()=>{
+                ui.enableMenu();
+                this.navigateToPageTag("quick-actions");
+              })              });
           })
           return;
         }
@@ -119,8 +106,10 @@ class BootingIdentityController extends DwController {
               disableClosing: true,
             }
         );
-        __waitForMessage();
-      }
+        getCommunicationService().waitForMessage(this.did, ()=>{
+          ui.enableMenu();
+          this.navigateToPageTag("quick-actions");
+        })      }
     });
   }
 

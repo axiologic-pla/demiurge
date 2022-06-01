@@ -170,10 +170,18 @@ class GroupsController extends DwController {
       }
     });
 
-    setTimeout(async () => {
-      this.model.groups = await utils.fetchGroups();
-      this.model.areGroupsLoaded = true;
-    });
+    const __waitForSharedEnclave = ()=>{
+      setTimeout(async () => {
+        const scAPI = require("opendsu").loadAPI("sc");
+        if(scAPI.sharedEnclaveExists()){
+          this.model.groups = await utils.fetchGroups();
+          this.model.areGroupsLoaded = true;
+        } else {
+          __waitForSharedEnclave();
+        }
+      },100);
+    }
+    __waitForSharedEnclave();
   }
 
   /**

@@ -1,3 +1,6 @@
+import {getStoredDID} from "./services/BootingIdentityService.js";
+import utils from "./utils.js";
+
 const { setConfig, getConfig, addControllers, addHook, navigateToPageTag } = WebCardinal.preload;
 const { define } = WebCardinal.components;
 
@@ -36,21 +39,26 @@ addHook("beforeAppLoads", async () => {
   const { getVaultDomainAsync } = await import("./hooks/getVaultDomain.js");
   const { getUserDetails } = await import("./hooks/getUserDetails.js");
   const { getStoredDID } = await import("./services/BootingIdentityService.js");
+  const { getCommunicationService } = await import("./services/CommunicationService.js");
 
   wallet.vaultDomain = await getVaultDomainAsync();
   wallet.userDetails = await getUserDetails();
   wallet.did = await getStoredDID();
 
-  if (wallet.did) {
-    const { default: getMessageProcessingService } = await import("./services/MessageProcessingService.js");
-    const messageProcessingService = await getMessageProcessingService({ did: wallet.did });
-    WebCardinal.wallet.messageProcessingService = messageProcessingService;
-    try {
-      messageProcessingService.readMessage();
-    } catch (err) {
-      console.log(err);
-    }
+  if(wallet.did){
+    const communicationService = getCommunicationService();
+    communicationService.waitForMessage(wallet.did, ()=>{});
   }
+  // if (wallet.did) {
+  //   const { default: getMessageProcessingService } = await import("./services/MessageProcessingService.js");
+  //   const messageProcessingService = await getMessageProcessingService({ did: wallet.did });
+  //   WebCardinal.wallet.messageProcessingService = messageProcessingService;
+  //   try {
+  //     messageProcessingService.readMessage();
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // }
 
   // setInitialTheme();
 

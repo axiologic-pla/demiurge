@@ -1,6 +1,4 @@
-const { Controller } = WebCardinal.controllers;
-
-export default class QuickActionsController extends Controller {
+export default class QuickActionsController extends DwController {
   constructor(...props) {
     super(...props);
 
