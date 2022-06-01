@@ -22,6 +22,7 @@ export default {
   IDENTITY: "identity",
   EPI_ADMIN_GROUP: "ePI_Administration_Group",
   EPI_WRITE_GROUP: "ePI_Write_Group",
+  EPI_READ_GROUP: "ePI_Read_Group",
   RECIPIENT_TYPES: {
     USER_RECIPIENT: "user",
     GROUP_RECIPIENT: "group",
