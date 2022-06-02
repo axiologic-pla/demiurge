@@ -222,11 +222,21 @@ class MembersController extends DwController {
 
     this.onTagClick("member.delete", async (...props) => {
       const deletedMembers = await ui.page.deleteMembers(...props);
-      await this.deleteMembers(this.model.selectedGroup, deletedMembers);
+      let button = props[1];
+      button.loading = true;
+      let undeleted = await this.deleteMembers(this.model.selectedGroup, deletedMembers);
+      if (undeleted.length > 0) {
+        for (let i = 1; i < undeleted.length; i++) {
+          let index = deletedMembers.indexOf(undeleted[i]);
+          deletedMembers.splice(index, 1);
+        }
+        await ui.showToast("Could not delete all selected members");
+      }
       while (deletedMembers.length > 0) {
         const did = deletedMembers.pop();
         this.model.members = this.model.members.filter((member) => member.did !== did);
       }
+      button.loading = false;
       ui.page.closeMultipleSelection();
     });
 
@@ -291,14 +301,22 @@ class MembersController extends DwController {
    * @param {array<{did: string}>} members
    */
   async deleteMembers(group, members) {
-    const deleteMembersFromGroupMessage = {
-      messageType: "RemoveMembersFromGroup",
-      groupDID: group.did,
-      memberDIDs: members
+    let deleteMmbersMsg = [];
+    for (let i = 0; i < members.length; i++) {
+      deleteMmbersMsg.push({
+        messageType: "RemoveMembersFromGroup",
+        groupDID: group.did,
+        memberDID: members[i]
+      })
     }
-    MessagesService.processMessages([deleteMembersFromGroupMessage], () => {
+
+    let undigestedMessages = await MessagesService.processMessages(deleteMmbersMsg, () => {
       console.log("Processed messages");
     })
+    undigestedMessages = undigestedMessages || [];
+    return undigestedMessages.map(msg => {
+      return {did: msg.memberDID}
+    });
   }
 
   async notifyMember(group, member) {
