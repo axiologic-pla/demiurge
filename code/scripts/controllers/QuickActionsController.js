@@ -1,4 +1,5 @@
-import {DwController} from "./DwController.js";
+const {DwController} = WebCardinal.controllers;
+
 export default class QuickActionsController extends DwController {
   constructor(...props) {
     super(...props);

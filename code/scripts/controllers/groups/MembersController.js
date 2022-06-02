@@ -296,7 +296,7 @@ class MembersController extends DwController {
       groupDID: group.did,
       memberDIDs: members
     }
-    MessagesService.processMessages(deleteMembersFromGroupMessage, () => {
+    MessagesService.processMessages([deleteMembersFromGroupMessage], () => {
       console.log("Processed messages");
     })
   }
