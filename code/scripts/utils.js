@@ -1,6 +1,9 @@
 import Message from "./utils/Message.js";
 import constants from "./constants.js";
 
+const LogService = require("gtin-resolver").loadApi("services").LogService;
+
+
 function promisify(fun) {
   return function (...args) {
     return new Promise((resolve, reject) => {
@@ -102,6 +105,20 @@ async function fetchGroups() {
   return groups;
 }
 
+async function addLogMessage(dsuStorage, userId, action, userGroup, priveleges = "-") {
+  let logService = new LogService(dsuStorage, constants.TABLES.LOGS_TABLE);
+  let logMsg = {
+    source: "demiurge",
+    actionUserId: WebCardinal.wallet.userDetails,
+    userId: userId || "-",
+    action: action,
+    group: userGroup,
+    privileges: priveleges
+  }
+  await $$.promisify(logService.log, logService)(logMsg);
+  return
+}
+
 export default {
   promisify,
   getPKFromCredential,
@@ -109,5 +126,6 @@ export default {
   sendUserMessage,
   addSharedEnclaveToEnv,
   getDisabledFeatures,
-  fetchGroups
+  fetchGroups,
+  addLogMessage
 };

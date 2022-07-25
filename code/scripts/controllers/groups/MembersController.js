@@ -284,8 +284,13 @@ class MembersController extends DwController {
         groupDID: group.did,
         memberDID: member.did,
         memberName: member.username,
+        auditData: {
+          action: constants.OPERATIONS.ADD,
+          userGroup: group.name,
+          userId: member.did
+        }
       };
-      MessagesService.processMessages([addMemberToGroupMessage], () => {
+      MessagesService.processMessages([addMemberToGroupMessage], async () => {
         console.log("Processed messages");
       });
       return member;
@@ -306,11 +311,18 @@ class MembersController extends DwController {
       deleteMmbersMsg.push({
         messageType: "RemoveMembersFromGroup",
         groupDID: group.did,
-        memberDID: members[i]
-      })
+        memberDID: members[i],
+        groupName: group.name,
+        auditData: {
+          action: constants.OPERATIONS.REMOVE,
+          userGroup: group.name,
+          userId: members[i]
+        }
+      });
     }
 
-    let undigestedMessages = await MessagesService.processMessages(deleteMmbersMsg, () => {
+    let undigestedMessages = await MessagesService.processMessages(deleteMmbersMsg, async () => {
+
       console.log("Processed messages");
     })
     undigestedMessages = undigestedMessages || [];

@@ -8,6 +8,7 @@ export default {
     IDENTITY: "identity_table",
     GROUP_ENCLAVES: "group_databases_table",
     USER_DATABASES: "user_databases_table",
+    LOGS_TABLE: "demiurge_logs_table"
   },
   CONTENT_TYPE: {
     CREDENTIAL: "credential",

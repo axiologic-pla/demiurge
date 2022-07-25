@@ -1,11 +1,11 @@
 import constants from "../../constants.js";
 import utils from "../../utils.js";
-import { cloneTemplate } from "../../../components/utils.js";
+import {cloneTemplate} from "../../../components/utils.js";
 import getStorageService from "../../services/StorageService.js";
 import MessagesService from "../../services/MessagesService.js";
 
-const { DwController } = WebCardinal.controllers;
-const { promisify } = utils;
+const {DwController} = WebCardinal.controllers;
+const {promisify} = utils;
 
 class GroupsUI extends DwController {
   constructor(...props) {
@@ -50,7 +50,7 @@ class GroupsUI extends DwController {
       [part]: ["group-members", "group-credentials", "group-databases"],
     };
 
-    this.model.onChange("selectedGroup", ({ targetChain }) => {
+    this.model.onChange("selectedGroup", ({targetChain}) => {
       if (targetChain !== "selectedGroup") {
         return;
       }
@@ -121,15 +121,15 @@ class GroupsUI extends DwController {
 class GroupsController extends DwController {
   constructor(...props) {
     super(...props);
-    const { ui } = this;
+    const {ui} = this;
     utils.getDisabledFeatures().then((disabledFeatures) => {
-          this.model.disabledFeatures = disabledFeatures;
-          disabledFeatures.forEach(disabledFeature => {
-            let selector = ".feature-" + disabledFeature;
-            this.querySelector(selector).hidden = true;
-          })
+      this.model.disabledFeatures = disabledFeatures;
+      disabledFeatures.forEach(disabledFeature => {
+        let selector = ".feature-" + disabledFeature;
+        this.querySelector(selector).hidden = true;
+      })
 
-        })
+    })
     this.model = {
       // blockchainDomain: "example.domain",
       groups: [],
@@ -143,8 +143,8 @@ class GroupsController extends DwController {
 
     this.onTagClick("group.add", async (...props) => {
       try {
-        const { name } = await ui.page.addGroup(...props);
-        const group = await $$.promisify(this.addGroup)({ name });
+        const {name} = await ui.page.addGroup(...props);
+        const group = await $$.promisify(this.addGroup)({name});
         this.model.selectedGroup = undefined;
         this.model.groups.push(group);
         // await ui.showToast(group);
@@ -170,16 +170,16 @@ class GroupsController extends DwController {
       }
     });
 
-    const __waitForSharedEnclave = ()=>{
+    const __waitForSharedEnclave = () => {
       setTimeout(async () => {
         const scAPI = require("opendsu").loadAPI("sc");
-        if(scAPI.sharedEnclaveExists()){
+        if (scAPI.sharedEnclaveExists()) {
           this.model.groups = await utils.fetchGroups();
           this.model.areGroupsLoaded = true;
         } else {
           __waitForSharedEnclave();
         }
-      },100);
+      }, 100);
     }
     __waitForSharedEnclave();
   }
@@ -196,14 +196,14 @@ class GroupsController extends DwController {
 
     const scAPI = require("opendsu").loadAPI("sc");
     if (group.name === constants.EPI_ADMIN_GROUP) {
-      scAPI.getMainEnclave((err, mainEnclave)=>{
+      scAPI.getMainEnclave((err, mainEnclave) => {
         if (err) {
           return callback(err);
         }
         return processMessages(mainEnclave, callback);
       })
     } else {
-      scAPI.getSharedEnclave((err, sharedEnclave)=>{
+      scAPI.getSharedEnclave((err, sharedEnclave) => {
         if (err) {
           return callback(err);
         }
@@ -211,7 +211,7 @@ class GroupsController extends DwController {
       })
     }
     const processMessages = (storageService, callback) => {
-      MessagesService.processMessages(storageService,[createGroupMessage], async () => {
+      MessagesService.processMessages(storageService, [createGroupMessage], async () => {
         const openDSU = require("opendsu");
         const scAPI = openDSU.loadAPI("sc");
         const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
@@ -225,8 +225,13 @@ class GroupsController extends DwController {
           groupDID: group.did,
           memberDID: adminDID.did,
           memberName: adminDID.username,
+          auditData: {
+            action: constants.OPERATIONS.ADD,
+            userGroup: this.model.selectedGroup.name,
+            userId: null,
+          }
         };
-        await MessagesService.processMessages([addMemberToGroupMessage], () => {
+        await MessagesService.processMessages([addMemberToGroupMessage], async () => {
           callback(undefined, group);
         });
       });
@@ -241,8 +246,14 @@ class GroupsController extends DwController {
     const deleteGroupMessage = {
       messageType: "DeleteGroup",
       groupDID: group.did,
+      auditData: {
+        action: constants.OPERATIONS.REMOVE,
+        userGroup: this.model.selectedGroup.name,
+        userId: null
+      }
     };
-    await MessagesService.processMessages([deleteGroupMessage], () => {});
+    await MessagesService.processMessages([deleteGroupMessage], () => {
+    });
   }
 }
 

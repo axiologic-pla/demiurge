@@ -9,6 +9,10 @@
       "tag": "groups"
     },
     {
+      "name": "Audit",
+      "tag": "audit"
+    },
+    {
       "name": "BDNS",
       "tag": "bdns",
       "src": "./blockchain-domains.html",
