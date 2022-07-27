@@ -1,10 +1,10 @@
 import {removeMemberFromGroup} from "./utils.js";
 
-function checkIfRemoveMemberFromGroupMessage(message) {
-  return message.messageType === "RemoveMembersFromGroup";
+function checkIfDeactivateMemberMessage(message) {
+  return message.messageType === "DeactivateMember";
 }
 
-async function removeMembersFromGroup(message) {
+async function deactivateMember(message) {
   const openDSU = require("opendsu");
   const system = openDSU.loadAPI("system");
   const config = openDSU.loadAPI("config");
@@ -14,9 +14,9 @@ async function removeMembersFromGroup(message) {
   await removeMemberFromGroup.call(this, message);
   const appName = await $$.promisify(config.getEnv)("appName");
   const did = crypto.encodeBase58(message.memberDID);
-  let url = `${system.getBaseURL()}/removeSSOSecret/${appName}/${did}`;
+  let url = `${system.getBaseURL()}/deactivateSSOSecret/${appName}/${did}`;
   await http.fetch(url, {method: "DELETE"});
 }
 
-require("opendsu").loadAPI("m2dsu").defineMapping(checkIfRemoveMemberFromGroupMessage, removeMembersFromGroup);
-export {removeMembersFromGroup}
+require("opendsu").loadAPI("m2dsu").defineMapping(checkIfDeactivateMemberMessage, deactivateMember);
+export {deactivateMember}

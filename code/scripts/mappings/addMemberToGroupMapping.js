@@ -57,7 +57,6 @@ async function addMemberToGroupMapping(message) {
     enclave: enclaveRecord,
   };
 
-  console.log("Message ===================", msg);
   await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), memberDID_Document);
 }
 
