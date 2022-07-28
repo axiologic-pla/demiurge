@@ -1,125 +1,130 @@
 /* Components */
 
 dw-clipboard-input > sl-input::part(suffix) {
-  padding: var(--sl-spacing-small);
-  cursor: pointer;
-  background-color: var(--icon-background);
+    padding: var(--sl-spacing-small);
+    cursor: pointer;
+    background-color: var(--icon-background);
+}
+
+dw-clipboard-input > sl-input::part(suffix):hover {
+    background-color: rgb(var(--sl-color-primary-50));
 }
 
 dw-clipboard-input > sl-input::part(input) {
-  font-family: "courier new", monospace;
-  padding-top: 3px;
+    font-family: "courier new", monospace;
+    padding-top: 3px;
 }
 
 dw-clipboard-input > sl-input > sl-icon::part(base) {
-  color: var(--icon-color);
+    color: var(--icon-color);
 }
 
 /* Classes */
 
 .dw-container {
-  display: grid;
-  padding: 1rem 2rem;
-  max-width: var(--dw-container-width);
-  margin: 0 auto;
+    display: grid;
+    margin: 45px 0 0 124px;
 }
 
 .not-implemented {
-  font-size: 40px;
-  margin-top: 80px;
+    font-size: 40px;
+    margin-top: 80px;
 }
+
 .dw-dialog {
-  --body-spacing: 0;
+    --body-spacing: 0;
 }
 
 .dw-dialog > header {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  padding: var(--sl-spacing-large) var(--sl-spacing-large) var(--sl-spacing-x-small) var(--sl-spacing-large);
-  column-gap: var(--sl-spacing-large);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: var(--sl-spacing-large) var(--sl-spacing-large) var(--sl-spacing-x-small) var(--sl-spacing-large);
+    column-gap: var(--sl-spacing-large);
 }
 
 .dw-dialog > header > h3 {
-  display: flex;
-  align-items: center;
-  gap: var(--sl-spacing-small);
-  margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--sl-spacing-small);
+    margin: 0;
 }
 
 .dw-dialog > header > sl-icon-button[close]::part(base) {
-  padding: 0;
+    padding: 0;
 }
 
 .dw-data-grid {
-  padding: var(--sl-spacing-small);
-  border: var(--border);
-  background: var(--background);
+    padding: var(--sl-spacing-small);
+    border: var(--border);
+    background: var(--background);
 }
 
 .dw-data-grid .no-data {
-  padding: var(--sl-spacing-small);
-  text-align: center;
+    padding: var(--sl-spacing-small);
+    text-align: center;
 }
 
 .dw-data-grid .dw-data-grid-item {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  border-bottom: 1px solid var(--border-color);
-  background-color: var(--background);
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--background);
 }
 
 .dw-data-grid .dw-data-grid-item:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .dw-data-grid .dw-data-grid-item sl-menu-item::part(base) {
-  padding-top: var(--sl-spacing-small);
-  padding-bottom: var(--sl-spacing-small);
+    padding-top: var(--sl-spacing-small);
+    padding-bottom: var(--sl-spacing-small);
 }
 
 .dw-data-grid .dw-data-grid-item sl-icon-button {
-  height: 100%;
-  display: flex;
+    height: 100%;
+    display: flex;
 }
 
 .dw-data-grid .dw-data-grid-item sl-icon-button::part(base) {
-  padding: 0 var(--sl-spacing-x-large);
+    padding: 0 var(--sl-spacing-x-large);
 }
 
 .dw-data-grid .dw-data-grid-item sl-menu-item[checked]::part(base) {
-  color: var(--webc-primary-color);
+    color: var(--webc-primary-color);
 }
 
 .dw-data-grid .dw-data-grid-item sl-menu-item[checked]::part(base),
 .dw-data-grid .dw-data-grid-item sl-menu-item[checked] + sl-icon-button::part(base) {
-  background-color: var(--check-background);
-  border-radius: 0;
+    background-color: var(--check-background);
+    border-radius: 0;
 }
 
 .dw-data-grid .dw-data-grid-item sl-menu-item[checked] + sl-icon-button {
-  pointer-events: none;
+    pointer-events: none;
 }
 
 .dw-data-grid .dw-data-grid-item sl-menu-item[checked] + sl-icon-button::part(base) {
-  background: transparent;
-  color: transparent;
-  cursor: not-allowed;
+    background: transparent;
+    color: transparent;
+    cursor: not-allowed;
 }
 
 .dw-data-grid .dw-data-grid-item sl-icon-button:hover::part(base) {
-  border-radius: 0;
-  color: var(--delete-color);
-  background: var(--delete-background);
+    border-radius: 0;
+    color: var(--delete-color);
+    background: var(--delete-background);
 }
 
-@media screen and (max-width: 420px) {
-  .dw-container {
-    padding: 0 1em;
-  }
+.dw-action
 
-  .dw-data-grid {
-    padding: 0;
-  }
+@media screen and (max-width: 420px) {
+    .dw-container {
+        padding: 0 1em;
+    }
+
+    .dw-data-grid {
+        padding: 0;
+    }
 }

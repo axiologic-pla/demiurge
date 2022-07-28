@@ -7,4 +7,7 @@
 #my-identities-page {
     display: grid;
     gap: var(--sl-spacing-medium);
+    padding: 15px;
+    margin-right: 56px;
+    background: #ffffff;
 }

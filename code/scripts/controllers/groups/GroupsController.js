@@ -153,11 +153,11 @@ class GroupsController extends DwController {
       }
     });
 
-    this.onTagClick("group.select", async (...props) => {
-      const selectedGroup = await ui.page.selectGroup(...props);
-      this.model.selectedGroup = selectedGroup;
-      // await ui.showToast(selectedGroup);
+    const groupSelect = document.querySelector('sl-select');
+    groupSelect.addEventListener('sl-change', event => {
+      this.model.selectedGroup = event.target.value;
     });
+
 
     this.onTagClick("group.delete", async (deletedGroup) => {
       try {
@@ -175,6 +175,7 @@ class GroupsController extends DwController {
         const scAPI = require("opendsu").loadAPI("sc");
         if (scAPI.sharedEnclaveExists()) {
           this.model.groups = await utils.fetchGroups();
+          this.model.defaultGroup = this.model.groups[0];
           this.model.areGroupsLoaded = true;
         } else {
           __waitForSharedEnclave();

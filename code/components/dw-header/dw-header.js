@@ -15,8 +15,7 @@ customElements.define(
                 <webc-app-menu mode="horizontal">
                     <div slot="before">
                         <stencil-route-link class="logo">
-                            <strong>Demiurge</strong>
-                            <span>Wallet</span>
+                            Demiurge Wallet
                         </stencil-route-link>
                     </div>
                     <div slot="after">

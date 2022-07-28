@@ -31,5 +31,6 @@ export default {
   OPERATIONS: {
     REMOVE: "remove",
     ADD: "add",
+    DEACTIVATE: "deactivate"
   },
 };

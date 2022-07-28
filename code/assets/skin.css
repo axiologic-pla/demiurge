@@ -1,5 +1,32 @@
 @import "./components.css";
 
+/* dm-sans-regular - latin-ext_latin */
+@font-face {
+    font-family: 'DM Sans regular';
+    font-style: normal;
+    font-weight: 400;
+    src: local(''),
+    url('../assets/fonts/DM_Sans/dm-sans-v11-latin-ext_latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */ url('../assets/fonts/DM_Sans/dm-sans-v11-latin-ext_latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+/* dm-sans-500 - latin-ext_latin */
+@font-face {
+    font-family: 'DM Sans medium';
+    font-style: normal;
+    font-weight: 500;
+    src: local(''),
+    url('../assets/fonts/DM_Sans/dm-sans-v11-latin-ext_latin-500.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */ url('../assets/fonts/DM_Sans/dm-sans-v11-latin-ext_latin-500.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+/* dm-sans-700 - latin-ext_latin */
+@font-face {
+    font-family: 'DM Sans bold';
+    font-style: normal;
+    font-weight: 700;
+    src: local(''),
+    url('../assets/fonts/DM_Sans/dm-sans-v11-latin-ext_latin-700.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */ url('../assets/fonts/DM_Sans/dm-sans-v11-latin-ext_latin-700.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
 :root {
     --webc-primary-color: rgb(var(--sl-color-gray-900));
     --webc-font-family: var(--sl-font-sans);
@@ -47,11 +74,14 @@ dw-menu {
 
 dw-title {
     --color: rgb(var(--sl-color-gray-900));
+    font-size: calc(100% + 0.4vh);
+    font-family: 'DM Sans regular';
+    line-height: 1;
 }
 
 dw-clipboard-input {
-    --icon-color: rgb(var(--sl-color-neutral-0));
-    --icon-background: rgb(var(--sl-color-primary-200));
+    --icon-color: #ffffff;
+    --icon-background: rgb(var(--sl-color-primary-green));
 }
 
 dw-dialog-booting-identity {
@@ -76,8 +106,26 @@ dw-subdomains {
     --background: rgb(var(--sl-input-background-color));
     --check-background: rgb(var(--sl-color-gray-300));
 
-    --delete-color: rgb(var(--sl-color-neutral-1000));
-    --delete-background: rgb(var(--sl-color-primary-600));
+    --delete-color: rgb(var(--sl-color-neutral-255));
+    --delete-background: rgb(var(--sl-color-primary-50));
+}
+
+.container.app-container {
+    background: url("../assets/images/background-shape.svg") no-repeat center;
+    background-size: cover;
+
+}
+
+.dw-action-button::part(base) {
+    background: rgb(var(--sl-color-primary-green));
+    color: #ffffff;
+    border: none;
+}
+
+.dw-action-button::part(base):hover {
+    background: rgb(var(--sl-color-primary-50));
+    color: #ffffff;
+    border: none;
 }
 
 /*:root .sl-theme-dark {*/

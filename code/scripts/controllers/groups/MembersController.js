@@ -9,12 +9,8 @@ class MembersUI extends DwController {
   constructor(...props) {
     super(...props);
 
-    this.isSelectMultiple = false;
-    this.selectedMembers = [];
     this.selectionElements = {
       sectionElement: this.querySelector(".dw-members"),
-      openButtonElement: this.getElementByTag("member.open-multiple-selection"),
-      closeButtonElement: this.getElementByTag("member.close-multiple-selection"),
       addButtonElement: this.querySelector("sl-form"),
       deleteButtonElement: this.getElementByTag("member.delete"),
     };
@@ -30,17 +26,6 @@ class MembersUI extends DwController {
 
   // listeners
 
-  addMultipleSelectionListeners() {
-    const {openButtonElement, closeButtonElement} = this.selectionElements;
-
-    openButtonElement.addEventListener("click", () => {
-      this.openMultipleSelection();
-    });
-
-    closeButtonElement.addEventListener("click", () => {
-      this.closeMultipleSelection();
-    });
-  }
 
   addPasteMemberDIDFromClipboardListener() {
     this.onTagClick("member.paste", async (model, target) => {
@@ -64,83 +49,9 @@ class MembersUI extends DwController {
 
   // methods
 
-  openMultipleSelection() {
-    const {
-      sectionElement,
-      openButtonElement,
-      closeButtonElement,
-      addButtonElement,
-      deleteButtonElement,
-    } = this.selectionElements;
-    openButtonElement.setAttribute("hidden", "");
-    addButtonElement.setAttribute("hidden", "");
-    closeButtonElement.removeAttribute("hidden");
-    deleteButtonElement.removeAttribute("hidden");
-    this.isSelectMultiple = true;
-
-    sectionElement.querySelectorAll(".dw-member").forEach((memberElement) => {
-      const checkboxElement = memberElement.querySelector("sl-checkbox");
-      checkboxElement.classList.add("active");
-    });
-  }
-
-  closeMultipleSelection() {
-    const {
-      sectionElement,
-      openButtonElement,
-      closeButtonElement,
-      addButtonElement,
-      deleteButtonElement,
-    } = this.selectionElements;
-    openButtonElement.removeAttribute("hidden");
-    addButtonElement.removeAttribute("hidden");
-    closeButtonElement.setAttribute("hidden", "");
-    deleteButtonElement.setAttribute("hidden", "");
-    this.isSelectMultiple = false;
-
-    sectionElement.querySelectorAll(".dw-member").forEach((memberElement) => {
-      const checkboxElement = memberElement.querySelector("sl-checkbox");
-      checkboxElement.classList.remove("active");
-      checkboxElement.checked = false;
-    });
-  }
-
-  isMultipleSelectionActive(target) {
-    if (!target) {
-      return this.isSelectMultiple;
-    }
-
-    if (this.isSelectMultiple) {
-      const checkboxElement = target.querySelector("sl-checkbox");
-      checkboxElement.checked = !checkboxElement.checked;
-      return true;
-    }
-    return false;
-  }
 
   async addMember(model, target) {
     return await this.ui.submitGenericForm(model, target);
-  }
-
-  async deleteMembers() {
-    if (this.isSelectMultiple) {
-      const deletedMembers = new Set();
-      const sectionElement = this.querySelector(".dw-members");
-      sectionElement.querySelectorAll(".dw-member").forEach((memberElement) => {
-        const checkboxElement = memberElement.querySelector("sl-checkbox");
-        const itemElement = memberElement.parentElement;
-        if (checkboxElement.checked) {
-          deletedMembers.add(itemElement.value);
-        }
-      });
-      return [...deletedMembers];
-    }
-
-    if (this.selectedMember) {
-      const deletedMembers = [this.selectedMember.did];
-      this.ui.hideDialogFromComponent("dw-dialog-edit-member");
-      return deletedMembers;
-    }
   }
 
   loadMemberPage(state) {
@@ -179,7 +90,6 @@ class MembersController extends DwController {
     };
 
     ui.page = new MembersUI(...props);
-    ui.page.addMultipleSelectionListeners();
     ui.page.addPasteMemberDIDFromClipboardListener();
 
     this.onTagClick("member.add", async (model, button) => {
@@ -202,9 +112,22 @@ class MembersController extends DwController {
           button.loading = false;
           throw new Error("Member already registered in a group!");
         }
+        await ui.showDialogFromComponent(
+          "dw-dialog-group-members-update",
+          {
+            action: "Adding",
+            did: model.did,
+          },
+          {
+            parentElement: this.element,
+            disableClosing: true,
+          }
+        );
         const member = await this.addMember(this.model.selectedGroup, {did: inputElement.value});
         this.model.members.push(member);
         button.loading = false;
+        await ui.hideDialogFromComponent("dw-dialog-group-members-update");
+
       } catch (e) {
         await ui.showToast("Could not add user to the group because: " + e.message);
       }
@@ -214,32 +137,41 @@ class MembersController extends DwController {
     });
 
     this.onTagClick("member.select", (selectedMember, ...props) => {
-      if (!ui.page.isMultipleSelectionActive(...props)) {
-        this.model.selectedMember = selectedMember;
-        ui.page.loadMemberPage({selectedGroup, selectedMember});
-      }
+      this.model.selectedMember = selectedMember;
+      ui.page.loadMemberPage({selectedGroup, selectedMember});
     });
 
-    this.onTagClick("member.delete", async (...props) => {
-      const deletedMembers = await ui.page.deleteMembers(...props);
-      let button = props[1];
-      button.loading = true;
-      let undeleted = await this.deleteMembers(this.model.selectedGroup, deletedMembers);
-      if (undeleted.length > 0) {
-        for (let i = 1; i < undeleted.length; i++) {
-          let index = deletedMembers.indexOf(undeleted[i]);
-          deletedMembers.splice(index, 1);
+    this.onTagClick("member.delete", async (model, target, event) => {
+      await removeGroupMember(model.did, constants.OPERATIONS.REMOVE)
+      // ui.page.closeMultipleSelection();
+    });
+
+    this.onTagClick("member.deactivate", async (model, target, event) => {
+      await removeGroupMember(model.did, constants.OPERATIONS.DEACTIVATE)
+      // ui.page.closeMultipleSelection();
+    });
+    let removeGroupMember = async (did, operation) => {
+
+      await ui.showDialogFromComponent(
+        "dw-dialog-group-members-update",
+        {
+          action: operation === constants.OPERATIONS.REMOVE ? "Deleting" : "Deactivating",
+          did: did,
+        },
+        {
+          parentElement: this.element,
+          disableClosing: true,
         }
-        await ui.showToast("Could not delete all selected members");
-      }
-      while (deletedMembers.length > 0) {
-        const did = deletedMembers.pop();
-        this.model.members = this.model.members.filter((member) => member.did !== did);
-      }
-      button.loading = false;
-      ui.page.closeMultipleSelection();
-    });
+      );
+      let undeleted = await this.deleteMembers(this.model.selectedGroup, did, operation);
+      await ui.hideDialogFromComponent("dw-dialog-group-members-update");
 
+      if (undeleted.length > 0) {
+        await ui.showToast("Member could not deleted");
+        return;
+      }
+      this.model.members = this.model.members.filter((member) => member.did !== did);
+    }
     setTimeout(async () => {
       this.model.members = await this.fetchMembers();
       this.model.areMembersLoaded = true;
@@ -305,21 +237,18 @@ class MembersController extends DwController {
    * @param {string} group.did
    * @param {array<{did: string}>} members
    */
-  async deleteMembers(group, members) {
-    let deleteMmbersMsg = [];
-    for (let i = 0; i < members.length; i++) {
-      deleteMmbersMsg.push({
-        messageType: "RemoveMembersFromGroup",
-        groupDID: group.did,
-        memberDID: members[i],
-        groupName: group.name,
-        auditData: {
-          action: constants.OPERATIONS.REMOVE,
-          userGroup: group.name,
-          userId: members[i]
-        }
-      });
-    }
+  async deleteMembers(group, memberDID, operation) {
+    let deleteMmbersMsg = [{
+      messageType: operation === constants.OPERATIONS.REMOVE ? "RemoveMembersFromGroup" : "DeactivateMember",
+      groupDID: group.did,
+      memberDID: memberDID,
+      groupName: group.name,
+      auditData: {
+        action: operation === constants.OPERATIONS.REMOVE ? constants.OPERATIONS.REMOVE : constants.OPERATIONS.DEACTIVATE,
+        userGroup: group.name,
+        userId: memberDID
+      }
+    }];
 
     let undigestedMessages = await MessagesService.processMessages(deleteMmbersMsg, async () => {
 

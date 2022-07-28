@@ -1,111 +1,111 @@
 #member-page {
-  --header-background: rgb(var(--sl-color-primary-50));
-
-  padding-bottom: calc(2 * var(--sl-spacing-large));
-  overflow: hidden;
+    --header-background: rgb(var(--sl-color-primary-50));
+    overflow: hidden;
+    background: #fff;
+    padding: 15px 15px calc(2 * var(--sl-spacing-large));
+    margin-right: 56px;
 }
 
 #member-page .dw-member-profile,
 #member-page .dw-group-profile {
-  display: grid;
-  gap: var(--sl-spacing-x-large);
-  grid-template-columns: repeat(2, 1fr);
+    display: grid;
+    gap: var(--sl-spacing-x-large);
+    grid-template-columns: repeat(2, 1fr);
 }
 
 #member-page .dw-member-profile {
-  margin: var(--sl-spacing-medium) auto;
+    margin: var(--sl-spacing-medium) auto;
 }
 
 /* Member content */
 
 #member-page .dw-member-content {
-  margin-top: var(--sl-spacing-small);
+    margin-top: var(--sl-spacing-small);
 }
 
 #member-page .dw-member-content > sl-tab::part(base) {
-  font-size: 1.1rem;
+    font-size: 1.1rem;
 }
 
 #member-page .dw-member-content > sl-tab > sl-icon {
-  margin-right: var(--sl-spacing-small);
+    margin-right: var(--sl-spacing-small);
 }
 
 #member-page .dw-member-content > sl-tab-panel::part(base) {
-  padding: 0;
+    padding: 0;
 }
 
 /* Credentials and Databases */
 
 #member-page .dw-credentials--header,
 #member-page .dw-databases--header {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 1.5rem;
-  align-items: center;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5rem;
+    align-items: center;
 }
 
 #member-page .dw-credentials--header {
-  padding-top: var(--sl-spacing-medium);
+    padding-top: var(--sl-spacing-medium);
 }
 
 #member-page .dw-databases--header {
-  padding-top: var(--sl-spacing-small);
+    padding-top: var(--sl-spacing-small);
 }
 
 #member-page sl-details > [slot=summary] strong,
 #member-page .dw-credentials--header strong,
 #member-page .dw-databases--header strong {
-  padding: var(--sl-spacing-x-small);
-  background-color: var(--header-background);
-  border-radius: var(--sl-border-radius-medium);
+    padding: var(--sl-spacing-x-small);
+    border-radius: var(--sl-border-radius-medium);
 }
 
 #member-page .dw-credentials--header dw-title,
 #member-page .dw-databases--header dw-title {
-  margin-top: var(--sl-spacing-large);
+    margin-top: var(--sl-spacing-large);
 }
 
 #member-page .dw-databases--header > sl-form::part(base) {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--sl-spacing-large);
+    display: flex;
+    align-items: flex-end;
+    gap: var(--sl-spacing-large);
 }
 
 #member-page .dw-databases--header > sl-form > sl-input::part(base) {
-  min-width: 330px;
+    min-width: 330px;
 }
 
 #member-page .dw-credentials,
 #member-page .dw-databases {
-  margin-top: var(--sl-spacing-x-large);
+    margin-top: var(--sl-spacing-x-large);
 }
 
 #dw-member-content {
-  overflow: hidden;
+    overflow: hidden;
 }
 
 /* media-queries */
 
 @media screen and (max-width: 815px) {
-  #member-page sl-input,
-  #member-page sl-input::part(input) {
-    width: 100% !important;
-    min-width: 0 !important;
-  }
+    #member-page sl-input,
+    #member-page sl-input::part(input) {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
 
-  #member-page .dw-credentials--header,
-  #member-page .dw-databases--header {
-    grid-template-columns: 1fr;
-  }
+    #member-page .dw-credentials--header,
+    #member-page .dw-databases--header {
+        grid-template-columns: 1fr;
+    }
 
-  #member-page .dw-databases--header > sl-form::part(base) {
-    display: grid;
-  }
+    #member-page .dw-databases--header > sl-form::part(base) {
+        display: grid;
+    }
 }
 
 @media screen and (max-width: 625px) {
-  #member-page .dw-member-profile,
-  #member-page .dw-group-profile {
-    grid-template-columns: 1fr;
-  }
+    #member-page .dw-member-profile,
+    #member-page .dw-group-profile {
+        grid-template-columns: 1fr;
+    }
 }

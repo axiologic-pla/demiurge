@@ -13,16 +13,13 @@
   </main>
 
   <section>
-    <h7>Group</h7>
-    <sl-details>
-      <p slot="summary">Member of group <strong>{{ @selectedGroup.name }}</strong></p>
 
-      <div class="dw-group-profile">
-        <sl-input label="Name" value="@selectedGroup.name" readonly></sl-input>
+    <div class="dw-group-profile">
+      <sl-input label="Group name" value="@selectedGroup.name" readonly></sl-input>
 
-        <dw-clipboard-input label="DID" value="@selectedGroup.did" readonly></dw-clipboard-input>
-      </div>
-    </sl-details>
+      <dw-clipboard-input label="DID" value="@selectedGroup.did" readonly></dw-clipboard-input>
+    </div>
+
   </section>
 
   <!-- Member content -->
@@ -42,9 +39,9 @@
         <webc-container controller="member/CredentialsController">
           <section class="dw-credentials--header">
             <dw-title>
-              <p slot="subheader">Manage credentials of member <strong>{{ @selectedMember.username }}</strong></p>
+              <p slot="subheader">Manage credentials of member "{{ @selectedMember.username }}"</p>
             </dw-title>
-            <sl-button type="primary" data-tag="credential.add">
+            <sl-button type="primary" data-tag="credential.add" class="dw-action-button">
               Generate credential
               <sl-icon slot="prefix" name="hammer"></sl-icon>
             </sl-button>
@@ -59,8 +56,9 @@
                 <sl-tooltip slot="suffix" content="Click on credential to copy it">
                   <sl-icon name="clipboard"></sl-icon>
                 </sl-tooltip>
-                <sl-icon-button slot="suffix" name="eye" data-tag="credential.inspect"></sl-icon-button>
               </sl-menu-item>
+              <sl-icon-button name="eye" data-tag="credential.inspect"></sl-icon-button>
+
               <sl-icon-button data-tag="credential.delete" name="trash"></sl-icon-button>
             </article>
             <div slot="no-data" data-if="@areCredentialsLoaded">
@@ -75,11 +73,11 @@
         <webc-container controller="member/DatabasesController">
           <section class="dw-databases--header">
             <dw-title>
-              <p slot="subheader">Manage databases of member <strong>{{ @selectedMember.username }}</strong></p>
+              <p slot="subheader">Manage databases of member "{{ @selectedMember.username }}"</p>
             </dw-title>
             <sl-form>
               <sl-input label="Database name" required clearable name="name"></sl-input>
-              <sl-button type="primary" data-tag="database.add">
+              <sl-button type="primary" data-tag="database.add" class="dw-action-button">
                 New database <sl-icon slot="prefix" name="plus-lg"></sl-icon>
               </sl-button>
             </sl-form>

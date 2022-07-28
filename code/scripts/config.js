@@ -1,8 +1,8 @@
 import {getStoredDID} from "./services/BootingIdentityService.js";
 import utils from "./utils.js";
 
-const { setConfig, getConfig, addControllers, addHook, navigateToPageTag } = WebCardinal.preload;
-const { define } = WebCardinal.components;
+const {setConfig, getConfig, addControllers, addHook, navigateToPageTag} = WebCardinal.preload;
+const {define} = WebCardinal.components;
 
 function getInitialConfig() {
   const config = getConfig();
@@ -32,22 +32,24 @@ function setInitialTheme() {
   }
 }
 
+
 addHook("beforeAppLoads", async () => {
   WebCardinal.wallet = {};
   const wallet = WebCardinal.wallet;
 
-  const { getVaultDomainAsync } = await import("./hooks/getVaultDomain.js");
-  const { getUserDetails } = await import("./hooks/getUserDetails.js");
-  const { getStoredDID } = await import("./services/BootingIdentityService.js");
-  const { getCommunicationService } = await import("./services/CommunicationService.js");
+  const {getVaultDomainAsync} = await import("./hooks/getVaultDomain.js");
+  const {getUserDetails} = await import("./hooks/getUserDetails.js");
+  const {getStoredDID} = await import("./services/BootingIdentityService.js");
+  const {getCommunicationService} = await import("./services/CommunicationService.js");
 
   wallet.vaultDomain = await getVaultDomainAsync();
   wallet.userDetails = await getUserDetails();
   wallet.did = await getStoredDID();
 
-  if(wallet.did){
+  if (wallet.did) {
     const communicationService = getCommunicationService();
-    communicationService.waitForMessage(wallet.did, ()=>{});
+    communicationService.waitForMessage(wallet.did, () => {
+    });
   }
   // if (wallet.did) {
   //   const { default: getMessageProcessingService } = await import("./services/MessageProcessingService.js");
@@ -72,12 +74,38 @@ addHook("beforeAppLoads", async () => {
   await import("../components/did-generator/did-generator.js");
 
   // load Demiurge base Controller
-  const { DwController } = await import("./controllers/DwController.js");
-  addControllers({ DwController });
+  const {DwController} = await import("./controllers/DwController.js");
+  addControllers({DwController});
+});
+
+addHook("afterAppLoads", () => {
+
+  document.querySelectorAll('webc-app-menu-item').forEach(item => {
+    item.setAttribute("icon-name", item.querySelector("a").innerHTML)
+    if (item.querySelector("a").innerHTML === "My Identities") {
+      let iconDiv = document.createElement("div");
+      iconDiv.innerHTML = `<sl-icon name="person-fill" class="menu-item-icon"></sl-icon>`;
+      item.parentElement.insertBefore(iconDiv, item);
+    }
+
+    if (item.querySelector("a").innerHTML === "Groups") {
+      let iconDiv = document.createElement("div");
+      iconDiv.innerHTML = `<sl-icon name="people-fill" class="menu-item-icon"></sl-icon>`;
+      item.parentElement.insertBefore(iconDiv, item);
+    }
+
+    if (item.querySelector("a").innerHTML === "Audit") {
+      let iconDiv = document.createElement("div");
+      iconDiv.innerHTML = `<sl-icon name="person-lines-fill" class="menu-item-icon"></sl-icon>`;
+      item.parentElement.insertBefore(iconDiv, item);
+    }
+
+  })
+
 });
 
 addHook("beforePageLoads", "quick-actions", async () => {
-  const { wallet } = WebCardinal;
+  const {wallet} = WebCardinal;
   if (!wallet.did) {
     await navigateToPageTag("booting-identity");
     return;
@@ -91,6 +119,7 @@ addHook("beforePageLoads", "quick-actions", async () => {
 
 setConfig(getInitialConfig());
 
+
 define("dw-action");
 define("dw-subdomains");
 define("dw-dialog-configuration");
@@ -99,3 +128,4 @@ define('dw-dialog-booting-identity');
 define('dw-dialog-add-domain');
 define('dw-dialog-waiting-approval');
 define('dw-dialog-initialising');
+define('dw-dialog-group-members-update');
