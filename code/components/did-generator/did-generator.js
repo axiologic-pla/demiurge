@@ -506,7 +506,7 @@ function createDidGenerator(config) {
         part: "main",
       });
       submitElement = createElement("sl-button", {
-        className: "submit--did",
+        className: "submit--did dw-action-button",
         part: "submit",
         type: "primary",
         hidden: true,

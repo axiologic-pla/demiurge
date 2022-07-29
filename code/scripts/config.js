@@ -81,6 +81,9 @@ addHook("beforeAppLoads", async () => {
 addHook("afterAppLoads", () => {
 
   document.querySelectorAll('webc-app-menu-item').forEach(item => {
+    if (!item.querySelector("a")) {
+      return
+    }
     item.setAttribute("icon-name", item.querySelector("a").innerHTML)
     if (item.querySelector("a").innerHTML === "My Identities") {
       let iconDiv = document.createElement("div");
