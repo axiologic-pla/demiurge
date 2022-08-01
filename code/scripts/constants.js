@@ -33,4 +33,9 @@ export default {
     ADD: "add",
     DEACTIVATE: "deactivate"
   },
+  APP_NAMES_MAP: {
+    "ePI Administration Group": "Demiurge",
+    "ePI Write Group": "DSU_Fabric",
+    "ePI Read Group": "DSU_Fabric"
+  }
 };

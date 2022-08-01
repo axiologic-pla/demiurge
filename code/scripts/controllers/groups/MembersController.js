@@ -100,6 +100,11 @@ class MembersController extends DwController {
         if (!inputElement.value) {
           throw new Error("DID is empty.");
         }
+
+        if (!inputElement.value.includes(constants.APP_NAMES_MAP[this.model.selectedGroup.name])) {
+          throw new Error("User can not be added to selected group. Please check user group.");
+        }
+
         button.loading = true;
         let groups = await utils.fetchGroups();
         let allMembers = [];
