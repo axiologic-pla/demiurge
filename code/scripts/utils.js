@@ -106,7 +106,7 @@ async function fetchGroups() {
 }
 
 async function addLogMessage(dsuStorage, userId, action, userGroup, priveleges = "-") {
-  let logService = new LogService(dsuStorage, constants.TABLES.LOGS_TABLE);
+  let logService = new LogService(constants.TABLES.LOGS_TABLE);
   let logMsg = {
     source: "demiurge",
     actionUserId: WebCardinal.wallet.userDetails,
