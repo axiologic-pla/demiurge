@@ -1,8 +1,6 @@
 import Message from "./utils/Message.js";
 import constants from "./constants.js";
-
-const LogService = require("gtin-resolver").loadApi("services").LogService;
-
+import LogService from "./services/LogService.js";
 
 function promisify(fun) {
   return function (...args) {
