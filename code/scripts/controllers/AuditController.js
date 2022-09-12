@@ -55,7 +55,10 @@ class LogsDataSource extends DataSource {
   }
 
   getMappedResult(data) {
-    return data;
+    return data.map(item => {
+      item._date = new Date(item.__timestamp).toISOString();
+      return item
+    })
   }
 
   async getPageDataAsync(startOffset, dataLengthForCurrentPage) {
