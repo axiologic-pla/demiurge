@@ -56,7 +56,7 @@ class LogsDataSource extends DataSource {
 
   getMappedResult(data) {
     return data.map(item => {
-      item._date = new Date(item.__timestamp).toISOString();
+      item.actionDate = new Date(item.__timestamp).toISOString();
       return item
     })
   }
