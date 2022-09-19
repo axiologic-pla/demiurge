@@ -229,7 +229,7 @@ class GroupsController extends DwController {
           auditData: {
             action: constants.OPERATIONS.ADD,
             userGroup: this.model.selectedGroup.name,
-            userId: null,
+            userDID: null,
           }
         };
         await MessagesService.processMessages([addMemberToGroupMessage], async () => {
@@ -250,7 +250,7 @@ class GroupsController extends DwController {
       auditData: {
         action: constants.OPERATIONS.REMOVE,
         userGroup: this.model.selectedGroup.name,
-        userId: null
+        userDID: null
       }
     };
     await MessagesService.processMessages([deleteGroupMessage], () => {

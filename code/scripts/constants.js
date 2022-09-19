@@ -31,7 +31,8 @@ export default {
   OPERATIONS: {
     REMOVE: "remove",
     ADD: "add",
-    DEACTIVATE: "deactivate"
+    DEACTIVATE: "deactivate",
+    LOGIN: "login"
   },
   APP_NAMES_MAP: {
     "ePI Administration Group": "Demiurge",

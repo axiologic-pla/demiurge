@@ -58,29 +58,45 @@ class BootingIdentityController extends DwController {
             "/app/messages/createEnclave.json"
           );
           const mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
-          this.processMessages(mainEnclave, data, async () => {
-            console.log("Processed create enclave messages");
-            const enclaveRecord = await enclaveDB.readKeyAsync(constants.SHARED_ENCLAVE);
-            await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
-            const messages = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
-              "/app/messages/createGroup.json"
-            );
-            const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
-            const enclaves = await $$.promisify(mainEnclave.getAllRecords)(constants.TABLES.GROUP_ENCLAVES);
-            for (let i = 0; i < enclaves.length; i++) {
-              await sharedEnclave.writeKeyAsync(enclaves[i].enclaveName, enclaves[i]);
-              await sharedEnclave.insertRecordAsync(constants.TABLES.GROUP_ENCLAVES, enclaves[i].enclaveDID, enclaves[i]);
-            }
+          await this.processMessages(mainEnclave, data);
+          console.log("Processed create enclave messages");
+          const enclaveRecord = await enclaveDB.readKeyAsync(constants.SHARED_ENCLAVE);
+          await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
+          const messages = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(
+            "/app/messages/createGroup.json"
+          );
+          const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+          const enclaves = await $$.promisify(mainEnclave.getAllRecords)(constants.TABLES.GROUP_ENCLAVES);
+          for (let i = 0; i < enclaves.length; i++) {
+            await sharedEnclave.writeKeyAsync(enclaves[i].enclaveName, enclaves[i]);
+            await sharedEnclave.insertRecordAsync(constants.TABLES.GROUP_ENCLAVES, enclaves[i].enclaveDID, enclaves[i]);
+          }
 
-            this.processMessages(sharedEnclave, messages, async () => {
-              console.log("Processed create group messages");
+          await this.processMessages(sharedEnclave, messages);
+          console.log("Processed create group messages");
+          ui.enableMenu();
+          let groupName = "ePI Administration Group";
+          let groups = [];
+          try {
+            groups = await utils.promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
+          } catch (e) {
+            console.log(e);
+          }
+          let groupDID = groups.find((gr) => gr.name === groupName).did;
+          const addMemberToGroupMessage = {
+            messageType: "AddMemberToGroup",
+            groupDID: groupDID,
+            memberDID: this.did,
+            memberName: this.userDetails
+          };
+          await this.processMessages(sharedEnclave, [addMemberToGroupMessage]);
+          console.log("Processed create addMemberToGroupMessage ");
+          getCommunicationService().waitForMessage(this.did, async () => {
 
-              getCommunicationService().waitForMessage(this.did, () => {
-                ui.enableMenu();
-                this.navigateToPageTag("quick-actions");
-              })
-            });
+            this.navigateToPageTag("quick-actions");
           })
+
+
           return;
         }
 
@@ -191,14 +207,21 @@ class BootingIdentityController extends DwController {
         });*/
   }
 
-  processMessages(storageService, messages, callback) {
+  async processMessages(storageService, messages) {
     if (!messages) {
-      return callback();
+      return
     }
-    MessagesService.processMessages(storageService, messages, () => {
-      console.log("Processed create group message");
-      callback();
-    });
+    try {
+      await MessagesService.processMessages(storageService, messages, (undigestedMessages) => {
+        if (undigestedMessages && undigestedMessages.length > 0) {
+          console.log("Couldn't process all messages. Undigested messages: ", undigestedMessages);
+          return
+        }
+      })
+    } catch (err) {
+      console.log("Couldn't process messages: ", err, messages);
+      return;
+    }
   }
 }
 

@@ -17,7 +17,7 @@ export default class LogService {
 
     let log = {
       ...logDetails,
-      timestamp: logDetails.timestamp || new Date().getTime()
+      logPk: logDetails.logPk || new Date().getTime()
     };
 
     this.getSharedStorage((err, storageService)=>{
@@ -28,7 +28,7 @@ export default class LogService {
         if (error) {
           return callback(error);
         }
-        storageService.insertRecord(this.logsTable, log.timestamp, log, (err) => {
+        storageService.insertRecord(this.logsTable, log.logPk, log, (err) => {
           if (err) {
             return callback(err);
           }

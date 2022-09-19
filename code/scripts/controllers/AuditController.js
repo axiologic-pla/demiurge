@@ -19,6 +19,29 @@ class LogsDataSource extends DataSource {
     this.sharedEnclaveDB = null;
   }
 
+  async exportToCSV(data) {
+    await this.getSharedEnclave();
+    let exportData = data;
+    if (!exportData) {
+      let allData = await $$.promisify(this.sharedEnclaveDB.filter, this.sharedEnclaveDB)(this.tableName, `__timestamp > 0`, "dsc");
+      exportData = this.getMappedResult(allData);
+    }
+    //prepare column titles
+    let titles = Object.keys(exportData[0]);
+    let columnTitles = titles.join(",") + "\n";
+    let rows = "";
+    exportData.forEach(item => {
+      let row = "";
+      titles.forEach(colTitle => {
+        row += item[colTitle] + ",";
+      })
+      rows += row + "\n";
+    })
+
+    let csvContent = "data:text/csv;charset=utf-8," + columnTitles + rows;
+    return encodeURI(csvContent);
+  }
+
   async getSharedEnclave() {
     if (!this.sharedEnclaveDB) {
       const openDSU = require("opendsu");
@@ -35,7 +58,7 @@ class LogsDataSource extends DataSource {
       await this.getSharedEnclave();
       if (inputValue) {
         await $$.promisify(this.sharedEnclaveDB.refresh.bind(this.sharedEnclaveDB))();
-        let result = await $$.promisify(this.sharedEnclaveDB.filter.bind(this.sharedEnclaveDB))(this.tableName, `${this.searchField} == ${inputValue}`, "dsc");
+        let result = await $$.promisify(this.sharedEnclaveDB.filter, this.sharedEnclaveDB)(this.tableName, `${this.searchField} == ${inputValue}`, "dsc");
 
         if (result && result.length > 0) {
           foundIcon.style.display = "inline";
@@ -55,9 +78,14 @@ class LogsDataSource extends DataSource {
   }
 
   getMappedResult(data) {
-    return data.map(item => {
-      item.actionDate = new Date(item.__timestamp).toISOString();
-      return item
+    return data.map((item) => {
+      return {
+        actionUserId: item.actionUserId || "-",
+        userDID: item.userDID || "-",
+        action: item.action,
+        userGroup: item.group,
+        actionDate: item.actionDate || new Date(item.__timestamp).toISOString()
+      }
     })
   }
 
@@ -112,9 +140,7 @@ class AuditController extends DwController {
     };
 
     this.model.logsDataSource = new LogsDataSource({
-      dsuStorage: this.DSUStorage,
-      tableName: constants.TABLES.LOGS_TABLE,
-      searchField: "userId"
+      dsuStorage: this.DSUStorage, tableName: constants.TABLES.LOGS_TABLE, searchField: "userDID"
     });
     this.attachHandlers();
   }
@@ -129,6 +155,10 @@ class AuditController extends DwController {
       })
     }
 
+    this.onTagClick("audit-export", async (model, target, event) => {
+      let csvResult = await this.model.logsDataSource.exportToCSV();
+      window.open(csvResult);
+    })
 
     this.onTagClick("prev-page", (model, target, event) => {
       target.parentElement.querySelector(".next-page-btn").disabled = false;

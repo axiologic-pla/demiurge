@@ -103,15 +103,15 @@ async function fetchGroups() {
   return groups;
 }
 
-async function addLogMessage(dsuStorage, userId, action, userGroup, priveleges = "-") {
+async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, priveleges = "-") {
   let logService = new LogService(constants.TABLES.LOGS_TABLE);
   let logMsg = {
-    source: "demiurge",
-    actionUserId: WebCardinal.wallet.userDetails,
-    userId: userId || "-",
+    logPk: logPk,
+    actionUserId: actionUserId || WebCardinal.wallet.userDetails,
+    userDID: userDID || "-",
     action: action,
     group: userGroup,
-    privileges: priveleges
+    privileges: priveleges,
   }
   await $$.promisify(logService.log, logService)(logMsg);
   return

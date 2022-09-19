@@ -21,8 +21,6 @@ async function processMessages(storageService, messages, callback) {
   const m2dsu = openDSU.loadAPI("m2dsu");
   const MessagesPipe = m2dsu.getMessagesPipe();
   let mappingEngine = m2dsu.getMappingEngine(storageService);
-  const {getDSUStorage} = require('opendsu').loadAPI('storage');
-  let dsuStorage = getDSUStorage();
 
   return new Promise(function (resolve, reject) {
     try {
@@ -38,7 +36,7 @@ async function processMessages(storageService, messages, callback) {
           let digestedMessages = messages;
           for (let i = 0; i < undigestedMessages.length; i++) {
             if (undigestedMessages[i].auditData) {
-              await utils.addLogMessage(dsuStorage, undigestedMessages[i].auditData.userId, "Failed " + undigestedMessages[i].auditData.action, undigestedMessages[i].auditData.userGroup);
+              await utils.addLogMessage( undigestedMessages[i].auditData.userDID, "Failed " + undigestedMessages[i].auditData.action, undigestedMessages[i].auditData.userGroup);
               let index = messages.findIndex(msg => JSON.stringify(msg) === JSON.stringify(undigestedMessages[i]));
               digestedMessages.splice(index, 1);
             }
@@ -46,7 +44,7 @@ async function processMessages(storageService, messages, callback) {
 
           for (let i = 0; i < digestedMessages.length; i++) {
             if (digestedMessages[i].auditData) {
-              await utils.addLogMessage(dsuStorage, digestedMessages[i].auditData.userId, digestedMessages[i].auditData.action, digestedMessages[i].auditData.userGroup);
+              await utils.addLogMessage( digestedMessages[i].auditData.userDID, digestedMessages[i].auditData.action, digestedMessages[i].auditData.userGroup);
             }
           }
           resolve(callback(undigestedMessages));

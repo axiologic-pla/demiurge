@@ -2,10 +2,13 @@
 
 <webc-container controller="AuditController" id="audit-page" class="dw-container">
     <dw-title>Audit</dw-title>
+
+    <button class="csv-export-btn" data-tag="audit-export"> Export as CSV</button>
+
     <div class="logs-container">
         <div class="search-container">
             <span class="label">Search: </span>
-            <input id="code-search" placeholder="Search by userId" type="search">
+            <input id="code-search" placeholder="Search by user DID" type="search">
             <span class="validity">
                     <i aria-hidden="true" class="fa fa-ban"></i>
                     <i class="fa fa-check"></i>
@@ -14,14 +17,14 @@
         <webc-datatable datasource="@logsDataSource" hide-pagination>
             <div class="fist-table-header first-column" slot="header">Action UserId</div>
             <div slot="header">Action</div>
-            <div slot="header">UserId</div>
-            <div slot="header">Group</div>
+            <div slot="header">User DID</div>
+            <div slot="header">User Group</div>
             <div slot="header" class="last-table-header">ISO Date</div>
 
             <div class="data-item first-column">{{@actionUserId}}</div>
             <div class="data-item">{{@action}}</div>
-            <div class="data-item">{{@userId}}</div>
-            <div class="data-item">{{@group}}</div>
+            <div class="data-item">{{@userDID}}</div>
+            <div class="data-item">{{@userGroup}}</div>
             <div class="data-item">{{@actionDate}}</div>
             <div slot="no-data">
                 <b>There are no data yet.</b>

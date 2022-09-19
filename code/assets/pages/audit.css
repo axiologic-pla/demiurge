@@ -53,11 +53,26 @@
     font-size: 1rem;
 }
 
+.csv-export-btn {
+    background-color: #328569;
+    box-shadow: none;
+    border: 1px solid #328569;
+    color: white;
+    padding: 8px 16px;
+    margin-right: 10px;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    width: 15%;
+    min-width: 150px;
+    margin-top: 30px;
+}
+
 #code-search {
     padding: 10px;
     box-sizing: border-box;
-    width: 25%;
-    height: 18px;
+    width: 20%;
+    min-width: 300px;
+    height: 36px;
     background: #FFFFFF;
     border: 0.5px solid #328569;
     border-radius: 5px;

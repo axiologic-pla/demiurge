@@ -78,7 +78,7 @@ addHook("beforeAppLoads", async () => {
   addControllers({DwController});
 });
 
-addHook("afterAppLoads", () => {
+addHook("afterAppLoads", async () => {
 
   document.querySelectorAll('webc-app-menu-item').forEach(item => {
     if (!item.querySelector("a")) {
@@ -103,8 +103,10 @@ addHook("afterAppLoads", () => {
       item.parentElement.insertBefore(iconDiv, item);
     }
 
-  })
-
+  });
+  if (WebCardinal.wallet.did) {
+    await utils.addLogMessage(WebCardinal.wallet.did, "login", "ePI Administration Group", "-");
+  }
 });
 
 addHook("beforePageLoads", "quick-actions", async () => {

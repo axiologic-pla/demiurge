@@ -224,7 +224,7 @@ class MembersController extends DwController {
         auditData: {
           action: constants.OPERATIONS.ADD,
           userGroup: group.name,
-          userId: member.did
+          userDID: member.did
         }
       };
       MessagesService.processMessages([addMemberToGroupMessage], async () => {
@@ -251,7 +251,7 @@ class MembersController extends DwController {
       auditData: {
         action: operation === constants.OPERATIONS.REMOVE ? constants.OPERATIONS.REMOVE : constants.OPERATIONS.DEACTIVATE,
         userGroup: group.name,
-        userId: memberDID
+        userDID: memberDID
       }
     }];
 
