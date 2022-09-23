@@ -20,6 +20,14 @@ async function createGroup(message) {
 
   const group = {};
   group.name = message.groupName;
+  group.tags = message.groupTags;
+  let enclaveName, accessMode;
+  if (message.accessModes) {
+    [enclaveName, accessMode] = message.accessModes.split(':');
+    group.enclaveName = enclaveName;
+    group.accessMode = accessMode;
+  }
+
   let groupName = message.groupName.replaceAll(" ", "_");
   let groupDIDDocument;
   try {

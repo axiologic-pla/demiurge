@@ -95,24 +95,30 @@ class MembersController extends DwController {
     this.onTagClick("member.add", async (model, button) => {
       let inputElement = document.querySelector("#add-member-input");
 
-
+      const newMemberDid = inputElement.value;
       try {
-        if (!inputElement.value) {
+        if (!newMemberDid) {
           throw new Error("DID is empty.");
         }
 
-        if (!inputElement.value.includes(constants.APP_NAMES_MAP[this.model.selectedGroup.name])) {
-          throw new Error("User can not be added to selected group. Please check user group.");
+        let groups = await utils.fetchGroups();
+        let selectedGroup = constants.EPI_GROUP_TAGS.find(group => group.name === this.model.selectedGroup.name);
+        if (!selectedGroup) {
+          selectedGroup = groups.find(group => group.name === this.model.selectedGroup.name);
+        }
+
+        let hasGroupTag = selectedGroup.tags.split(',').findIndex(tag => newMemberDid.includes(tag.trim())) !== -1;
+        if (!hasGroupTag) {
+          throw new Error('User can not be added to selected group. Please check user group.');
         }
 
         button.loading = true;
-        let groups = await utils.fetchGroups();
         let allMembers = [];
         for (let i = 0; i < groups.length; i++) {
           let groupMembers = await this.fetchMembers(groups[i]);
           allMembers = [...allMembers, ...groupMembers]
         }
-        let alreadyExists = allMembers.find(arrMember => arrMember.did === inputElement.value)
+        let alreadyExists = allMembers.find(arrMember => arrMember.did === newMemberDid)
         if (alreadyExists) {
           button.loading = false;
           throw new Error("Member already registered in a group!");
@@ -128,7 +134,7 @@ class MembersController extends DwController {
             disableClosing: true,
           }
         );
-        const member = await this.addMember(this.model.selectedGroup, {did: inputElement.value});
+        const member = await this.addMember(this.model.selectedGroup, {did: newMemberDid});
         this.model.members.push(member);
         button.loading = false;
         await ui.hideDialogFromComponent("dw-dialog-group-members-update");
@@ -219,6 +225,8 @@ class MembersController extends DwController {
       const addMemberToGroupMessage = {
         messageType: "AddMemberToGroup",
         groupDID: group.did,
+        enclaveName: group.enclaveName,
+        accessMode: group.accessMode,
         memberDID: member.did,
         memberName: member.username,
         auditData: {

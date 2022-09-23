@@ -1,0 +1,26 @@
+<link href='./assets/pages/governance.css' rel='stylesheet' />
+<link href='./assets/parts/credentials.css' rel='stylesheet' />
+
+<webc-container class='dw-container' controller='governance/GovernanceController' id='governance-page'>
+  <main id='dw-governance'>
+    <section class='dw-governance--header'>
+      <dw-title header='Governance Dashboard'></dw-title>
+    </section>
+  </main>
+
+  <section id='dw-governance-content'>
+    <sl-tab-group class='dw-governance-content'>
+      <sl-tab panel='credentials' slot='nav'>
+        <sl-icon name='key-fill'></sl-icon>
+        Credentials
+      </sl-tab>
+
+      <!-- Credentials Panel -->
+      <sl-tab-panel name='credentials'>
+        <section id='dw-governance-credentials'>
+          <webc-template template='governance/credentials/credentials'></webc-template>
+        </section>
+      </sl-tab-panel>
+    </sl-tab-group>
+  </section>
+</webc-container>

@@ -31,22 +31,18 @@ async function addMemberToGroupMapping(message) {
   const memberDID_Document = await $$.promisify(w3cdid.resolveDID)(member.did);
   const credential = await promisify(crypto.createCredentialForDID)(adminDID, message.groupDID);
 
-  let enclave;
-  if (groupDIDDocument.getGroupName() === constants.EPI_ADMIN_GROUP) {
-    enclave = await sharedEnclave.readKeyAsync(constants.SHARED_ENCLAVE);
-  } else {
-    enclave = await sharedEnclave.readKeyAsync(constants.EPI_SHARED_ENCLAVE);
-  }
-
+  // ePI backward compatibility
+  let enclave = await sharedEnclave.readKeyAsync(message.enclaveName || constants.EPI_SHARED_ENCLAVE);
   const enclaveRecord = {
     enclaveType: enclave.enclaveType,
     enclaveDID: enclave.enclaveDID,
-    enclaveKeySSI: enclave.enclaveKeySSI,
+    enclaveKeySSI: enclave.enclaveKeySSI
   };
 
-  if (groupDIDDocument.getGroupName() === constants.EPI_READ_GROUP) {
-    const keySSISpace = openDSU.loadAPI("keyssi");
-    if (typeof enclaveRecord.enclaveKeySSI === "string") {
+  // ePI backward compatibility
+  if (message.accessMode === constants.READ_ONLY_ACCESS_MODE || groupDIDDocument.getGroupName() === constants.EPI_READ_GROUP) {
+    const keySSISpace = openDSU.loadAPI('keyssi');
+    if (typeof enclaveRecord.enclaveKeySSI === 'string') {
       enclaveRecord.enclaveKeySSI = keySSISpace.parse(enclaveRecord.enclaveKeySSI);
       enclaveRecord.enclaveKeySSI = enclaveRecord.enclaveKeySSI.derive().getIdentifier();
     }
