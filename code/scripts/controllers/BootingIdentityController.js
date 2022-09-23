@@ -87,6 +87,7 @@ class BootingIdentityController extends DwController {
           const addMemberToGroupMessage = {
             messageType: "AddMemberToGroup",
             groupDID: adminGroup.did,
+            enclaveName: adminGroup.enclaveName,
             memberDID: this.did,
             memberName: this.userDetails
           };
