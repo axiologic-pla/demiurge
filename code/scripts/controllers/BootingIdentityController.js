@@ -75,14 +75,14 @@ class BootingIdentityController extends DwController {
           await this.processMessages(sharedEnclave, messages);
           console.log("Processed create group messages");
           ui.enableMenu();
-          let groupName = "ePI Administration Group";
           let groups = [];
           try {
             groups = await utils.promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
           } catch (e) {
             console.log(e);
           }
-          let groupDID = groups.find((gr) => gr.name === groupName).did;
+          let groupDID = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE)?.did;
+          this.groupName = groupDID.name;
           const addMemberToGroupMessage = {
             messageType: "AddMemberToGroup",
             groupDID: groupDID,
@@ -92,10 +92,8 @@ class BootingIdentityController extends DwController {
           await this.processMessages(sharedEnclave, [addMemberToGroupMessage]);
           console.log("Processed create addMemberToGroupMessage ");
           getCommunicationService().waitForMessage(this.did, async () => {
-
             this.navigateToPageTag("quick-actions");
-          })
-
+          });
 
           return;
         }

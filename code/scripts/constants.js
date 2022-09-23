@@ -51,7 +51,7 @@ export default {
     enclaveName: "epiEnclave",
     accessMode: "write"
   }],
-  // EPI_ADMIN_GROUP: "ePI_Administration_Group",
+  EPI_ADMIN_GROUP: "ePI_Administration_Group",
   // EPI_WRITE_GROUP: "ePI_Write_Group",
   EPI_READ_GROUP: "ePI_Read_Group",
   EPI_SHARED_ENCLAVE: "epiEnclave",

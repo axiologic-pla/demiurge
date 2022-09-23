@@ -49,7 +49,16 @@ class GenerateCredentialController extends DwController {
     });
 
     this.onTagClick('credential.add.claim', () => {
+      const inputsCredentialClaims = document.querySelectorAll('#public-claims sl-input');
+      for (let index = 0; index < inputsCredentialClaims.length; index = index + 2) {
+        let name = inputsCredentialClaims[index]?.value;
+        let value = inputsCredentialClaims[index + 1]?.value;
+        this.model.credentialClaims[index / 2] = { name: name, value: value };
+      }
+
       this.model.credentialClaims.push({
+        name: '',
+        value: '',
         uid: utils.uuidv4()
       });
     });

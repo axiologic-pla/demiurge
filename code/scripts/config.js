@@ -1,5 +1,6 @@
 import {getStoredDID} from "./services/BootingIdentityService.js";
 import utils from "./utils.js";
+import constants from './constants.js';
 
 const {setConfig, getConfig, addControllers, addHook, navigateToPageTag} = WebCardinal.preload;
 const {define} = WebCardinal.components;
@@ -97,6 +98,12 @@ addHook("afterAppLoads", async () => {
       item.parentElement.insertBefore(iconDiv, item);
     }
 
+    if (item.querySelector("a").innerHTML === "Governance") {
+      let iconDiv = document.createElement("div");
+      iconDiv.innerHTML = `<sl-icon name="clouds-fill" class="menu-item-icon"></sl-icon>`;
+      item.parentElement.insertBefore(iconDiv, item);
+    }
+
     if (item.querySelector("a").innerHTML === "Audit") {
       let iconDiv = document.createElement("div");
       iconDiv.innerHTML = `<sl-icon name="person-lines-fill" class="menu-item-icon"></sl-icon>`;
@@ -105,7 +112,8 @@ addHook("afterAppLoads", async () => {
 
   });
   if (WebCardinal.wallet.did) {
-    await utils.addLogMessage(WebCardinal.wallet.did, "login", "ePI Administration Group", "-");
+    const groupName = WebCardinal.wallet.groupName || constants.EPI_ADMIN_GROUP;
+    await utils.addLogMessage(WebCardinal.wallet.did, "login", groupName, "-");
   }
 });
 

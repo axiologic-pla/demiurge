@@ -54,6 +54,14 @@ class DwController extends WebcController {
     WebCardinal.wallet.did = did;
   }
 
+  get groupName() {
+    return WebCardinal.wallet.groupName;
+  }
+
+  set groupName(groupName) {
+    WebCardinal.wallet.groupName = groupName;
+  }
+
   /**
    * @param {string} key
    * @param {object} value

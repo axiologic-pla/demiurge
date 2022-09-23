@@ -32,7 +32,9 @@ async function addMemberToGroupMapping(message) {
   const credential = await promisify(crypto.createCredentialForDID)(adminDID, message.groupDID);
 
   // ePI backward compatibility
-  let enclave = await sharedEnclave.readKeyAsync(message.enclaveName || constants.EPI_SHARED_ENCLAVE);
+  const enclaveName = message.enclaveName || constants.EPI_SHARED_ENCLAVE;
+  console.log("enclave name: ", enclaveName);
+  let enclave = await sharedEnclave.readKeyAsync(enclaveName);
   const enclaveRecord = {
     enclaveType: enclave.enclaveType,
     enclaveDID: enclave.enclaveDID,
@@ -41,6 +43,7 @@ async function addMemberToGroupMapping(message) {
 
   // ePI backward compatibility
   if (message.accessMode === constants.READ_ONLY_ACCESS_MODE || groupDIDDocument.getGroupName() === constants.EPI_READ_GROUP) {
+    console.log("access modes", message.accessMode, groupDIDDocument.getGroupName());
     const keySSISpace = openDSU.loadAPI('keyssi');
     if (typeof enclaveRecord.enclaveKeySSI === 'string') {
       enclaveRecord.enclaveKeySSI = keySSISpace.parse(enclaveRecord.enclaveKeySSI);
