@@ -81,11 +81,12 @@ class BootingIdentityController extends DwController {
           } catch (e) {
             console.log(e);
           }
-          let groupDID = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE)?.did;
-          this.groupName = groupDID.name;
+
+          let adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE) || {};
+          this.groupName = adminGroup.name;
           const addMemberToGroupMessage = {
             messageType: "AddMemberToGroup",
-            groupDID: groupDID,
+            groupDID: adminGroup.did,
             memberDID: this.did,
             memberName: this.userDetails
           };
