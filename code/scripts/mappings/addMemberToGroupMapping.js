@@ -50,6 +50,7 @@ async function addMemberToGroupMapping(message) {
   }
 
   const msg = {
+    messageType: "AddMemberToGroup",
     credential,
     enclave: enclaveRecord,
   };
