@@ -9,6 +9,10 @@
       "tag": "groups"
     },
     {
+      "name": "Governance",
+      "tag": "governance"
+    },
+    {
       "name": "Audit",
       "tag": "audit"
     },

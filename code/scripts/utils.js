@@ -83,10 +83,10 @@ async function getDisabledFeatures() {
       let disabledCodesArr = disabledFeaturesList.split(",");
       disabledCodesArr.forEach(item => {
         disabledFeaturesArr.push(item.trim());
-      })
+      });
     }
   } catch (e) {
-    console.log("Couldn't load disabledFeatures")
+    console.log("Couldn't load disabledFeatures");
   }
   return disabledFeaturesArr;
 }
@@ -94,7 +94,7 @@ async function getDisabledFeatures() {
 async function fetchGroups() {
   const scAPI = require("opendsu").loadAPI("sc");
   const enclaveDB = await $$.promisify(scAPI.getSharedEnclave)();
-  let groups
+  let groups;
   try {
     groups = await promisify(enclaveDB.filter)(constants.TABLES.GROUPS);
   } catch (e) {
@@ -114,7 +114,24 @@ async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, pr
     privileges: priveleges,
   }
   await $$.promisify(logService.log, logService)(logMsg);
-  return
+  return;
+}
+
+function uuidv4() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c === "x" ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+async function isValidDID(stringDID) {
+  try {
+    const w3cdid = require("opendsu").loadAPI("w3cdid");
+    await promisify(w3cdid.resolveDID)(stringDID);
+    return true;
+  } catch (err) {
+    return false;
+  }
 }
 
 export default {
@@ -125,5 +142,7 @@ export default {
   addSharedEnclaveToEnv,
   getDisabledFeatures,
   fetchGroups,
-  addLogMessage
+  addLogMessage,
+  uuidv4,
+  isValidDID
 };
