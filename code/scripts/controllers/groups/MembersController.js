@@ -107,7 +107,7 @@ class MembersController extends DwController {
           selectedGroup = groups.find(group => group.name === this.model.selectedGroup.name);
         }
 
-        let hasGroupTag = selectedGroup.tags.split(',').findIndex(tag => newMemberDid.includes(tag.trim())) !== -1;
+        let hasGroupTag = selectedGroup.tags.split(',').findIndex(tag => newMemberDid.toLowerCase().includes(tag.trim().toLowerCase())) !== -1;
         if (!hasGroupTag) {
           throw new Error('User can not be added to selected group. Please check user group.');
         }
