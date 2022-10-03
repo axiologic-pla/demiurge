@@ -37,14 +37,19 @@ class ImportCredentialController extends DwController {
 
   attachImportCredentialListener() {
     this.onTagClick('credential.import', async () => {
-      let inputElement = document.querySelector('#import-credential-input');
-      const encodedCredential = inputElement.value;
+      const credentialInputElement = document.querySelector('#import-credential-input');
+      const tagsInputElement = document.querySelector('#tags-input');
+      const encodedCredential = credentialInputElement.value;
+      let tags = tagsInputElement.value;
       try {
         if (!encodedCredential) {
           throw new Error('Encoded Credential is empty.');
         }
 
         // TODO: Perform validation of the credential??
+        if (tags.trim().length > 0) {
+          tags = tags.split(",").map(tag => tag.trim());
+        }
         const tokenModel = { issuer: this.did, token: encodedCredential, encodingType: this.selectedEncodingType };
         this.storeCredential(tokenModel);
         this.model.credentials.push(tokenModel);

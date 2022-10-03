@@ -66,8 +66,10 @@ class GenerateCredentialController extends DwController {
 
   attachGenerateCredentialListener() {
     this.onTagClick('credential.generate', async () => {
-      let inputElement = document.querySelector('#subject-input');
-      const subjectDID = inputElement.value;
+      const subjectInputElement = document.querySelector('#subject-input');
+      const tagsInputElement = document.querySelector('#tags-input');
+      const subjectDID = subjectInputElement.value;
+      let tags = tagsInputElement.value;
       try {
         if (!subjectDID) {
           throw new Error('Subject DID is empty!');
@@ -88,10 +90,12 @@ class GenerateCredentialController extends DwController {
             credentialOptions.subjectClaims[name] = value;
           }
         }
-        console.log(credentialOptions);
 
         const encodedJWTToken = await this.JWTCredentialService.createVerifiableCredential(this.did, subjectDID, credentialOptions);
-        const tokenModel = { issuer: this.did, token: encodedJWTToken, encodingType: this.selectedEncodingType };
+        if (tags.trim().length > 0) {
+          tags = tags.split(",").map(tag => tag.trim());
+        }
+        const tokenModel = { issuer: this.did, token: encodedJWTToken, encodingType: this.selectedEncodingType, tags };
         this.storeCredential(tokenModel);
         this.model.credentials.push(tokenModel);
       } catch (err) {
