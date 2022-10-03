@@ -20,7 +20,7 @@ class GenerateCredentialController extends DwController {
   }
 
   init() {
-    this.selectedEncodingType = constants.OTHER_ENCODING;
+    this.selectedEncodingType = constants.JWT_ENCODING;
     this.ui.page = new GenerateCredentialUI();
     this.model = this.ui.page.getInitialViewModel();
 
