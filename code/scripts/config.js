@@ -1,6 +1,6 @@
 import {getStoredDID} from "./services/BootingIdentityService.js";
 import utils from "./utils.js";
-import constants from './constants.js';
+import constants from "./constants.js";
 
 const {setConfig, getConfig, addControllers, addHook, navigateToPageTag} = WebCardinal.preload;
 const {define} = WebCardinal.components;
@@ -80,37 +80,47 @@ addHook("beforeAppLoads", async () => {
 });
 
 addHook("afterAppLoads", async () => {
+  const { getEnvironmentDataAsync } = await import("./hooks/getEnvironmentData.js");
+  const envData = await getEnvironmentDataAsync() || {};
+  const hiddenMenuItems = envData.hiddenMenuItems || [];
 
-  document.querySelectorAll('webc-app-menu-item').forEach(item => {
+  document.querySelectorAll("webc-app-menu-item").forEach(item => {
     if (!item.querySelector("a")) {
-      return
+      return;
     }
-    item.setAttribute("icon-name", item.querySelector("a").innerHTML)
-    if (item.querySelector("a").innerHTML === "My Identities") {
+
+    const menuItemName = item.querySelector("a").innerHTML;
+    if (hiddenMenuItems.includes(menuItemName)) {
+      item.remove();
+      return;
+    }
+
+    item.setAttribute("icon-name", menuItemName);
+    if (menuItemName === "My Identities") {
       let iconDiv = document.createElement("div");
       iconDiv.innerHTML = `<sl-icon name="person-fill" class="menu-item-icon"></sl-icon>`;
       item.parentElement.insertBefore(iconDiv, item);
     }
 
-    if (item.querySelector("a").innerHTML === "Groups") {
+    if (menuItemName === "Groups") {
       let iconDiv = document.createElement("div");
       iconDiv.innerHTML = `<sl-icon name="people-fill" class="menu-item-icon"></sl-icon>`;
       item.parentElement.insertBefore(iconDiv, item);
     }
 
-    if (item.querySelector("a").innerHTML === "Governance") {
+    if (menuItemName === "Governance") {
       let iconDiv = document.createElement("div");
       iconDiv.innerHTML = `<sl-icon name="clouds-fill" class="menu-item-icon"></sl-icon>`;
       item.parentElement.insertBefore(iconDiv, item);
     }
 
-    if (item.querySelector("a").innerHTML === "Audit") {
+    if (menuItemName === "Audit") {
       let iconDiv = document.createElement("div");
       iconDiv.innerHTML = `<sl-icon name="person-lines-fill" class="menu-item-icon"></sl-icon>`;
       item.parentElement.insertBefore(iconDiv, item);
     }
-
   });
+
   if (WebCardinal.wallet.did) {
     const groupName = WebCardinal.wallet.groupName || constants.EPI_ADMIN_GROUP;
     await utils.addLogMessage(WebCardinal.wallet.did, "login", groupName, "-");
@@ -124,9 +134,9 @@ addHook("beforePageLoads", "quick-actions", async () => {
     return;
   }
 
-  const activeElement = document.querySelector('webc-app-menu-item[active]');
+  const activeElement = document.querySelector("webc-app-menu-item[active]");
   if (activeElement) {
-    activeElement.removeAttribute('active');
+    activeElement.removeAttribute("active");
   }
 });
 
@@ -137,8 +147,8 @@ define("dw-action");
 define("dw-subdomains");
 define("dw-dialog-configuration");
 define("dw-dialog-view-credential");
-define('dw-dialog-booting-identity');
-define('dw-dialog-add-domain');
-define('dw-dialog-waiting-approval');
-define('dw-dialog-initialising');
-define('dw-dialog-group-members-update');
+define("dw-dialog-booting-identity");
+define("dw-dialog-add-domain");
+define("dw-dialog-waiting-approval");
+define("dw-dialog-initialising");
+define("dw-dialog-group-members-update");
