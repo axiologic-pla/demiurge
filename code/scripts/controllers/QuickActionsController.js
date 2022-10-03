@@ -1,11 +1,11 @@
-const {DwController} = WebCardinal.controllers;
+const { DwController } = WebCardinal.controllers;
 
 export default class QuickActionsController extends DwController {
   constructor(...props) {
     super(...props);
 
     this.model = {
-      domain: "example.domain",
+      domain: "example.domain"
     };
 
     this.resolveNavigation();
@@ -15,12 +15,19 @@ export default class QuickActionsController extends DwController {
     });
   }
 
-  resolveNavigation() {
+  async resolveNavigation() {
+    const { getEnvironmentDataAsync } = await import("../hooks/getEnvironmentData.js");
+    const envData = await getEnvironmentDataAsync() || {};
+    const hiddenMenuItems = envData.hiddenMenuItems || [];
+
     const actionElements = this.querySelectorAll("dw-action[tag]");
     Array.from(actionElements).forEach((actionElement) => {
-      actionElement.addEventListener("click", () => {
-        this.navigateToPageTag(actionElement.getAttribute("tag"));
-      });
+      if (!hiddenMenuItems.includes(actionElement.getAttribute("action"))) {
+        actionElement.removeAttribute("hidden");
+        actionElement.addEventListener("click", () => {
+          this.navigateToPageTag(actionElement.getAttribute("tag"));
+        });
+      }
     });
   }
 }
