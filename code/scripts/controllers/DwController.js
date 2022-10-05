@@ -19,8 +19,12 @@ class DwController extends WebcController {
       }
     }
 
-     this.getMainEnclaveDB((err, mainEnclaveDB)=>{
-       this.storageService = mainEnclaveDB;
+    this.getMainEnclaveDB((err, mainEnclaveDB) => {
+      this.storageService = mainEnclaveDB;
+    });
+
+    this.waitForSharedEnclave((err, sharedEnclaveDB) => {
+      this.sharedStorageService = sharedEnclaveDB;
     });
   }
 
@@ -80,6 +84,22 @@ class DwController extends WebcController {
     const state = this.getState();
     delete state[key];
     this.setState(state);
+  }
+
+  /**
+   * @param {Function} callback
+   */
+  waitForSharedEnclave(callback) {
+    const scApi = require('opendsu').loadApi('sc');
+    scApi.getSharedEnclave((err, sharedEnclave) => {
+      if (err) {
+        return setTimeout(() => {
+          this.waitForSharedEnclave(callback);
+        }, 100);
+      }
+
+      callback(undefined, sharedEnclave);
+    });
   }
 }
 

@@ -1,3 +1,4 @@
+import {getCredentialService} from "../services/JWTCredentialService.js";
 import constants from "../constants.js";
 import utils from "../utils.js";
 
@@ -29,7 +30,6 @@ async function addMemberToGroupMapping(message) {
   adminDID = adminDID.did;
   const adminDID_Document = await $$.promisify(w3cdid.resolveDID)(adminDID);
   const memberDID_Document = await $$.promisify(w3cdid.resolveDID)(member.did);
-  const credential = await promisify(crypto.createCredentialForDID)(adminDID, message.groupDID);
 
   // ePI backward compatibility
   const enclaveName = message.enclaveName || constants.EPI_SHARED_ENCLAVE;
@@ -49,9 +49,25 @@ async function addMemberToGroupMapping(message) {
     }
   }
 
+  const credentials = await sharedEnclave.filterAsync(constants.TABLES.GROUPS_CREDENTIALS, `groupDID == ${message.groupDID}`);
+  let groupCredential = credentials.find(el => el.credentialType === constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION);
+
+  if (!groupCredential) {
+    const credentialService = getCredentialService();
+    const groupCredential = await credentialService.createVerifiableCredential(adminDID, message.groupDID);
+    await sharedEnclave.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromCredential(groupCredential), {
+      issuer: adminDID,
+      groupDID: message.groupDID,
+      token: groupCredential,
+      credentialType: constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION,
+      encodingType: constants.JWT_ENCODING,
+      tags: [groupDIDDocument.getGroupName(), constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION]
+    });
+  }
+
   const msg = {
     messageType: "AddMemberToGroup",
-    credential,
+    credential: groupCredential,
     enclave: enclaveRecord,
   };
 

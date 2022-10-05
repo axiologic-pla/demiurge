@@ -61,7 +61,7 @@ class ImportCredentialController extends DwController {
 
   async storeCredential(model) {
     // Store credential, cu ceva uid sau hash
-    await this.storageService.insertRecordAsync(constants.TABLES.GOVERNANCE_CREDENTIALS, utils.getPKFromCredential(model.token), model);
+    await this.sharedStorageService.insertRecordAsync(constants.TABLES.GOVERNANCE_CREDENTIALS, utils.getPKFromCredential(model.token), model);
   }
 }
 

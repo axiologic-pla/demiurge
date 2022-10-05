@@ -5,9 +5,9 @@ const JWT_ERRORS = credentials.JWT_ERRORS;
 const validationStrategiesTypes = validationStrategies.VALIDATION_STRATEGIES;
 
 class JWTCredentialService {
-  async createVerifiableCredential(issuer, subject, options) {
+  async createVerifiableCredential(issuer, subject, options = {}) {
     const jwtVcInstance = await credentials.createJWTVerifiableCredentialAsync(issuer, subject, options);
-    const { subjectClaims } = options;
+    const subjectClaims = options.subjectClaims || {};
     for (const claimKey of Object.keys(subjectClaims)) {
       await jwtVcInstance.embedClaimAsync(claimKey, subjectClaims[claimKey]);
     }

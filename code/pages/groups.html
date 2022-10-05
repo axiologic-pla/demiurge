@@ -141,14 +141,45 @@
                 <p slot="subheader">Each item is shared between members of this group</p>
             </dw-title>
 
-            <sl-button type="primary" data-tag="credential.add" class="dw-action-button">
-                Generate credential
-                <sl-icon slot="prefix" name="hammer"></sl-icon>
+            <sl-button type="primary" data-tag="toggle.credential.assign" class="dw-action-button">
+                Assign credential to Group
+                <sl-icon slot="prefix" name="plus"></sl-icon>
             </sl-button>
         </section>
 
+<!--        <div data-if="@isAssignCredentialOpened">-->
+            <section class="dw-credentials dw-data-grid" data-for="@governanceCredentials">
+                <article class="dw-data-grid-item dw-data-grid-multi">
+                    <sl-menu-item value="@tags">
+                        <div class="dw-group-credential-data">
+                            <sl-input value="@tags" readonly></sl-input>
+                        </div>
+                    </sl-menu-item>
+                    <sl-menu-item value="@token" data-tag="credential.select">
+                        <div class="dw-group-credential-data">
+                            <sl-input dir="rtl" value="@token" readonly></sl-input>
+                        </div>
+                        <sl-tooltip slot="suffix" content="Click on credential to copy it">
+                            <sl-icon name="clipboard"></sl-icon>
+                        </sl-tooltip>
+                    </sl-menu-item>
+                    <sl-icon-button name="eye" data-tag="credential.inspect"></sl-icon-button>
+                    <sl-icon-button data-tag="credential.assign" name="plus"></sl-icon-button>
+                </article>
+                <div slot="no-data" data-if="@areCredentialsLoaded">
+                    <dw-spinner slot="false" content="Credentials are loading"></dw-spinner>
+                    <p slot="true" class="no-data">There are no other credentials generated!</p>
+                </div>
+            </section>
+<!--        </div>-->
+
         <section class="dw-credentials dw-data-grid" data-for="@credentials">
-            <article class="dw-data-grid-item">
+            <article class="dw-data-grid-item dw-data-grid-multi">
+                <sl-menu-item value="@tags">
+                    <div class="dw-group-credential-data">
+                        <sl-input value="@tags" readonly></sl-input>
+                    </div>
+                </sl-menu-item>
                 <sl-menu-item value="@token" data-tag="credential.select">
                     <div class="dw-group-credential-data">
                         <sl-input dir="rtl" value="@token" readonly></sl-input>

@@ -49,7 +49,11 @@ class CredentialsController extends DwController {
         const scAPI = require('opendsu').loadAPI('sc');
         if (scAPI.sharedEnclaveExists()) {
           console.log('Shared enclave exists');
-          this.model.credentials = await this.fetchCredentials();
+          const credentials = await this.fetchCredentials();
+          this.model.credentials = credentials.map(el => {
+            const tags = (el.tags || []).join(', ');
+            return { ...el, tags };
+          });
           this.model.areCredentialsLoaded = true;
           console.log('Model: ', this.model.toObject());
         } else {
@@ -113,7 +117,9 @@ class CredentialsController extends DwController {
             throw new Error('Encoding type not recognized! Cannot inspect the token!');
         }
 
-        model.json = JSON.stringify(jsonCredential, null, 4);
+        const tags = `Credential Tags:\n${model.tags}\n\n`;
+        const decodedCredential = JSON.stringify(jsonCredential, null, 4);
+        model.json = tags + decodedCredential;
         await this.ui.showDialogFromComponent('dw-dialog-view-credential', model);
       } catch (err) {
         this.ui.showToast('Encountered error: ' + err);
@@ -134,14 +140,14 @@ class CredentialsController extends DwController {
   }
 
   async fetchCredentials() {
-    return await this.storageService.filterAsync(constants.TABLES.GOVERNANCE_CREDENTIALS);
+    return await this.sharedStorageService.filterAsync(constants.TABLES.GOVERNANCE_CREDENTIALS);
   }
 
   /**
    * @param {string} token
    */
   async deleteCredential(token) {
-    await this.storageService.deleteRecordAsync(constants.TABLES.GOVERNANCE_CREDENTIALS, utils.getPKFromCredential(token));
+    await this.sharedStorageService.deleteRecordAsync(constants.TABLES.GOVERNANCE_CREDENTIALS, utils.getPKFromCredential(token));
   }
 }
 

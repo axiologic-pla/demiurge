@@ -1,3 +1,4 @@
+import {getCredentialService} from "../services/JWTCredentialService.js";
 import constants from "../constants.js";
 import utils from "../utils.js";
 
@@ -42,6 +43,18 @@ async function createGroup(message) {
 
     const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
     const adminDID_Document = await $$.promisify(w3cdid.resolveDID)(adminDID.did);
+
+    const credentialService = getCredentialService();
+    const groupCredential = await credentialService.createVerifiableCredential(adminDID.did, group.did);
+    await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromCredential(groupCredential), {
+      issuer: adminDID.did,
+      groupDID: group.did,
+      token: groupCredential,
+      credentialType: constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION,
+      encodingType: constants.JWT_ENCODING,
+      tags: [group.name, constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION]
+    });
+
     const msg = {
       sender: adminDID.did,
     };

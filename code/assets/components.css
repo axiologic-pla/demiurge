@@ -73,6 +73,10 @@ dw-clipboard-input > sl-input > sl-icon::part(base) {
     background-color: var(--background);
 }
 
+.dw-data-grid .dw-data-grid-item.dw-data-grid-multi {
+    grid-template-columns: 1fr 3fr auto auto;
+}
+
 .dw-data-grid .dw-data-grid-item:last-child {
     border-bottom: none;
 }
