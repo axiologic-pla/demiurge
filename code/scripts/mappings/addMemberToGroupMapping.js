@@ -45,7 +45,8 @@ async function addMemberToGroupMapping(message) {
     const keySSISpace = openDSU.loadAPI('keyssi');
     if (typeof enclaveRecord.enclaveKeySSI === 'string') {
       enclaveRecord.enclaveKeySSI = keySSISpace.parse(enclaveRecord.enclaveKeySSI);
-      enclaveRecord.enclaveKeySSI = enclaveRecord.enclaveKeySSI.derive().getIdentifier();
+      enclaveRecord.enclaveKeySSI = await $$.promisify(enclaveRecord.enclaveKeySSI.derive)();
+      enclaveRecord.enclaveKeySSI = enclaveRecord.enclaveKeySSI.getIdentifier();
     }
   }
 
