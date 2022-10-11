@@ -1,6 +1,6 @@
-import constants from '../../constants.js';
-import utils from '../../utils.js';
-import { parseJWTSegments } from '../../services/JWTCredentialService.js';
+import constants from '../../../constants.js';
+import utils from '../../../utils.js';
+import { parseJWTSegments } from '../../../services/JWTCredentialService.js';
 
 const { DwController } = WebCardinal.controllers;
 
@@ -132,7 +132,7 @@ class CredentialsController extends DwController {
         this.model.credentials = this.model.credentials.filter(
           (credential) => credential.token !== deletedCredential.token
         );
-        await this.ui.showToast(deletedCredential);
+        await this.ui.showToast("Credential deleted: " + deletedCredential.token);
       } catch (err) {
         console.log(err);
       }

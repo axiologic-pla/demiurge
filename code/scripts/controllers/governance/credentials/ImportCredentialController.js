@@ -1,5 +1,5 @@
-import constants from '../../constants.js';
-import utils from '../../utils.js';
+import constants from '../../../constants.js';
+import utils from '../../../utils.js';
 
 const { DwController } = WebCardinal.controllers;
 

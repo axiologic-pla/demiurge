@@ -15,10 +15,34 @@
         Credentials
       </sl-tab>
 
+      <sl-tab panel='deployment' slot='nav'>
+        <sl-icon name='key-fill'></sl-icon>
+        Deployment
+      </sl-tab>
+
+      <sl-tab panel='voting' slot='nav'>
+        <sl-icon name='key-fill'></sl-icon>
+        Voting
+      </sl-tab>
+
       <!-- Credentials Panel -->
       <sl-tab-panel name='credentials'>
         <section id='dw-governance-credentials'>
           <webc-template template='governance/credentials/credentials'></webc-template>
+        </section>
+      </sl-tab-panel>
+
+      <!-- Deployment Panel -->
+      <sl-tab-panel name='deployment'>
+        <section id='dw-governance-deployment'>
+          <webc-template template='governance/deployment/deployment'></webc-template>
+        </section>
+      </sl-tab-panel>
+
+      <!-- Voting Panel -->
+      <sl-tab-panel name='voting'>
+        <section id='dw-governance-voting'>
+          <webc-template template='governance/voting/voting'></webc-template>
         </section>
       </sl-tab-panel>
     </sl-tab-group>

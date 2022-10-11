@@ -1,0 +1,53 @@
+<webc-container controller='governance/voting/PerformVoteController' data-view-model='@'>
+  <link href='assets/css/pages/main.css' rel='stylesheet'>
+
+  <div class='container main-container'>
+    <h1>Perform Vote</h1>
+
+    <div class='container form-wrapper'>
+      <div class='form-row-wrapper'>
+        <label>Question:</label>
+        <textarea class='form-control' readonly='readonly' value='@question'></textarea>
+      </div>
+
+      <div class='form-row-wrapper'>
+        <label>Vote will be concluded:</label>
+        <label class='bold'>{{@deadline}}</label>
+      </div>
+
+      <div class='form-row-wrapper'>
+        <label>Voting action to be performed:</label>
+        <div class='d-flex flex-column'>
+          <label class='bold'>{{@votingAction}}</label>
+          <div class='d-flex' data-if='@hasDocumentation'>
+            <label class='download w-auto' data-tag='view-documentation'>View candidate
+              documentation</label>
+          </div>
+        </div>
+      </div>
+
+      <div class='answers-container' data-if='@uniqueAnswer' id='possible-responses'>
+        <fieldset class='answers-wrapper' data-for='@answers' id='answers' slot='true'>
+          <div class='form-check'>
+            <input class='form-check-input' data-response='@reference' data-view-model='@checkInput'
+                   name='answers' type='radio'>
+            <label class='form-check-label' data-view-model='@label'>{{@label.text}}</label>
+          </div>
+        </fieldset>
+
+        <div class='answers-wrapper' data-for='@answers' slot='false'>
+          <div class='form-check'>
+            <input class='form-check-input' data-response='@reference' data-view-model='@checkInput'
+                   type='checkbox'>
+            <label class='form-check-label' data-view-model='@label'>{{@label.text}}</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class='left-align'>
+      <button data-tag='back'>Back</button>
+      <button data-tag='vote-and-sign'>Vote and Sign</button>
+    </footer>
+  </div>
+</webc-container>

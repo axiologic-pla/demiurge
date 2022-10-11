@@ -90,11 +90,15 @@ class CredentialsController extends DwController {
 
     this.onTagClick("credential.delete", async (deletedCredential) => {
       try {
+        if (deletedCredential.credentialType === constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION) {
+          throw new Error("Wallet Authorization credential cannot be deleted!");
+        }
+
         await this.deleteCredential(deletedCredential.token);
         this.model.credentials = this.model.credentials.filter(
           (credential) => credential.token !== deletedCredential.token
         );
-        await ui.showToast("Credential deleted: " + deletedCredential);
+        await this.ui.showToast("Credential deleted: " + deletedCredential.token);
       } catch (err) {
         this.ui.showToast("Encountered error: " + err);
       }

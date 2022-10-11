@@ -1,6 +1,6 @@
-import constants from '../../constants.js';
-import utils from '../../utils.js';
-import { getCredentialService } from '../../services/JWTCredentialService.js';
+import constants from '../../../constants.js';
+import utils from '../../../utils.js';
+import { getCredentialService } from '../../../services/JWTCredentialService.js';
 
 const { DwController } = WebCardinal.controllers;
 

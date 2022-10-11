@@ -1,0 +1,60 @@
+<webc-container controller='governance/voting/NewVotingSessionController' data-view-model='@'>
+  <section class='dw-credentials--header'>
+    <dw-title>
+      <p slot='subheader'>New Voting Session Form</p>
+    </dw-title>
+  </section>
+
+  <section id='voting-type-selector'>
+    <label>Please select the type of voting </label>
+    <sl-button-group>
+      <sl-button data-tag='vote.type.opinion' variant='primary'>Consultation / Opinion Poll</sl-button>
+      <sl-button data-tag='vote.type.generic' variant='primary'>Generic Proposal</sl-button>
+      <sl-button data-tag='vote.type.fixed' variant='primary'>Fixed Structure Proposal</sl-button>
+    </sl-button-group>
+    <label>Voting type selected: {{@votingType}}</label>
+  </section>
+
+  <section class='dw-credentials dw-data-grid'>
+    <div class='dw-form-row'>
+      <label>Question:</label>
+      <textarea class='form-control' data-view-model='@question'></textarea>
+    </div>
+
+    <div class='dw-form-row'>
+      <label>Possible answers:</label>
+      <div class='inner-wrapper w-25'>
+        <div class='inner-wrapper' data-for='@answers'>
+          <input class='form-control small' data-view-model='@' />
+        </div>
+        <button class='small' data-tag='add-answer'>Add Answer</button>
+      </div>
+    </div>
+
+    <div class='dw-form-row'>
+      <label>Deadline:</label>
+      <input class='form-control w-25' data-view-model='@deadline' type='date'>
+    </div>
+
+    <div class='dw-form-row'>
+      <label>Response type:</label>
+      <div class='form-check'>
+        <input class='form-check-input' id='unique' type='checkbox' value='@uniqueAnswer'>
+        <label class='form-check-label' for='unique'>Unique</label>
+      </div>
+    </div>
+
+    <div class='dw-form-row'>
+      <label>Partner DID:</label>
+      <div class='file-input-wrapper'>
+        <label for='upload-documentation'>Upload documentation</label>
+        <input id='upload-documentation' name='documentation' type='file' />
+      </div>
+    </div>
+
+    <div class='dw-form-row dw-form-buttons-right'>
+      <sl-button class='dw-action-button' data-tag='vote.new.submit' type='primary'>Submit Voting Session</sl-button>
+    </div>
+  </section>
+
+</webc-container>
