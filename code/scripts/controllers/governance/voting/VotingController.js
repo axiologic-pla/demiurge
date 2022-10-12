@@ -58,7 +58,7 @@ class VotingController extends DwController {
     votingSessions = votingSessions.map(vote => {
       vote.options = [{
         eventTag: 'toggle.voting.add',
-        label: 'Add Vote'
+        optionLabel: 'Add Vote'
       }];
       return vote;
     });

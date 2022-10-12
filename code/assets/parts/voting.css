@@ -1,8 +1,32 @@
 #voting-type-selector {
     display: grid;
-    grid-template-columns: 2fr 3fr 2fr;
-    column-gap: 1rem;
+    column-gap: 2rem;
+    padding-top: 2rem;
     width: 100%;
+    grid-template-columns: 1fr 2fr 1fr;
+    justify-content: center;
+}
+
+#voting-type-selector > * {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+#voting-type-selector > :first-child {
+    justify-content: flex-start;
+}
+
+#voting-type-selector > :last-child {
+    justify-content: end;
+}
+
+.answers-wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 1.5rem;
+    row-gap: 1rem;
+    padding: 0.5rem 0;
 }
 
 label.download,

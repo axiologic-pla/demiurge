@@ -26,13 +26,13 @@
       <div class='no-data' data-if='@areVotingSessionsLoaded' slot='false'>
         <dw-spinner content='Voting Sessions are loading' slot='false'></dw-spinner>
 
-        <div data-if='@hasVotingSessions' slot='true'>
+        <div class='dw-data-table' data-if='@hasVotingSessions' slot='true'>
           <div class='no-data' slot='false'>
             <p class='no-data'>There are no Voting Sessions available!</p>
           </div>
 
           <article class='dw-data-grid-header dw-col-6' slot='true'>
-            <label>Vote Name</label>
+            <label>Question / Vote Name</label>
             <label>Type</label>
             <label>Due date</label>
             <label>Status</label>
@@ -41,7 +41,7 @@
           </article>
 
           <article class='dw-data-grid-item dw-col-6' data-for='@votingSessions' slot='true'>
-            <label title='@title'>{{@title}}</label>
+            <label title='@title'>{{@question}}</label>
             <label>{{@type}}</label>
             <label>{{@date}}</label>
             <label data-status='@voted' data-tag='vote-now'>{{@status}}</label>

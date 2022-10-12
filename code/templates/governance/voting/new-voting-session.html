@@ -2,6 +2,7 @@
   <section class='dw-credentials--header'>
     <dw-title>
       <p slot='subheader'>New Voting Session Form</p>
+      <p slot='subheader'>There are different forms according to the selected voting session type.</p>
     </dw-title>
   </section>
 
@@ -12,43 +13,62 @@
       <sl-button data-tag='vote.type.generic' variant='primary'>Generic Proposal</sl-button>
       <sl-button data-tag='vote.type.fixed' variant='primary'>Fixed Structure Proposal</sl-button>
     </sl-button-group>
-    <label>Voting type selected: {{@votingType}}</label>
+    <label>Voting type selected:&nbsp;<strong>{{@votingType}}</strong></label>
   </section>
 
   <section class='dw-credentials dw-data-grid'>
     <div class='dw-form-row'>
-      <label>Question:</label>
-      <textarea class='form-control' data-view-model='@question'></textarea>
+      <sl-textarea id='question-vote-name' label='Question / Vote Name'
+                   placeholder='Your question or a title of a vote here...' resize='auto'>
+      </sl-textarea>
     </div>
 
-    <div class='dw-form-row'>
-      <label>Possible answers:</label>
-      <div class='inner-wrapper w-25'>
-        <div class='inner-wrapper' data-for='@answers'>
-          <input class='form-control small' data-view-model='@' />
+    <div class='dw-form-row dw-col-2-equal'>
+      <sl-input clearable id='deadline' label='Deadline' placeholder='Date' type='date'></sl-input>
+      <div class='dw-form-row-inner'>
+        <label>Check if the answer type should be unique (checkboxes or radio buttons)</label>
+        <sl-checkbox id='response-type'>Unique answer type</sl-checkbox>
+      </div>
+    </div>
+
+    <div data-if='@isFixedStructure'>
+      <div class='dw-form-row dw-col-3-equal'>
+        <div class='dw-form-row-inner'>
+          <label>Select Voting Action</label>
+          <sl-dropdown id='voting-action'>
+            <sl-button caret slot='trigger'>{{@form.votingActions.placeholder}}</sl-button>
+            <sl-menu data-for='@form.votingActions.options'>
+              <sl-menu-item value='@value'>{{@label}}</sl-menu-item>
+            </sl-menu>
+          </sl-dropdown>
         </div>
-        <button class='small' data-tag='add-answer'>Add Answer</button>
+        <sl-input clearable id='partner-did' label='Partner DID' placeholder='Partner DID here...'></sl-input>
+        <div class='dw-form-row-inner'>
+          <label>Upload candidate documentation</label>
+          <div class='file-input-wrapper'>
+            <label for='upload-documentation'>Candidate documentation</label>
+            <input id='upload-documentation' name='documentation' type='file' />
+          </div>
+        </div>
       </div>
     </div>
 
     <div class='dw-form-row'>
-      <label>Deadline:</label>
-      <input class='form-control w-25' data-view-model='@deadline' type='date'>
-    </div>
-
-    <div class='dw-form-row'>
-      <label>Response type:</label>
-      <div class='form-check'>
-        <input class='form-check-input' id='unique' type='checkbox' value='@uniqueAnswer'>
-        <label class='form-check-label' for='unique'>Unique</label>
+      <label>Possible answers</label>
+      <div data-if='@hasDefaultAnswers'>
+        <div class='answers-wrapper' data-for='@defaultAnswers'>
+          <sl-input readonly value='@label'></sl-input>
+        </div>
       </div>
-    </div>
-
-    <div class='dw-form-row'>
-      <label>Partner DID:</label>
-      <div class='file-input-wrapper'>
-        <label for='upload-documentation'>Upload documentation</label>
-        <input id='upload-documentation' name='documentation' type='file' />
+      <div class='answers-wrapper' data-for='@form.possibleAnswers' id='possible-responses'>
+        <sl-input clearable placeholder='Possible answer here...' value='@label'>
+          <sl-button class='dw-paste' data-tag='input.paste' slot='suffix' type='text'>
+            Paste
+          </sl-button>
+        </sl-input>
+      </div>
+      <div class='dw-form-row dw-form-buttons-right'>
+        <sl-button class='dw-action-button' data-tag='vote.answer.add' type='primary'>Add Answer</sl-button>
       </div>
     </div>
 
