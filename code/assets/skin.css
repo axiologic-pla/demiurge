@@ -1,4 +1,7 @@
 @import "./components.css";
+@import "./labels.css";
+@import "./tables.css";
+@import "./forms.css";
 
 /* dm-sans-regular - latin-ext_latin */
 @font-face {

@@ -1,0 +1,154 @@
+.dw-data-grid .dw-data-grid-header {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    text-align: left;
+    background-color: var(--background);
+    margin-bottom: 0.25rem;
+    font-weight: bold;
+    column-gap: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+.dw-data-grid .dw-data-grid-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--background);
+    column-gap: 0.5rem;
+    row-gap: 0.25rem;
+}
+
+.dw-data-grid .dw-data-grid-item.dw-data-grid-multi {
+    grid-template-columns: 1fr 3fr auto auto;
+}
+
+.dw-data-grid .dw-data-grid-item:last-child {
+    border-bottom: none;
+}
+
+.dw-data-grid .dw-data-grid-item sl-menu-item::part(base) {
+    padding-top: var(--sl-spacing-small);
+    padding-bottom: var(--sl-spacing-small);
+}
+
+.dw-data-grid .dw-data-grid-item sl-icon-button {
+    height: 100%;
+    display: flex;
+}
+
+.dw-data-grid .dw-data-grid-item sl-icon-button::part(base) {
+    padding: 0 var(--sl-spacing-x-large);
+}
+
+.dw-data-grid .dw-data-grid-item sl-menu-item[checked]::part(base) {
+    color: var(--webc-primary-color);
+}
+
+.dw-data-grid .dw-data-grid-item sl-menu-item[checked]::part(base),
+.dw-data-grid .dw-data-grid-item sl-menu-item[checked] + sl-icon-button::part(base) {
+    background-color: var(--check-background);
+    border-radius: 0;
+}
+
+.dw-data-grid .dw-data-grid-item sl-menu-item[checked] + sl-icon-button {
+    pointer-events: none;
+}
+
+.dw-data-grid .dw-data-grid-item sl-menu-item[checked] + sl-icon-button::part(base) {
+    background: transparent;
+    color: transparent;
+    cursor: not-allowed;
+}
+
+.dw-data-grid .dw-data-grid-item sl-icon-button:hover::part(base) {
+    border-radius: 0;
+    color: var(--delete-color);
+    background: var(--delete-background);
+}
+
+.dw-data-grid .dw-col-2 {
+    grid-template-columns: 1fr auto;
+}
+
+.dw-data-grid .dw-col-2-left {
+    grid-template-columns: auto 1fr;
+}
+
+.dw-data-grid .dw-col-3 {
+    grid-template-columns: repeat(2, 1fr) auto;
+}
+
+.dw-data-grid .dw-col-4 {
+    grid-template-columns: repeat(3, 1fr) auto;
+}
+
+.dw-data-grid .dw-col-5 {
+    grid-template-columns: repeat(4, 1fr) auto;
+}
+
+.dw-data-grid .dw-col-6 {
+    grid-template-columns: 5fr 2fr repeat(4, 1fr);
+}
+
+/* EQUAL GRIDS */
+.dw-data-grid .dw-col-2-equal {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.dw-data-grid .dw-col-3-equal {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.dw-data-grid .dw-col-4-equal {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.dw-data-grid .dw-col-5-equal {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.dw-data-grid .dw-col-6-equal {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+.dw-table-options label {
+    margin-right: 0.5rem;
+    padding-right: 0.5rem;
+    border-right: 1px solid rgba(47, 128, 237, 1);
+}
+
+.dw-table-options label:last-child {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.dw-data-grid-header.dw-col-6 > *,
+.dw-data-grid-item.dw-col-6 > * {
+    background: #cfe8eb;
+    padding: 0.25rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.dw-data-grid-header.dw-col-6 > * {
+    padding: 0.5rem 0.25rem;
+    font-size: 105%;
+}
+
+.dw-data-grid-item.dw-col-6 > :nth-child(12n+1),
+.dw-data-grid-item.dw-col-6 > :nth-child(12n+2),
+.dw-data-grid-item.dw-col-6 > :nth-child(12n+3),
+.dw-data-grid-item.dw-col-6 > :nth-child(12n+4),
+.dw-data-grid-item.dw-col-6 > :nth-child(12n+5),
+.dw-data-grid-item.dw-col-6 > :nth-child(12n+6),
+.dw-data-grid-item.dw-col-6-equal > :nth-child(12n+1),
+.dw-data-grid-item.dw-col-6-equal > :nth-child(12n+2),
+.dw-data-grid-item.dw-col-6-equal > :nth-child(12n+3),
+.dw-data-grid-item.dw-col-6-equal > :nth-child(12n+4),
+.dw-data-grid-item.dw-col-6-equal > :nth-child(12n+5),
+.dw-data-grid-item.dw-col-6-equal > :nth-child(12n+6) {
+    background: #c2ced8;
+}

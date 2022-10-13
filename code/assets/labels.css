@@ -1,0 +1,39 @@
+.link {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    color: rgba(47, 128, 237, 1);
+}
+
+.link:focus,
+.link:hover,
+.link:active {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+label[data-status] {
+    font-weight: bold;
+}
+
+label[data-status="true"] {
+    color: rgba(57, 203, 71, 1);
+}
+
+label[data-status="false"],
+label[data-status="failed"],
+label[data-status="uninstalling"] {
+    color: rgba(210, 13, 13, 1);
+}
+
+label[data-status="installed"] {
+    color: rgba(47, 128, 237, 1);
+}
+
+label[data-status="ready"] {
+    color: rgba(39, 174, 96, 1);
+}
+
+label[data-status="installing"] {
+    color: rgba(198, 155, 24, 1);
+}
