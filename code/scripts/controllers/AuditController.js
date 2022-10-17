@@ -156,8 +156,10 @@ class AuditController extends DwController {
     }
 
     this.onTagClick("audit-export", async (model, target, event) => {
+      const waitCsv = this.showModalFromTemplate('wait-download');
       let csvResult = await this.model.logsDataSource.exportToCSV();
       window.open(csvResult);
+      waitCsv.destroy();
     })
 
     this.onTagClick("prev-page", (model, target, event) => {
