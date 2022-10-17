@@ -3,16 +3,18 @@
 <webc-container controller="AuditController" id="audit-page" class="dw-container">
     <dw-title>Audit</dw-title>
 
-    <button class="csv-export-btn" data-tag="audit-export"> Export as CSV</button>
 
     <div class="logs-container">
         <div class="search-container">
-            <span class="label">Search: </span>
-            <input id="code-search" placeholder="Search by user DID" type="search">
-            <span class="validity">
+            <div>
+                <span class="label">Search: </span>
+                <input id="code-search" placeholder="Search by user DID" type="search">
+                <span class="validity">
                     <i aria-hidden="true" class="fa fa-ban"></i>
                     <i class="fa fa-check"></i>
                 </span>
+            </div>
+            <button class="csv-export-btn" data-tag="audit-export"> Export as CSV</button>
         </div>
         <webc-datatable datasource="@logsDataSource" hide-pagination>
             <div class="fist-table-header first-column" slot="header">Action UserId</div>

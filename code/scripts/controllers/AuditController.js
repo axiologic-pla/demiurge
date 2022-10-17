@@ -38,8 +38,8 @@ class LogsDataSource extends DataSource {
       rows += row + "\n";
     })
 
-    let csvContent = "data:text/csv;charset=utf-8," + columnTitles + rows;
-    return encodeURI(csvContent);
+    let csvBlob = new Blob([columnTitles + rows], {type: "text/csv"});
+    return csvBlob;
   }
 
   async getSharedEnclave() {
@@ -158,7 +158,13 @@ class AuditController extends DwController {
     this.onTagClick("audit-export", async (model, target, event) => {
       const waitCsv = this.showModalFromTemplate('wait-download');
       let csvResult = await this.model.logsDataSource.exportToCSV();
-      window.open(csvResult);
+      let url = window.URL.createObjectURL(csvResult);
+      let anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "audit.csv";
+      anchor.click();
+      window.URL.revokeObjectURL(url);
+      anchor.remove();
       waitCsv.destroy();
     })
 
