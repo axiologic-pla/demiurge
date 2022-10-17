@@ -6,6 +6,9 @@
     </dw-title>
 
     <div>
+      <sl-button class='dw-action-button' data-tag='toggle.voting.dashboard' type='primary'>
+        Voting Dashboard
+      </sl-button>
       <sl-button class='dw-action-button' data-tag='toggle.voting.new' type='primary'>
         New Voting Session
         <sl-icon name='plus' slot='prefix'></sl-icon>
@@ -13,15 +16,11 @@
     </div>
   </section>
 
-  <div data-if='@isNewVotingOpened'>
-    <section class='dw-credentials dw-data-grid' slot='true'>
-      <webc-template data-view-model='@' template='governance/voting/new-voting-session'></webc-template>
-    </section>
+  <div class='dw-credentials dw-data-grid' data-if='@isNewVotingOpened'>
+    <webc-template data-view-model='@' slot='true' template='governance/voting/new-voting-session'></webc-template>
 
-    <section class='dw-credentials dw-data-grid' data-if='@isAddVoteOpened' slot='false'>
-      <!--      <section class='dw-credentials dw-data-grid' slot='true'>-->
+    <div data-if='@isAddVoteOpened' slot='false'>
       <webc-template data-view-model='@' slot='true' template='governance/voting/perform-vote'></webc-template>
-      <!--      </section>-->
 
       <div data-if='@isVoteResultsOpened' slot='false'>
         <webc-template data-view-model='@' slot='true' template='governance/voting/view-results'></webc-template>
@@ -49,14 +48,15 @@
               <label>{{@deadline}}</label>
               <label data-status='@canVote'>{{@status}}</label>
               <label data-status='@concluded'>{{@overallStatus}}</label>
-              <div class='dw-table-options' data-for='@options'>
-                <label class='link' data-tag='@eventTag'>{{@optionLabel}}</label>
+              <div class='dw-table-options'>
+                <label class='link' data-tag='@options.eventTag'>{{@options.optionLabel}}</label>
+                <label class='link' data-tag='toggle.voting.results'>Test (Results)</label>
               </div>
             </article>
           </div>
         </div>
       </div>
-    </section>
+      </section>
+    </div>
   </div>
-
 </webc-container>

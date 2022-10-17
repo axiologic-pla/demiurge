@@ -67,6 +67,20 @@
     background: var(--delete-background);
 }
 
+.dw-col-2,
+.dw-col-3,
+.dw-col-4,
+.dw-col-5,
+.dw-col-6,
+.dw-col-2-equal,
+.dw-col-3-equal,
+.dw-col-4-equal,
+.dw-col-5-equal,
+.dw-col-6-equal,
+.dw-col-2-left {
+    display: grid;
+}
+
 .dw-data-grid .dw-col-2 {
     grid-template-columns: 1fr auto;
 }

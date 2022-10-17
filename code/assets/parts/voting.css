@@ -21,12 +21,18 @@
     justify-content: end;
 }
 
-.answers-wrapper {
+.answers-container .answers-wrapper {
+    border: 1px solid rgb(39, 39, 42, 0.25);
+    border-radius: 0.5rem;
+}
+
+.answers-wrapper,
+.answers-container sl-radio-group::part(base) {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     column-gap: 1.5rem;
     row-gap: 1rem;
-    padding: 0.5rem 0;
+    padding: 1.25rem;
 }
 
 label.download,
@@ -46,4 +52,33 @@ label.download,
     opacity: 0;
     position: absolute;
     z-index: -1;
+}
+
+.progress-wrapper,
+.progress-bar[data-width="0%"] {
+    border-radius: 1rem;
+    color: #000;
+    background-color: #f1f1f1 !important;
+    width: 100%;
+}
+
+.progress-bar {
+    border-radius: 1rem;
+    color: #fff;
+    padding: 0.35rem 1rem;
+}
+
+.progress-bar:after,
+.progress-bar:before {
+    content: '';
+    display: table;
+    clear: both;
+}
+
+.rating-container .progress-wrapper:nth-child(2n) .progress-bar {
+    background-color: rgb(var(--sl-color-primary-400));
+}
+
+.rating-container .progress-wrapper:nth-child(2n+1) .progress-bar {
+    background-color: rgb(var(--sl-color-primary-green));
 }

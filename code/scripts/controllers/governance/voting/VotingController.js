@@ -9,8 +9,10 @@ class VotingUI {
       hasVotingSessions: false,
       areVotingSessionsLoaded: false,
       isNewVotingOpened: false,
+      isAddVoteOpened: false,
       isVoteResultsOpened: false,
-      selectedVotingSession: ''
+      triggerRefreshTable: false,
+      selectedVotingSession: null
     };
   }
 }
@@ -44,6 +46,22 @@ class VotingController extends DwController {
   }
 
   attachViewEventListeners() {
+    this.model.onChange('triggerRefreshTable', async () => {
+      if (this.model.triggerRefreshTable === true) {
+        this.model.votingSessions = await this.fetchVotingSessions();
+      }
+    });
+
+    this.onTagClick('toggle.voting.dashboard', () => {
+      this.model = {
+        isNewVotingOpened: false,
+        isAddVoteOpened: false,
+        isVoteResultsOpened: false,
+        triggerRefreshTable: true,
+        selectedVotingSession: null
+      };
+    });
+
     this.onTagClick('toggle.voting.new', () => {
       this.model.isNewVotingOpened = !this.model.isNewVotingOpened;
     });
@@ -76,18 +94,18 @@ class VotingController extends DwController {
       vote.hasVoted = hasVoted;
       vote.isConcluded = isConcluded;
 
-      vote.options = [];
+      vote.options = {};
       if (!hasVoted && !isConcluded) {
-        vote.options.push({
+        vote.options = {
           eventTag: 'toggle.voting.add',
           optionLabel: 'Add vote'
-        });
+        };
       }
       if (isConcluded) {
-        vote.options.push({
+        vote.options = {
           eventTag: 'toggle.voting.results',
           optionLabel: 'View results'
-        });
+        };
       }
 
       return vote;

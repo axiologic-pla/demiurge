@@ -19,16 +19,14 @@ class NewVotingSessionUI {
       }],
       form: {
         uid: utils.uuidv4(),
-        hasVoted: false,
         question: '',
         possibleAnswers: [],
+        numberOfVotes: 0,
         deadline: '',
         isUniqueAnswer: false,
         votingActions: {
-          placeholder: 'Voting action',
-          options: [{
-            label: 'Enroll Partner',
-            value: 'enroll-partner'
+          placeholder: 'Voting action', options: [{
+            label: 'Enroll Partner', value: 'enroll-partner'
           }]
         },
         selectedVotingAction: '',
@@ -120,7 +118,11 @@ class NewVotingSessionController extends DwController {
       for (let index = 0; index < possibleAnswersInputs.length; ++index) {
         possibleAnswers.push(possibleAnswersInputs[index].value);
       }
-      modelSubmit.possibleAnswers = possibleAnswers;
+      modelSubmit.possibleAnswers = possibleAnswers.map(answer => {
+        return {
+          label: answer, uid: utils.uuidv4(), count: 0
+        };
+      });
 
       const documentation = document.querySelector('#upload-documentation');
       if (documentation && documentation.files.length) {
@@ -168,9 +170,9 @@ class NewVotingSessionController extends DwController {
     const votingActions = document.querySelector('#voting-action');
     const votingActionsHandler = (event) => {
       const selectedValue = event.detail.item.value;
-      this.model.form.selectedVotingAction = selectedValue;
-      this.model.form.votingActions.placeholder = this.model.votingActions.options
-        .find(op => op.value === selectedValue).label;
+      this.model.form.selectedVotingAction = this.model.form.votingActions.options
+        .find(op => op.value === selectedValue);
+      this.model.form.votingActions.placeholder = this.model.form.selectedVotingAction.label;
     };
     votingActions.addEventListener('sl-select', votingActionsHandler);
   }
@@ -185,10 +187,15 @@ class NewVotingSessionController extends DwController {
   }
 
   async submitVotingSession(model) {
-    await this.sharedStorageService.insertRecordAsync(constants.TABLES.GOVERNANCE_VOTING_SESSIONS, utils.getPKFromCredential(model.deadline), model);
-    this.model.votingSessions.push(model);
-    this.model.isNewVotingOpened = false;
+    await this.sharedStorageService.insertRecordAsync(constants.TABLES.GOVERNANCE_VOTING_SESSIONS, utils.getPKFromCredential(utils.uuidv4()), model);
     this.model.form = this.ui.page.getInitialViewModel().form;
+    this.model = {
+      isNewVotingOpened: false,
+      isAddVoteOpened: false,
+      isVoteResultsOpened: false,
+      triggerRefreshTable: true,
+      selectedVotingSession: null
+    };
   }
 }
 

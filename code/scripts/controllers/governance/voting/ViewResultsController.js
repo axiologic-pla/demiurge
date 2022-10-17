@@ -17,6 +17,7 @@ class ViewResultsController extends DwController {
 
   init() {
     this.attachViewEventListeners();
+    this.initProgressBars();
   }
 
   attachViewEventListeners() {
@@ -24,9 +25,25 @@ class ViewResultsController extends DwController {
       event.preventDefault();
       event.stopImmediatePropagation();
 
-      this.model.isVoteResultsOpened = !this.model.isVoteResultsOpened;
+      this.model.isVoteResultsOpened = false;
       this.model.selectedVotingSession = null;
     });
+  }
+
+  initProgressBars() {
+    this.model.selectedVotingSession.possibleAnswers.map((answer) => {
+      answer.rating = `${answer.count * 100 / this.model.selectedVotingSession.numberOfVotes}%`;
+      return answer;
+    });
+
+    setTimeout(() => {
+      const progressBars = document.querySelectorAll('.progress-bar');
+      for (let index = 0; index < progressBars.length; ++index) {
+        const bar = progressBars[index];
+        const progressRating = bar.getAttribute('data-width');
+        bar.setAttribute('style', `width:${progressRating}`);
+      }
+    }, 100);
   }
 }
 

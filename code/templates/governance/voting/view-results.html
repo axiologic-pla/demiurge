@@ -1,51 +1,50 @@
 <webc-container controller='governance/voting/ViewResultsController' data-view-model='@'>
-  <div class='container main-container'>
-    <h1>Perform Vote</h1>
+  <section class='dw-credentials--header'>
+    <dw-title>
+      <p slot='subheader'>Perform Vote</p>
+      <p slot='subheader'>The voting results will be available after at the end of the voting period.</p>
+    </dw-title>
+  </section>
 
-    <div class='container form-wrapper'>
-      <div class='form-row-wrapper'>
-        <label>Question:</label>
-        <textarea class='form-control' readonly='readonly' value='@question'></textarea>
+  <section class='dw-credentials dw-data-grid dw-col-2-equal'>
+    <article>
+      <div class='dw-form-row'>
+        <sl-textarea id='question-vote-name' label='Question / Vote Name'
+                     placeholder='Your question or a title of a vote here...'
+                     readonly resize='auto'
+                     value='@selectedVotingSession.question'>
+        </sl-textarea>
       </div>
 
-      <div class='form-row-wrapper'>
-        <label>Vote will be concluded:</label>
-        <label class='bold'>{{@deadline}}</label>
+      <div class='dw-form-row'>
+        <sl-input label='Vote concluded on:' readonly value='@selectedVotingSession.deadline'></sl-input>
       </div>
 
-      <div class='form-row-wrapper'>
-        <label>Voting action to be performed:</label>
-        <div class='d-flex flex-column'>
-          <label class='bold'>{{@votingAction}}</label>
-          <div class='d-flex' data-if='@hasDocumentation'>
-            <label class='download w-auto' data-tag='view-documentation'>View candidate
-              documentation</label>
+      <div data-if='@selectedVotingSession.isFixedStructure'>
+        <div class='dw-form-row dw-col-3-equal'>
+          <sl-input label='Voting action to be performed:' readonly
+                    value='@selectedVotingSession.selectedVotingAction.label'></sl-input>
+          <sl-input label='Partner DID' readonly value='@selectedVotingSession.partnerDID'></sl-input>
+          <div class='dw-form-row-inner' data-if='@selectedVotingSession.hasDocumentation'>
+            <label>Candidate documentation</label>
+            <sl-button class='dw-action-button' data-tag='vote.document.download' type='primary'>Download candidate
+              documentation
+            </sl-button>
           </div>
         </div>
       </div>
+    </article>
 
-      <div class='answers-container' data-if='@uniqueAnswer' id='possible-responses'>
-        <fieldset class='answers-wrapper' data-for='@answers' id='answers' slot='true'>
-          <div class='form-check'>
-            <input class='form-check-input' data-response='@reference' data-view-model='@checkInput'
-                   name='answers' type='radio'>
-            <label class='form-check-label' data-view-model='@label'>{{@label.text}}</label>
-          </div>
-        </fieldset>
-
-        <div class='answers-wrapper' data-for='@answers' slot='false'>
-          <div class='form-check'>
-            <input class='form-check-input' data-response='@reference' data-view-model='@checkInput'
-                   type='checkbox'>
-            <label class='form-check-label' data-view-model='@label'>{{@label.text}}</label>
+    <article>
+      <div class='dw-form-row'>
+        <label>Vote result:</label>
+        <div class='dw-col-2-equal rating-container' data-for='@selectedVotingSession.possibleAnswers'>
+          <label title='@uid'>{{@label}}</label>
+          <div class='progress-wrapper'>
+            <div class='progress-bar' data-width='@rating'>{{@rating}}</div>
           </div>
         </div>
       </div>
-    </div>
-
-    <footer class='left-align'>
-      <button data-tag='back'>Back</button>
-      <button data-tag='vote-and-sign'>Vote and Sign</button>
-    </footer>
-  </div>
+    </article>
+  </section>
 </webc-container>
