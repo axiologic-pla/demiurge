@@ -66,6 +66,10 @@
             Paste
           </sl-button>
         </sl-input>
+
+        <div class='no-data' data-if='@hasDefaultAnswers' slot='no-data'>
+          <label slot='false'>No possible answers defined yet!</label>
+        </div>
       </div>
       <div class='dw-form-row dw-form-buttons-right'>
         <sl-button class='dw-action-button' data-tag='vote.answer.add' type='primary'>Add Answer</sl-button>

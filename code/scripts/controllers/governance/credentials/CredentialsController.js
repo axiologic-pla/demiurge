@@ -122,7 +122,7 @@ class CredentialsController extends DwController {
         model.json = tags + decodedCredential;
         await this.ui.showDialogFromComponent('dw-dialog-view-credential', model);
       } catch (err) {
-        this.ui.showToast('Encountered error: ' + err);
+        await this.ui.showToast('Encountered error: ' + err.message);
       }
     });
 

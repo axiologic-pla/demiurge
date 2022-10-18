@@ -22,7 +22,7 @@ class NewVotingSessionUI {
         question: '',
         possibleAnswers: [],
         numberOfVotes: 0,
-        deadline: '',
+        deadline: null,
         isUniqueAnswer: false,
         votingActions: {
           placeholder: 'Voting action', options: [{
@@ -54,11 +54,11 @@ class NewVotingSessionController extends DwController {
 
   attachViewEventListeners() {
     this.onTagClick('history.go.back', (model, target, event) => {
-    event.preventDefault();
-    event.stopImmediatePropagation();
+      event.preventDefault();
+      event.stopImmediatePropagation();
 
-    this.model.isNewVotingOpened = false;
-  });
+      this.model.isNewVotingOpened = false;
+    });
 
     this.onTagClick('vote.type.opinion', (model, target, event) => {
       event.preventDefault();
@@ -66,6 +66,7 @@ class NewVotingSessionController extends DwController {
 
       this.model.submitVotingType = 'opinion';
       this.model.votingType = 'Consultation / Opinion Poll';
+      this.model.isFixedStructure = false;
       this.model.hasDefaultAnswers = false;
     });
 
@@ -75,6 +76,7 @@ class NewVotingSessionController extends DwController {
 
       this.model.submitVotingType = 'generic';
       this.model.votingType = 'Generic Proposal';
+      this.model.isFixedStructure = false;
       this.model.hasDefaultAnswers = true;
     });
 
@@ -129,24 +131,42 @@ class NewVotingSessionController extends DwController {
       const modelSubmit = this.model.toObject('form');
       modelSubmit.votingType = this.model.votingType;
       modelSubmit.submitVotingType = this.model.submitVotingType;
-      const possibleAnswers = this.model.hasDefaultAnswers ? this.model.defaultAnswers.map(answer => answer.label) : [];
-      const possibleAnswersInputs = document.querySelectorAll('#possible-responses sl-input');
-      for (let index = 0; index < possibleAnswersInputs.length; ++index) {
-        possibleAnswers.push(possibleAnswersInputs[index].value);
-      }
-      modelSubmit.possibleAnswers = possibleAnswers.map(answer => {
-        return {
-          label: answer, uid: utils.uuidv4(), count: 0
-        };
-      });
 
-      const documentation = document.querySelector('#upload-documentation');
-      if (documentation && documentation.files.length) {
-        modelSubmit.candidateDocumentation = documentation.files[0];
-        modelSubmit.candidateDocumentationName = modelSubmit.candidateDocumentation.name;
-      }
+      try {
+        if (modelSubmit.question.trim().length === 0) {
+          throw new Error('Question / Vote name is empty!');
+        }
 
-      await this.submitVotingSession(modelSubmit);
+        if (!modelSubmit.deadline) {
+          throw new Error('Deadline field is mandatory!');
+        }
+
+        const possibleAnswers = this.model.hasDefaultAnswers ? this.model.defaultAnswers.map(answer => answer.label) : [];
+        const possibleAnswersInputs = document.querySelectorAll('#possible-responses sl-input');
+        for (let index = 0; index < possibleAnswersInputs.length; ++index) {
+          possibleAnswers.push(possibleAnswersInputs[index].value);
+        }
+
+        if (possibleAnswers.length === 0) {
+          throw new Error('No answers defined');
+        }
+
+        modelSubmit.possibleAnswers = possibleAnswers.map(answer => {
+          return {
+            label: answer, uid: utils.uuidv4(), count: 0
+          };
+        });
+
+        const documentation = document.querySelector('#upload-documentation');
+        if (documentation && documentation.files.length) {
+          modelSubmit.candidateDocumentation = documentation.files[0];
+          modelSubmit.candidateDocumentationName = modelSubmit.candidateDocumentation.name;
+        }
+
+        await this.submitVotingSession(modelSubmit);
+      } catch (e) {
+        await this.ui.showToast(`Encountered error: ` + e.message);
+      }
     });
   }
 
