@@ -32,6 +32,11 @@ class ViewResultsController extends DwController {
 
   initProgressBars() {
     this.model.selectedVotingSession.possibleAnswers.map((answer) => {
+      if (this.model.selectedVotingSession.numberOfVotes === 0) {
+        answer.rating = `0%`;
+        return answer;
+      }
+
       answer.rating = `${answer.count * 100 / this.model.selectedVotingSession.numberOfVotes}%`;
       return answer;
     });
