@@ -1,17 +1,42 @@
-const {DwController} = WebCardinal.controllers;
+const { DwController } = WebCardinal.controllers;
 
 class GovernanceDashboardUI extends DwController {
   constructor(...props) {
     super(...props);
+  }
+
+  getInitialViewModel() {
+    return {
+      isCredentialsSelected: true,
+      isDeploymentSelected: false,
+      isVotingSelected: false
+    };
   }
 }
 
 class GovernanceController extends DwController {
   constructor(...props) {
     super(...props);
-    const {ui} = this;
 
-    ui.page = new GovernanceDashboardUI(...props);
+    this.ui.page = new GovernanceDashboardUI(...props);
+    this.model = this.ui.page.getInitialViewModel();
+
+    this.attachEventListeners();
+  }
+
+  attachEventListeners() {
+    this.onTagClick('governance.change.tab', (model, target, event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      const activePanelHandler = target.getAttribute('data-template-handler');
+      this.model = {
+        isCredentialsSelected: false,
+        isDeploymentSelected: false,
+        isVotingSelected: false
+      };
+      this.model[activePanelHandler] = true;
+    });
   }
 }
 

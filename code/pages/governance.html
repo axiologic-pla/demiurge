@@ -11,38 +11,40 @@
 
   <section id='dw-governance-content'>
     <sl-tab-group class='dw-governance-content'>
-      <sl-tab panel='credentials' slot='nav'>
+      <sl-tab data-tag='governance.change.tab' data-template-handler='isCredentialsSelected' panel='credentials'
+              slot='nav'>
         <sl-icon name='key-fill'></sl-icon>
         Credentials
       </sl-tab>
 
-      <sl-tab panel='deployment' slot='nav'>
+      <sl-tab data-tag='governance.change.tab' data-template-handler='isDeploymentSelected' panel='deployment'
+              slot='nav'>
         <sl-icon name='key-fill'></sl-icon>
         Deployment
       </sl-tab>
 
-      <sl-tab panel='voting' slot='nav'>
+      <sl-tab data-tag='governance.change.tab' data-template-handler='isVotingSelected' panel='voting' slot='nav'>
         <sl-icon name='key-fill'></sl-icon>
         Voting
       </sl-tab>
 
       <!-- Credentials Panel -->
       <sl-tab-panel name='credentials'>
-        <section id='dw-governance-credentials'>
+        <section data-if='@isCredentialsSelected' id='dw-governance-credentials'>
           <webc-template template='governance/credentials/credentials'></webc-template>
         </section>
       </sl-tab-panel>
 
       <!-- Deployment Panel -->
       <sl-tab-panel name='deployment'>
-        <section id='dw-governance-deployment'>
+        <section data-if='@isDeploymentSelected' id='dw-governance-deployment'>
           <webc-template template='governance/deployment/deployment'></webc-template>
         </section>
       </sl-tab-panel>
 
       <!-- Voting Panel -->
       <sl-tab-panel name='voting'>
-        <section id='dw-governance-voting'>
+        <section data-if='@isVotingSelected' id='dw-governance-voting'>
           <webc-template template='governance/voting/voting'></webc-template>
         </section>
       </sl-tab-panel>
