@@ -53,19 +53,35 @@ class NewVotingSessionController extends DwController {
   }
 
   attachViewEventListeners() {
-    this.onTagClick('vote.type.opinion', () => {
+    this.onTagClick('history.go.back', (model, target, event) => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    this.model.isNewVotingOpened = false;
+  });
+
+    this.onTagClick('vote.type.opinion', (model, target, event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
       this.model.submitVotingType = 'opinion';
       this.model.votingType = 'Consultation / Opinion Poll';
       this.model.hasDefaultAnswers = false;
     });
 
-    this.onTagClick('vote.type.generic', () => {
+    this.onTagClick('vote.type.generic', (model, target, event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
       this.model.submitVotingType = 'generic';
       this.model.votingType = 'Generic Proposal';
       this.model.hasDefaultAnswers = true;
     });
 
-    this.onTagClick('vote.type.fixed', () => {
+    this.onTagClick('vote.type.fixed', (model, target, event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
       this.model.submitVotingType = 'fixed';
       this.model.votingType = 'Fixed Structure Proposal';
       this.model.isFixedStructure = true;

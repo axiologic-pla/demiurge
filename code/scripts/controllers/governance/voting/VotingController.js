@@ -52,7 +52,10 @@ class VotingController extends DwController {
       }
     });
 
-    this.onTagClick('toggle.voting.dashboard', () => {
+    this.onTagClick('toggle.voting.dashboard', (model, target, event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
       this.model = {
         isNewVotingOpened: false,
         isAddVoteOpened: false,
@@ -62,16 +65,25 @@ class VotingController extends DwController {
       };
     });
 
-    this.onTagClick('toggle.voting.new', () => {
+    this.onTagClick('toggle.voting.new', (model, target, event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
       this.model.isNewVotingOpened = !this.model.isNewVotingOpened;
     });
 
-    this.onTagClick('toggle.voting.add', (model) => {
+    this.onTagClick('toggle.voting.add', (model, target, event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
       this.model.isAddVoteOpened = !this.model.isAddVoteOpened;
       this.model.selectedVotingSession = model;
     });
 
-    this.onTagClick('toggle.voting.results', (model) => {
+    this.onTagClick('toggle.voting.results', (model, target, event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
       this.model.isVoteResultsOpened = !this.model.isVoteResultsOpened;
       this.model.selectedVotingSession = model;
     });

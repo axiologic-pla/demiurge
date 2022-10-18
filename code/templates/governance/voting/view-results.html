@@ -12,8 +12,7 @@
         <sl-textarea id='question-vote-name' label='Question / Vote Name'
                      placeholder='Your question or a title of a vote here...'
                      readonly resize='auto'
-                     value='@selectedVotingSession.question'>
-        </sl-textarea>
+                     value='@selectedVotingSession.question'></sl-textarea>
       </div>
 
       <div class='dw-form-row'>
@@ -47,4 +46,8 @@
       </div>
     </article>
   </section>
+
+  <div class='dw-form-row dw-form-buttons-right'>
+    <sl-button class='dw-action-button' data-tag='history.go.back' type='success'>Go back</sl-button>
+  </div>
 </webc-container>
