@@ -30,20 +30,35 @@ class DwClipboardInput extends HTMLElement {
     this.onClipboardClick = async (event) => {
       const { inputElement, showToast } = this;
       const { value } = inputElement;
+
       event.stopPropagation();
       inputElement.select();
       inputElement.setSelectionRange(0, value.length);
-      document.execCommand("copy");
+      try {
+        document.execCommand("copy");
+      }
+      catch (err) {
+        // we ignore the error due to the fact that some browsers don't support one of the methods in the try block
+      }
+      try {
+        navigator.clipboard.writeText(inputElement.value).then( () => {}, () => {} );
+      }
+      catch (err) {
+        // we ignore the error due to the fact that some browsers don't support one of the methods in the try block
+      }
+
       inputElement.setSelectionRange(0, 0);
       inputElement.blur();
-      // await showToast(`"${value}" copied to clipboard!`, {
-      //   duration: 1500,
-      // });
+      await showToast(`Copied to clipboard!`, {
+        duration: 1500,
+      });
     };
 
     this.inputElement.updateComplete.then(() => {
       const suffixElement = this.inputElement.shadowRoot.querySelector("[part=suffix]");
-      suffixElement.addEventListener("click", this.onClipboardClick);
+      if (suffixElement) {
+        suffixElement.addEventListener("click", this.onClipboardClick);
+      }
     });
   }
 
@@ -78,6 +93,17 @@ class DwClipboardInput extends HTMLElement {
   get value() {
     return this.inputElement.value;
   }
+
+  set type(value) {
+    if (this.inputElement) {
+      this.inputElement.type = value;
+    }
+  }
+
+  get type() {
+    return this.inputElement.type;
+  }
+
 }
 
 customElements.define("dw-clipboard-input", DwClipboardInput);

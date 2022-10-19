@@ -50,7 +50,7 @@ class BootingIdentityController extends DwController {
             },
             {
               parentElement: this.element,
-              disableClosing: true,
+              disableClosing: false,
             }
           );
           await $$.promisify(w3cDID.createIdentity)("ssi:name", didDomain, publicName);
