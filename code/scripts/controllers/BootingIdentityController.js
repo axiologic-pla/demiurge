@@ -92,6 +92,7 @@ class BootingIdentityController extends DwController {
             memberName: this.userDetails
           };
           await this.processMessages(sharedEnclave, [addMemberToGroupMessage]);
+          await utils.addLogMessage(WebCardinal.wallet.did, "login", "ePI Administration Group", "-");
           console.log("Processed create addMemberToGroupMessage ");
           getCommunicationService().waitForMessage(this.did, async () => {
             this.navigateToPageTag("quick-actions");

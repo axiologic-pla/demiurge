@@ -187,7 +187,7 @@ class DwUI {
     }
 
     if (typeof duration !== "number") {
-      duration = 3000;
+      duration = 10000;
     }
 
     if (typeof closable !== "boolean") {
