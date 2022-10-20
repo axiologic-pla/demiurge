@@ -21,7 +21,8 @@ class MyIdentitiesController extends DwController {
           this.model.sharedEnclaveKeySSI = sharedEnclave;
         }
     ).catch(err => {
-      console.log(err);
+      this.model.notAuthorized = true;
+      console.log("sharedEnclave doesn't have a defined KeySSI. " + err);
     })
 
     console.log(JSON.stringify(this.model, null, 1));
@@ -42,7 +43,7 @@ class MyIdentitiesController extends DwController {
     try {
       sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
     } catch (e) {
-      throw ("Failed to get shared enclave " + err);
+      console.log("Failed to get shared enclave " + e);
     }
     return sharedEnclave.getKeySSIAsync();
   }
