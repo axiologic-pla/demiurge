@@ -8,7 +8,22 @@ class MyIdentitiesController extends DwController {
     this.model = {
       did: this.did,
       domain: this.domain,
+      sharedEnclaveKeySSI: "",
+      notAuthorized: false
     };
+
+    this.getSharedEnclaveKeySSI().then( sharedEnclaveKeySSI => {
+          if (typeof sharedEnclaveKeySSI === "undefined") {
+            console.log("user not authorized yet");
+            this.model.notAuthorized = true;
+            return;
+          }
+          this.model.sharedEnclaveKeySSI = sharedEnclaveKeySSI;
+        }
+    ).catch(err => {
+      this.model.notAuthorized = true;
+      console.log("sharedEnclave doesn't have a defined KeySSI. " + err);
+    })
 
     console.log(JSON.stringify(this.model, null, 1));
 
@@ -18,6 +33,24 @@ class MyIdentitiesController extends DwController {
       console.log(didDocument.getIdentifier());
       // await ui.showToast(`New DID created: '${didDocument.getIdentifier()}'`);
     });
+  }
+
+  async getSharedEnclaveKeySSI() {
+    const openDSU = require("opendsu");
+    const scAPI = openDSU.loadAPI("sc");
+
+    let sharedEnclave;
+    try {
+      sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+    } catch (e) {
+      console.log("Failed to get shared enclave " + e);
+    }
+    
+    let keySSI = await sharedEnclave.getKeySSIAsync();
+    if (typeof keySSI !== "string" && keySSI.getIdentifier) {
+      keySSI = keySSI.getIdentifier();
+    }
+    return keySSI;
   }
 }
 

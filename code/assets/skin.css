@@ -128,6 +128,10 @@ dw-subdomains {
     border: none;
 }
 
+.dw-paste::part(base) {
+    color: rgb(var(--sl-color-primary-green));
+}
+
 /*:root .sl-theme-dark {*/
 /*    --webc-primary-color: rgb(var(--sl-color-gray-50));*/
 /*    --sl-input-label-color: rgb(var(--sl-color-gray-50));*/
