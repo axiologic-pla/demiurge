@@ -12,13 +12,13 @@ class MyIdentitiesController extends DwController {
       notAuthorized: false
     };
 
-    this.getSharedEnclaveKeySSI().then( sharedEnclave => {
-          if (typeof sharedEnclave === "undefined") {
+    this.getSharedEnclaveKeySSI().then( sharedEnclaveKeySSI => {
+          if (typeof sharedEnclaveKeySSI === "undefined") {
             console.log("user not authorized yet");
             this.model.notAuthorized = true;
             return;
           }
-          this.model.sharedEnclaveKeySSI = sharedEnclave;
+          this.model.sharedEnclaveKeySSI = sharedEnclaveKeySSI;
         }
     ).catch(err => {
       this.model.notAuthorized = true;
