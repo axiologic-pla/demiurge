@@ -45,7 +45,12 @@ class MyIdentitiesController extends DwController {
     } catch (e) {
       console.log("Failed to get shared enclave " + e);
     }
-    return sharedEnclave.getKeySSIAsync();
+    
+    let keySSI = await sharedEnclave.getKeySSIAsync();
+    if (typeof keySSI !== "string" && keySSI.getIdentifier) {
+      keySSI = keySSI.getIdentifier();
+    }
+    return keySSI;
   }
 }
 
