@@ -18,9 +18,7 @@ export default class DwDialogWaitingApprovalController extends DwController {
         });
         this.onTagClick("continue", async () => {
             if (document.getElementById("add-member-input").value === "") {
-                await this.showToast(`Please insert a recovery code.`, {
-                    duration: 3000,
-                });
+                await this.showToast(`Please insert a recovery code.`);
                 return;
             }
             this.setSharedEnclaveKeySSI().then(
@@ -33,15 +31,11 @@ export default class DwDialogWaitingApprovalController extends DwController {
                     ).catch(async err => {
                         this.model.notAuthorized = true;
                         console.log("sharedEnclave doesn't have a defined KeySSI. " + err);
-                        await this.showToast(`Recovery code is not valid.`, {
-                            duration: 3000,
-                        });
+                        await this.showToast(`Recovery code is not valid.`);
                     })
                 }
             ).catch(async err => {
-                await this.showToast(`Recovery code is not valid.`, {
-                    duration: 3000,
-                });
+                await this.showToast(`Recovery code is not valid.`);
             });
         });
     }
@@ -57,7 +51,6 @@ export default class DwDialogWaitingApprovalController extends DwController {
             try {
                 keySSI.parse(recoveryCode); // parse and check if the recoveryCode has the right format for a sharedEnclaveKeySSI
             } catch (err) {
-                debugger
                 return reject(err);
             }
 
