@@ -6,3 +6,50 @@
     padding: var(--sl-spacing-medium);
     margin-bottom: var(--sl-spacing-medium);
 }
+
+.dw-dialog-waiting-approval #did-div {
+    margin-bottom: 16px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgb(var(--sl-input-border-color));
+}
+
+.dw-paste::part(base):hover {
+    color: rgb(var(--sl-color-primary-50));
+}
+
+.dw-dialog-waiting-approval #recovery-code-div > sl-input::part(suffix) {
+    cursor: pointer;
+    background-color: transparent;
+}
+
+.dw-dialog-waiting-approval #recovery-code-div .button__label:hover {
+    color: rgb(var(--sl-color-primary-50));
+}
+
+.dw-dialog-waiting-approval #recovery-code-div > sl-input > sl-icon[slot="suffix"] {
+    background-color: rgb(var(--sl-color-primary-green));
+    color: white;
+    height: 26px;
+    width: 26px;
+    padding: 6px;
+}
+
+.dw-dialog-waiting-approval #recovery-code-div > sl-input > sl-icon[slot="suffix"]:hover {
+    background-color: rgb(var(--sl-color-primary-50));
+}
+
+.dw-dialog-waiting-approval #recovery-code-div > sl-input::part(input) {
+    font-family: "courier new", monospace;
+    padding-top: 3px;
+}
+
+.dw-dialog-waiting-approval #recovery-code-div > sl-input > sl-icon::part(base) {
+    color: var(--icon-color);
+}
+
+.dw-dialog-waiting-approval #recovery-code-div > h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--sl-spacing-small);
+    margin-left: 6px;
+}
