@@ -38,5 +38,9 @@ export default {
     "ePI Administration Group": "Demiurge",
     "ePI Write Group": "DSU_Fabric",
     "ePI Read Group": "DSU_Fabric"
+  },
+  ACCOUNT_STATUS:{
+    WAITING_APPROVAL: "waitingForApproval",
+    CREATED:"created"
   }
 };

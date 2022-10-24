@@ -1,4 +1,5 @@
 import config from "./did-generator.config.js";
+import {getStoredDID} from "../../scripts/services/BootingIdentityService.js";
 
 const {promisify} = $$;
 
@@ -458,6 +459,11 @@ function createDidGenerator(config) {
     let did = null;
     let userId = data.inputElement.value;
     if (userId !== "@username") {
+
+      let storedDid = await getStoredDID();
+      if (storedDid) {
+        return;
+      }
       const openDSU = require("opendsu");
       const w3cDID = openDSU.loadAPI("w3cdid");
       let i = 1;

@@ -1,5 +1,6 @@
 import {getStoredDID} from "./services/BootingIdentityService.js";
 import utils from "./utils.js";
+import constants from "./constants.js"
 
 const {setConfig, getConfig, addControllers, addHook, navigateToPageTag} = WebCardinal.preload;
 const {define} = WebCardinal.components;
@@ -39,7 +40,7 @@ addHook("beforeAppLoads", async () => {
 
   const {getVaultDomainAsync} = await import("./hooks/getVaultDomain.js");
   const {getUserDetails} = await import("./hooks/getUserDetails.js");
-  const {getStoredDID} = await import("./services/BootingIdentityService.js");
+  const {getStoredDID, getWalletStatus} = await import("./services/BootingIdentityService.js");
   const {getCommunicationService} = await import("./services/CommunicationService.js");
 
   wallet.vaultDomain = await getVaultDomainAsync();
@@ -104,18 +105,19 @@ addHook("afterAppLoads", async () => {
     }
 
   });
-  if (WebCardinal.wallet.did) {
-    await utils.addLogMessage(WebCardinal.wallet.did, "login", "ePI Administration Group", "-");
-  }
 });
 
 addHook("beforePageLoads", "quick-actions", async () => {
-  const {wallet} = WebCardinal;
-  if (!wallet.did) {
+  if (!WebCardinal.wallet.status || WebCardinal.wallet.status !== constants.ACCOUNT_STATUS.CREATED) {
     await navigateToPageTag("booting-identity");
     return;
   }
 
+  try {
+    await utils.addLogMessage(WebCardinal.wallet.did, "login", "ePI Administration Group", "-");
+  } catch (e) {
+    console.log("Could not log user login action ", e)
+  }
   const activeElement = document.querySelector('webc-app-menu-item[active]');
   if (activeElement) {
     activeElement.removeAttribute('active');
