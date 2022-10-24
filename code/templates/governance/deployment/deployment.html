@@ -1,18 +1,23 @@
 <webc-container controller='governance/deployment/DeploymentController'>
   <section class='dw-credentials--header'>
     <dw-title>
-      <p slot='subheader'>Title</p>
-      <p slot='subheader'>Description</p>
+      <p slot='subheader'>Blockchain Deployment</p>
+      <p slot='subheader'>Blockchain Deployment Platform Dashboard</p>
     </dw-title>
 
-    <div class="dw-tab-navigator">
-      Tabs for deployment
-      <sl-button class='dw-action-button' data-tag='toggle.tabName.actionName' type='primary'>
-        Tab name
-        <sl-icon name='hammer' slot='prefix'></sl-icon>
+    <div>
+      <sl-button class='dw-action-button' data-tag='toggle.organization.dashboard' type='primary'>
+        Organizations Dashboard
+      </sl-button>
+      <sl-button class='dw-action-button' data-tag='toggle.organization.add-edit' type='primary'>
+        Define Organization
       </sl-button>
     </div>
   </section>
 
-  Content here!
+  <div class='dw-credentials dw-data-grid' data-if='@canDisplayTemplate'>
+    <dw-spinner content='Loading' slot='false'></dw-spinner>
+
+    <webc-template data-view-model='@' slot='true' template='@templatePath'></webc-template>
+  </div>
 </webc-container>

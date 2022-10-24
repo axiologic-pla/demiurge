@@ -11,7 +11,9 @@ export default {
     LOGS_TABLE: "demiurge_logs_table",
     GOVERNANCE_CREDENTIALS: "governance_credentials",
     GOVERNANCE_VOTING_SESSIONS: "governance_voting_sessions",
-    GOVERNANCE_MY_VOTES: "governance_my_votes"
+    GOVERNANCE_MY_VOTES: "governance_my_votes",
+    GOVERNANCE_NETWORKS: "governance_networks",
+    GOVERNANCE_ORGANIZATIONS: "governance_organizations"
   },
   CONTENT_TYPE: {
     CREDENTIAL: "credential",

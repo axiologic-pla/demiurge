@@ -138,8 +138,14 @@
     border: none;
 }
 
+.dw-data-grid-header.dw-col-5 > *,
+.dw-data-grid-item.dw-col-5 > *,
+.dw-data-grid-header.dw-col-5-equal > *,
+.dw-data-grid-item.dw-col-5-equal > *,
 .dw-data-grid-header.dw-col-6 > *,
-.dw-data-grid-item.dw-col-6 > * {
+.dw-data-grid-item.dw-col-6 > *,
+.dw-data-grid-header.dw-col-6-equal > *,
+.dw-data-grid-item.dw-col-6-equal > * {
     background: #cfe8eb;
     padding: 0.25rem;
     display: flex;
@@ -147,11 +153,24 @@
     align-items: flex-start;
 }
 
-.dw-data-grid-header.dw-col-6 > * {
+.dw-data-grid-header.dw-col-5 > *,
+.dw-data-grid-header.dw-col-5-equal > *,
+.dw-data-grid-header.dw-col-6 > *,
+.dw-data-grid-header.dw-col-6-equal > * {
     padding: 0.5rem 0.25rem;
     font-size: 105%;
 }
 
+.dw-data-grid-item.dw-col-5 > :nth-child(10n+1),
+.dw-data-grid-item.dw-col-5 > :nth-child(10n+2),
+.dw-data-grid-item.dw-col-5 > :nth-child(10n+3),
+.dw-data-grid-item.dw-col-5 > :nth-child(10n+4),
+.dw-data-grid-item.dw-col-5 > :nth-child(10n+5),
+.dw-data-grid-item.dw-col-5-equal > :nth-child(10n+1),
+.dw-data-grid-item.dw-col-5-equal > :nth-child(10n+2),
+.dw-data-grid-item.dw-col-5-equal > :nth-child(10n+3),
+.dw-data-grid-item.dw-col-5-equal > :nth-child(10n+4),
+.dw-data-grid-item.dw-col-5-equal > :nth-child(10n+5),
 .dw-data-grid-item.dw-col-6 > :nth-child(12n+1),
 .dw-data-grid-item.dw-col-6 > :nth-child(12n+2),
 .dw-data-grid-item.dw-col-6 > :nth-child(12n+3),

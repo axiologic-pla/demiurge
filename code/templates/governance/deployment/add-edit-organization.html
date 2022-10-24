@@ -1,0 +1,33 @@
+<webc-container controller='governance/deployment/AddEditOrganizationController' data-view-model='@'>
+  <section class='dw-credentials--header'>
+    <dw-title>
+      <p slot='subheader'>{{@title}}</p>
+      <p slot='subheader'></p>
+    </dw-title>
+  </section>
+
+  <section class='dw-credentials dw-data-grid'>
+    <div class='dw-form-row' data-if='@isEditing'>
+      <label>Previous value: <strong>{{@previousOrganizationName}}</strong></label>
+    </div>
+    <div class='dw-form-row'>
+      <sl-input clearable help-text='Maximum of 30 alphanumeric characters, including spaces, dots and dashes' id='organization-name'
+                label='Organization name'
+                placeholder='Organization name (e.g. PharmaLedger-ImI, ePI, CSC, Eco-IoT)' value='@form.name'>
+        <sl-button class='dw-paste' data-tag='input.paste' slot='suffix' type='text'>
+          Paste
+        </sl-button>
+      </sl-input>
+    </div>
+  </section>
+
+  <div class='dw-form-row dw-form-buttons-right'>
+    <sl-button class='dw-action-button' data-tag='history.go.back' variant='primary'>Go back</sl-button>
+    <sl-button class='dw-action-button' data-tag='organization.submit' variant='success'>{{@submitButtonLabel}}
+    </sl-button>
+  </div>
+  <div class='dw-form-row dw-form-buttons-right' data-if='@isEditing'>
+    <sl-button class='dw-action-button' data-tag='organization.remove' variant='danger'>REMOVE Organization</sl-button>
+  </div>
+
+</webc-container>

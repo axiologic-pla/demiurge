@@ -1,0 +1,26 @@
+<webc-container controller='governance/deployment/ViewOrganizationController' data-view-model='@'>
+  <section class='dw-credentials--header'>
+    <dw-title>
+      <p slot='subheader'>Organization details</p>
+      <p slot='subheader'></p>
+    </dw-title>
+  </section>
+
+  <section class='dw-credentials dw-data-grid'>
+    <div class='dw-form-row'>
+      <label>Organization name: <strong>{{@selectedOrganization.name}}</strong></label>
+    </div>
+    <div class='dw-form-row'>
+      <label>Created at: <strong>{{@selectedOrganization.createdAt}}</strong></label>
+    </div>
+    <div class='dw-form-row'>
+      <label>Number of clusters: <strong>{{@selectedOrganization.clustersCount}}</strong></label>
+    </div>
+  </section>
+
+  <div class='dw-form-row dw-form-buttons-right'>
+    <sl-button class='dw-action-button' data-tag='toggle.organization.dashboard' variant='primary'>Go back</sl-button>
+    </sl-button>
+  </div>
+
+</webc-container>

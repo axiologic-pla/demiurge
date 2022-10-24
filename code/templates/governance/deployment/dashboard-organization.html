@@ -1,0 +1,30 @@
+<webc-container controller='governance/deployment/DashboardOrganizationController' data-view-model='@'>
+  <div class='no-data' data-if='@areOrganizationsLoaded'>
+    <dw-spinner content='Organizations are loading' slot='false'></dw-spinner>
+
+    <div class='dw-data-table' data-if='@hasOrganizations' slot='true'>
+      <div class='no-data' slot='false'>
+        <p class='no-data'>There are no defined organizations!</p>
+      </div>
+
+      <article class='dw-data-grid-header dw-col-5-equal' slot='true'>
+        <label>Organization name</label>
+        <label>Created at</label>
+        <label>Clusters no.</label>
+        <label>Blockchain domains</label>
+        <label>Options</label>
+      </article>
+
+      <article class='dw-data-grid-item dw-col-5-equal' data-for='@organizations' slot='true'>
+        <label>{{@name}}</label>
+        <label>{{@createdAt}}</label>
+        <label>{{@clustersCount}}</label>
+        <label class='link' data-tag='toggle.organization.manage'>Manage</label>
+        <div class='dw-table-options'>
+          <label class='link' data-tag='toggle.organization.view'>View</label>
+          <label class='link' data-tag='toggle.organization.add-edit' data-edit='edit'>Edit</label>
+        </div>
+      </article>
+    </div>
+  </div>
+</webc-container>
