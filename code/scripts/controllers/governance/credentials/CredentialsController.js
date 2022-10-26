@@ -54,6 +54,7 @@ class CredentialsController extends DwController {
             const tags = (el.tags || []).join(', ');
             return { ...el, tags };
           });
+          this.model.hasCredentials = this.model.credentials.length > 0;
           this.model.areCredentialsLoaded = true;
           console.log('Model: ', this.model.toObject());
         } else {
@@ -132,7 +133,7 @@ class CredentialsController extends DwController {
         this.model.credentials = this.model.credentials.filter(
           (credential) => credential.token !== deletedCredential.token
         );
-        await this.ui.showToast("Credential deleted: " + deletedCredential.token);
+        await this.ui.showToast('Credential deleted: ' + deletedCredential.token);
       } catch (err) {
         console.log(err);
       }

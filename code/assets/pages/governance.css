@@ -170,25 +170,6 @@ sl-menu-item::part(base):hover {
     margin-top: 10px;
 }
 
-#governance-page .dw-credentials--header {
-    padding-top: var(--sl-spacing-small);
-}
-
-#governance-page .dw-databases--header > sl-form::part(base) {
-    display: flex;
-    align-items: flex-end;
-    gap: var(--sl-spacing-large);
-}
-
-#governance-page .dw-databases--header > sl-form > sl-input::part(input) {
-    min-width: 330px;
-}
-
-#governance-page .dw-credentials,
-#governance-page .dw-databases {
-    margin-top: var(--sl-spacing-x-large);
-}
-
 #dw-governance-content {
     overflow: hidden;
     margin-right: 56px;

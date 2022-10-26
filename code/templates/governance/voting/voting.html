@@ -25,7 +25,7 @@
       <div data-if='@isVoteResultsOpened' slot='false'>
         <webc-template data-view-model='@' slot='true' template='governance/voting/view-results'></webc-template>
 
-        <div class='no-data' data-if='@areVotingSessionsLoaded' slot='false'>
+        <div data-if='@areVotingSessionsLoaded' slot='false'>
           <dw-spinner content='Voting Sessions are loading' slot='false'></dw-spinner>
 
           <div class='dw-data-table' data-if='@hasVotingSessions' slot='true'>
@@ -34,23 +34,25 @@
             </div>
 
             <article class='dw-data-grid-header dw-col-6' slot='true'>
-              <label>Question / Vote Name</label>
-              <label>Type</label>
-              <label>Due date</label>
-              <label>Status</label>
-              <label>Overall Status</label>
-              <label>Options</label>
+              <div><label>Question / Vote Name</label></div>
+              <div><label>Type</label></div>
+              <div><label>Due date</label></div>
+              <div><label>Status</label></div>
+              <div><label>Overall Status</label></div>
+              <div><label>Options</label></div>
             </article>
 
             <article class='dw-data-grid-item dw-col-6' data-for='@votingSessions' slot='true'>
-              <label title='@title'>{{@question}}</label>
-              <label>{{@votingType}}</label>
-              <label>{{@deadline}}</label>
-              <label data-status='@canVote'>{{@status}}</label>
-              <label data-status='@concluded'>{{@overallStatus}}</label>
-              <div class='dw-table-options'>
-                <label class='link' data-tag='@options.eventTag'>{{@options.optionLabel}}</label>
-                <label class='link' data-tag='toggle.voting.results'>Test (Results)</label>
+              <div><label title='@title'>{{@question}}</label></div>
+              <div><label>{{@votingType}}</label></div>
+              <div><label>{{@deadline}}</label></div>
+              <div><label data-status='@canVote'>{{@status}}</label></div>
+              <div><label data-status='@concluded'>{{@overallStatus}}</label></div>
+              <div data-if='@option'>
+                <sl-button data-tag='@option.eventTag' outline variant='@option.buttonType'>
+                  {{@option.optionLabel}}
+                  <sl-icon name='@option.icon' slot='prefix'></sl-icon>
+                </sl-button>
               </div>
             </article>
           </div>

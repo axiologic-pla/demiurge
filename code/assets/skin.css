@@ -104,13 +104,18 @@ dw-subdomains {
 }
 
 .dw-data-grid {
-    --border-color: rgb(var(--sl-color-gray-200));
-    --border: 1px solid var(--border-color);
-    --background: rgb(var(--sl-input-background-color));
-    --check-background: rgb(var(--sl-color-gray-300));
-
-    --delete-color: rgb(var(--sl-color-neutral-255));
-    --delete-background: rgb(var(--sl-color-primary-50));
+    --border-color:
+            rgb(var(--sl-color-gray-200));
+    --border: 1px solid
+    var(--border-color);
+    --background:
+            rgb(var(--sl-input-background-color));
+    --check-background:
+            rgb(var(--sl-color-gray-300));
+    --delete-color:
+            rgb(var(--sl-color-neutral-255));
+    --delete-background:
+            rgb(var(--sl-color-primary-50));
 }
 
 .container.app-container {

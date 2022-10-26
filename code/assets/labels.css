@@ -12,28 +12,36 @@
     text-decoration: underline;
 }
 
+.dw-data-table label {
+    padding: 0.25rem 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 label[data-status] {
     font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid #f0f0f0;
+    border-radius: 0.5rem;
 }
 
-label[data-status="true"] {
-    color: rgba(57, 203, 71, 1);
-}
-
-label[data-status="false"],
-label[data-status="failed"],
-label[data-status="uninstalling"] {
+label[data-status="red"] {
     color: rgba(210, 13, 13, 1);
+    background-color: rgba(210, 13, 13, 0.15) !important;
 }
 
-label[data-status="installed"] {
+label[data-status="blue"] {
     color: rgba(47, 128, 237, 1);
+    background-color: rgba(47, 128, 237, 0.15) !important;
 }
 
-label[data-status="ready"] {
+label[data-status="green"] {
     color: rgba(39, 174, 96, 1);
+    background-color: rgba(39, 174, 96, 0.25) !important;
 }
 
-label[data-status="installing"] {
+label[data-status="orange"] {
     color: rgba(198, 155, 24, 1);
+    background-color: rgba(198, 155, 24, 0.25) !important;
 }

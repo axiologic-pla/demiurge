@@ -98,25 +98,29 @@ class VotingController extends DwController {
       const hasVoted = myVotes.filter(v => v.uid === vote.uid)?.length > 0;
       const isConcluded = Date.now() > new Date(vote.deadline).getTime();
 
-      vote.canVote = hasVoted ? 'false' : (isConcluded ? '' : 'true');
+      vote.canVote = hasVoted ? 'green' : (isConcluded ? 'red' : 'orange');
       vote.status = hasVoted ? 'Voted' : (isConcluded ? 'Ended' : 'In progress');
-      vote.concluded = isConcluded ? 'true' : '';
+      vote.concluded = isConcluded ? 'blue' : 'green';
       vote.overallStatus = isConcluded ? 'Concluded' : 'In progress';
       vote.options = isConcluded ? 'View results' : '';
       vote.hasVoted = hasVoted;
       vote.isConcluded = isConcluded;
 
-      vote.options = {};
+      vote.option = null;
       if (!hasVoted && !isConcluded) {
-        vote.options = {
+        vote.option = {
           eventTag: 'toggle.voting.add',
-          optionLabel: 'Add vote'
+          optionLabel: 'Add vote',
+          buttonType: 'success',
+          icon: 'plus'
         };
       }
       if (isConcluded) {
-        vote.options = {
+        vote.option = {
           eventTag: 'toggle.voting.results',
-          optionLabel: 'View results'
+          optionLabel: 'View results',
+          buttonType: 'primary',
+          icon: 'eye'
         };
       }
 

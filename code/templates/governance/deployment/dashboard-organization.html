@@ -8,21 +8,32 @@
       </div>
 
       <article class='dw-data-grid-header dw-col-5-equal' slot='true'>
-        <label>Organization name</label>
-        <label>Created at</label>
-        <label>Clusters no.</label>
-        <label>Blockchain domains</label>
-        <label>Options</label>
+        <div><label>Organization name</label></div>
+        <div><label>Created at</label></div>
+        <div><label>Clusters no.</label></div>
+        <div><label>Blockchain domains</label></div>
+        <div><label>Options</label></div>
       </article>
 
       <article class='dw-data-grid-item dw-col-5-equal' data-for='@organizations' slot='true'>
-        <label>{{@name}}</label>
-        <label>{{@createdAt}}</label>
-        <label>{{@clustersCount}}</label>
-        <label class='link' data-tag='toggle.organization.manage'>Manage</label>
+        <div><label>{{@name}}</label></div>
+        <div><label>{{@createdAt}}</label></div>
+        <div><label>{{@clustersCount}}</label></div>
+        <div>
+          <sl-button data-tag='toggle.organization.manage' variant='primary'>
+            Manage
+            <sl-icon name='hammer' slot='prefix'></sl-icon>
+          </sl-button>
+        </div>
         <div class='dw-table-options'>
-          <label class='link' data-tag='toggle.organization.view'>View</label>
-          <label class='link' data-tag='toggle.organization.add-edit' data-edit='edit'>Edit</label>
+          <sl-button data-tag='toggle.organization.view' variant='primary'>
+            View
+            <sl-icon name='eye' slot='prefix'></sl-icon>
+          </sl-button>
+          <sl-button data-edit='edit' data-tag='toggle.organization.add-edit' variant='success'>
+            Edit
+            <sl-icon name='pencil' slot='prefix'></sl-icon>
+          </sl-button>
         </div>
       </article>
     </div>
