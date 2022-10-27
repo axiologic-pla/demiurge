@@ -38,6 +38,17 @@
 
     --sl-z-index-dialog: 1000 !important;
     --sl-z-index-toast: 1001 !important;
+
+    --dw-custom-default-color-100: rgba(1, 1, 1, 1);
+    --dw-custom-default-color-015: rgba(1, 1, 1, 0.15);
+    --dw-custom-primary-color-100: rgba(47, 128, 237, 1);
+    --dw-custom-primary-color-015: rgba(47, 128, 237, 0.15);
+    --dw-custom-success-color-100: rgba(39, 174, 96, 1);
+    --dw-custom-success-color-015: rgba(39, 174, 96, 0.15);
+    --dw-custom-danger-color-100: rgba(210, 13, 13, 1);
+    --dw-custom-danger-color-015: rgba(210, 13, 13, 0.15);
+    --dw-custom-warning-color-100: rgba(198, 155, 24, 1);
+    --dw-custom-warning-color-015: rgba(198, 155, 24, 0.15);
 }
 
 [disable-menu] webc-app-menu > .content,
