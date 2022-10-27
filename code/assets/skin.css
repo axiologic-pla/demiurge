@@ -106,7 +106,7 @@ dw-dialog-booting-identity {
 dw-dialog-configuration {
     --jsoneditor-background: rgb(var(--sl-color-primary-600));
     --jsoneditor-dropdown-color: rgb(var(--sl-color-neutral-0));
-    --jsoneditor-dropdown-background: rgb(var(--sl-color-neutral-1000));
+    --jsoneditor-dropdown-background: rgb(var(--sl-color-primary-green));
 }
 
 dw-subdomains {
@@ -119,7 +119,7 @@ dw-subdomains {
     --border: 1px solid var(--border-color);
     --background: rgb(var(--sl-input-background-color));
     --check-background: rgb(var(--sl-color-gray-300));
-    --delete-color: rgb(var(--sl-color-neutral-255));
+    --delete-color: rgb(var(--sl-color-neutral-1000));
     --delete-background: rgb(var(--sl-color-primary-50));
 }
 

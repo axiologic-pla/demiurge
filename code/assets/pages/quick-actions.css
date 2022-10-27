@@ -31,6 +31,18 @@
     height: inherit;
     font-family: "DM Sans bold";
     font-size: calc(100% + 1.4vh);
+    background-color: rgb(var(--sl-color-success-600));
+    border-color: rgb(var(--sl-color-success-600));
+    color: rgb(var(--sl-color-neutral-1000));
+}
+
+#quick-actions-page .dw-actions .dw-action:hover::part(base) {
+    height: inherit;
+    font-family: "DM Sans bold";
+    font-size: calc(100% + 1.4vh);
+    background-color: rgb(var(--sl-color-success-500));
+    border-color: rgb(var(--sl-color-success-500));
+    color: rgb(var(--sl-color-neutral-1000));
 }
 
 #quick-actions-page .dw-actions .dw-action::part(label) {

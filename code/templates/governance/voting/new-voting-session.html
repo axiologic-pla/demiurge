@@ -10,8 +10,8 @@
     <label>Please select the type of voting </label>
     <sl-button-group>
       <sl-button data-tag='vote.type.opinion' type='primary'>Consultation / Opinion Poll</sl-button>
-      <sl-button data-tag='vote.type.generic' type='primary'>Generic Proposal</sl-button>
-      <sl-button data-tag='vote.type.fixed' type='primary'>Fixed Structure Proposal</sl-button>
+      <sl-button data-tag='vote.type.generic' type='success'>Generic Proposal</sl-button>
+      <sl-button data-tag='vote.type.fixed' type='warning'>Fixed Structure Proposal</sl-button>
     </sl-button-group>
     <label>Voting type selected:&nbsp;<strong>{{@votingType}}</strong></label>
   </section>
@@ -72,14 +72,14 @@
         </div>
       </div>
       <div class='dw-form-row dw-form-buttons-right'>
-        <sl-button data-tag='vote.answer.add' type='primary'>Add Answer</sl-button>
+        <sl-button data-tag='vote.answer.add' type='warning'>Add Answer</sl-button>
       </div>
     </div>
   </section>
 
   <div class='dw-form-row dw-form-buttons-right'>
-    <sl-button data-tag='history.go.back'>Go back</sl-button>
-    <sl-button data-tag='vote.new.submit' type='primary'>Submit Voting Session</sl-button>
+    <sl-button data-tag='history.go.back' type='primary'>Go back</sl-button>
+    <sl-button data-tag='vote.new.submit' type='success'>Submit Voting Session</sl-button>
   </div>
 
 </webc-container>
