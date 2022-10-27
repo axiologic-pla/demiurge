@@ -1,5 +1,5 @@
 <webc-container controller='governance/deployment/DashboardOrganizationController' data-view-model='@'>
-  <div class='no-data' data-if='@areOrganizationsLoaded'>
+  <div data-if='@areOrganizationsLoaded'>
     <dw-spinner content='Organizations are loading' slot='false'></dw-spinner>
 
     <div class='dw-data-table' data-if='@hasOrganizations' slot='true'>
@@ -30,7 +30,7 @@
             View
             <sl-icon name='eye' slot='prefix'></sl-icon>
           </sl-button>
-          <sl-button data-edit='edit' data-tag='toggle.organization.add-edit' variant='success'>
+          <sl-button data-edit='edit' data-tag='toggle.organization.add-edit'>
             Edit
             <sl-icon name='pencil' slot='prefix'></sl-icon>
           </sl-button>

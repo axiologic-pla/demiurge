@@ -85,6 +85,10 @@
     grid-template-columns: auto 1fr;
 }
 
+.dw-data-grid .dw-col-3-auto {
+    grid-template-columns: 1fr 1fr auto;
+}
+
 .dw-data-grid .dw-col-3 {
     grid-template-columns: 60% 20% auto;
 }
@@ -162,12 +166,12 @@
     background-color: rgba(246,246,246,1);
 }
 
-.dw-data-grid-item.dw-col-3 > :nth-child(10n+1),
-.dw-data-grid-item.dw-col-3 > :nth-child(10n+2),
-.dw-data-grid-item.dw-col-3 > :nth-child(10n+3),
-.dw-data-grid-item.dw-col-3-equal > :nth-child(10n+1),
-.dw-data-grid-item.dw-col-3-equal > :nth-child(10n+2),
-.dw-data-grid-item.dw-col-3-equal > :nth-child(10n+3),
+.dw-data-grid-item.dw-col-3 > :nth-child(6n+1),
+.dw-data-grid-item.dw-col-3 > :nth-child(6n+2),
+.dw-data-grid-item.dw-col-3 > :nth-child(6n+3),
+.dw-data-grid-item.dw-col-3-equal > :nth-child(6n+1),
+.dw-data-grid-item.dw-col-3-equal > :nth-child(6n+2),
+.dw-data-grid-item.dw-col-3-equal > :nth-child(6n+3),
 .dw-data-grid-item.dw-col-5 > :nth-child(10n+1),
 .dw-data-grid-item.dw-col-5 > :nth-child(10n+2),
 .dw-data-grid-item.dw-col-5 > :nth-child(10n+3),

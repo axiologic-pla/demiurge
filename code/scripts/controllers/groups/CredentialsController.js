@@ -1,28 +1,21 @@
-import { parseJWTSegments } from "../../services/JWTCredentialService.js";
-import constants from "../../constants.js";
-import utils from "../../utils.js";
+import { parseJWTSegments } from '../../services/JWTCredentialService.js';
+import constants from '../../constants.js';
+import utils from '../../utils.js';
 
 const { DwController } = WebCardinal.controllers;
 
 class CredentialsUI {
-  async copyTokenToClipboard(model, target, event) {
-    // credential.inspect is triggered
-    // event.target (actual target)
-    // target from callback (actual currentTarget)
-    if (event.target.getAttribute("name") === "eye") {
-      return;
-    }
+  async copyTokenToClipboard(model) {
+    const tempText = document.createElement('input');
+    tempText.value = model.token;
+    document.body.appendChild(tempText);
+    tempText.select();
 
-    const slInputElement = target.querySelector("sl-input");
-    const { value } = slInputElement;
-    await slInputElement.select();
-    await slInputElement.setSelectionRange(0, value.length);
-    document.execCommand("copy");
+    document.execCommand('copy');
+    document.body.removeChild(tempText);
     await this.ui.showToast(`Credential copied to clipboard!`, {
       duration: 1500
     });
-    await slInputElement.setSelectionRange(0, 0);
-    await slInputElement.blur();
   }
 }
 
@@ -38,32 +31,35 @@ class CredentialsController extends DwController {
       selectedGroup,
       credentials: [],
       governanceCredentials: [],
+      hasCredentials: false,
       areCredentialsLoaded: false,
-      isAssignCredentialOpened: false
+      isAssignCredentialOpened: false,
+      hasGovernanceCredentials: false
     };
 
-    this.onTagClick("toggle.credential.assign", () => {
+    this.onTagClick('toggle.credential.assign', () => {
       this.model.isAssignCredentialOpened = !this.model.isAssignCredentialOpened;
     });
 
-    this.onTagClick("credential.assign", async (model) => {
+    this.onTagClick('credential.assign', async (model) => {
       try {
         const group = this.model.selectedGroup;
         await this.storeCredential(model, group);
         this.model.credentials.push({ ...model });
         await this.shareCredentialWithMembers(group, model.token);
         this.model.isAssignCredentialOpened = false;
-        this.ui.showToast("Credential assigned to group!");
+        this.ui.showToast('Credential assigned to group!');
       } catch (err) {
-        this.ui.showToast("Encountered error: " + err);
+        console.log(err);
+        this.ui.showToast('Encountered error: ' + err);
       }
     });
 
-    this.onTagClick("credential.select", async (...props) => {
+    this.onTagClick('credential.select', async (...props) => {
       await ui.page.copyTokenToClipboard.apply(this, props);
     });
 
-    this.onTagClick("credential.inspect", async (model) => {
+    this.onTagClick('credential.inspect', async (model) => {
       let jsonCredential = {};
       try {
         switch (model.encodingType) {
@@ -76,37 +72,41 @@ class CredentialsController extends DwController {
             break;
           }
           default:
-            throw new Error("Encoding type not recognized! Cannot inspect the token!");
+            throw new Error('Encoding type not recognized! Cannot inspect the token!');
         }
 
         const tags = `Credential Tags:\n${model.tags}\n\n`;
         const decodedCredential = JSON.stringify(jsonCredential, null, 4);
         model.json = tags + decodedCredential;
-        await this.ui.showDialogFromComponent("dw-dialog-view-credential", model);
+        await this.ui.showDialogFromComponent('dw-dialog-view-credential', model);
       } catch (err) {
-        this.ui.showToast("Encountered error: " + err);
+        console.log(err);
+        this.ui.showToast('Encountered error: ' + err);
       }
     });
 
-    this.onTagClick("credential.delete", async (deletedCredential) => {
+    this.onTagClick('credential.delete', async (deletedCredential) => {
       try {
         if (deletedCredential.credentialType === constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION) {
-          throw new Error("Wallet Authorization credential cannot be deleted!");
+          throw new Error('Wallet Authorization credential cannot be deleted!');
         }
 
         await this.deleteCredential(deletedCredential.token);
         this.model.credentials = this.model.credentials.filter(
           (credential) => credential.token !== deletedCredential.token
         );
-        await this.ui.showToast("Credential deleted: " + deletedCredential.token);
+        await this.ui.showToast('Credential deleted: ' + deletedCredential.token);
       } catch (err) {
-        this.ui.showToast("Encountered error: " + err);
+        console.log(err);
+        this.ui.showToast('Encountered error: ' + err);
       }
     });
 
     setTimeout(async () => {
       this.model.credentials = await this.fetchGroupCredentials(this.model.selectedGroup.did);
       this.model.governanceCredentials = await this.fetchGovernanceCredentials();
+      this.model.hasCredentials = this.model.credentials.length > 0;
+      this.model.hasGovernanceCredentials = this.model.governanceCredentials.length > 0;
       this.model.areCredentialsLoaded = true;
     });
   }
@@ -117,7 +117,8 @@ class CredentialsController extends DwController {
   async fetchGovernanceCredentials() {
     const governanceCredentials = await this.sharedStorageService.filterAsync(constants.TABLES.GOVERNANCE_CREDENTIALS);
     return governanceCredentials.map(el => {
-      return { ...el, tags: el.tags.join(", ") };
+      const tags = (el.tags || []).join(', ');
+      return { ...el, tags };
     });
   }
 
@@ -128,7 +129,8 @@ class CredentialsController extends DwController {
   async fetchGroupCredentials(groupDID) {
     const groupCredentials = await this.sharedStorageService.filterAsync(constants.TABLES.GROUPS_CREDENTIALS, `groupDID == ${groupDID}`);
     return groupCredentials.map(el => {
-      return { ...el, tags: el.tags.join(", ") };
+      const tags = (el.tags || []).join(', ');
+      return { ...el, tags };
     });
   }
 

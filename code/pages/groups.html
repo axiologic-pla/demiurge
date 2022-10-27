@@ -147,55 +147,82 @@
             </sl-button>
         </section>
 
-<!--        <div data-if="@isAssignCredentialOpened">-->
-            <section class="dw-credentials dw-data-grid" data-for="@governanceCredentials">
-                <article class="dw-data-grid-item dw-data-grid-multi">
-                    <sl-menu-item value="@tags">
-                        <div class="dw-group-credential-data">
-                            <sl-input value="@tags" readonly></sl-input>
-                        </div>
-                    </sl-menu-item>
-                    <sl-menu-item value="@token" data-tag="credential.select">
-                        <div class="dw-group-credential-data">
-                            <sl-input dir="rtl" value="@token" readonly></sl-input>
-                        </div>
-                        <sl-tooltip slot="suffix" content="Click on credential to copy it">
-                            <sl-icon name="clipboard"></sl-icon>
-                        </sl-tooltip>
-                    </sl-menu-item>
-                    <sl-icon-button name="eye" data-tag="credential.inspect"></sl-icon-button>
-                    <sl-icon-button data-tag="credential.assign" name="plus"></sl-icon-button>
-                </article>
-                <div slot="no-data" data-if="@areCredentialsLoaded">
-                    <dw-spinner slot="false" content="Credentials are loading"></dw-spinner>
-                    <p slot="true" class="no-data">There are no other credentials generated!</p>
+        <div class='dw-credentials dw-data-grid'>
+            <div class='dw-data-table' data-if='@hasCredentials'>
+                <div class='no-data' data-if='@areCredentialsLoaded' slot='false'>
+                    <dw-spinner content='Credentials are loading' slot='false'></dw-spinner>
+                    <p class='no-data' slot='true'>There are no credentials assigned to the group!</p>
                 </div>
-            </section>
-<!--        </div>-->
 
-        <section class="dw-credentials dw-data-grid" data-for="@credentials">
-            <article class="dw-data-grid-item dw-data-grid-multi">
-                <sl-menu-item value="@tags">
-                    <div class="dw-group-credential-data">
-                        <sl-input value="@tags" readonly></sl-input>
+                <article class='dw-data-grid-header dw-col-3' slot='true'>
+                    <div><label>Credential Token</label></div>
+                    <div><label>Credential Tags</label></div>
+                    <div><label>Options</label></div>
+                </article>
+
+                <article class='dw-data-grid-item dw-col-3' data-for='@credentials' slot='true'>
+                    <div><label>{{@token}}</label></div>
+                    <div><label>{{@tags}}</label></div>
+                    <div class='dw-table-options'>
+                        <sl-button data-tag='credential.select' outline>
+                            Copy
+                            <sl-icon name='clipboard' slot='prefix'></sl-icon>
+                        </sl-button>
+                        <sl-button data-tag='credential.inspect' outline variant='primary'>
+                            Inspect
+                            <sl-icon name='eye' slot='prefix'></sl-icon>
+                        </sl-button>
+                        <sl-button data-tag='credential.delete' outline variant='danger'>
+                            Delete
+                            <sl-icon name='trash' slot='prefix'></sl-icon>
+                        </sl-button>
                     </div>
-                </sl-menu-item>
-                <sl-menu-item value="@token" data-tag="credential.select">
-                    <div class="dw-group-credential-data">
-                        <sl-input dir="rtl" value="@token" readonly></sl-input>
-                    </div>
-                    <sl-tooltip slot="suffix" content="Click on credential to copy it">
-                        <sl-icon name="clipboard"></sl-icon>
-                    </sl-tooltip>
-                </sl-menu-item>
-                <sl-icon-button name="eye" data-tag="credential.inspect"></sl-icon-button>
-                <sl-icon-button data-tag="credential.delete" name="trash"></sl-icon-button>
-            </article>
-            <div slot="no-data" data-if="@areCredentialsLoaded">
-                <dw-spinner slot="false" content="Credentials are loading"></dw-spinner>
-                <p slot="true" class="no-data">There are no credentials generated for this group!</p>
+                </article>
             </div>
-        </section>
+        </div>
+
+        <div data-if="@isAssignCredentialOpened">
+            <section class="dw-credentials--header">
+                <dw-title>
+                    <p slot="subheader">List of credentials that can be assigned</p>
+                    <p slot="subheader"></p>
+                </dw-title>
+            </section>
+
+            <div class='dw-credentials dw-data-grid'>
+                <div class='dw-data-table' data-if='@hasGovernanceCredentials'>
+                    <div class='no-data' data-if='@areCredentialsLoaded' slot='false'>
+                        <dw-spinner content='Credentials are loading' slot='false'></dw-spinner>
+                        <p class='no-data' slot='true'>There are no credentials generated!</p>
+                    </div>
+
+                    <article class='dw-data-grid-header dw-col-3' slot='true'>
+                        <div><label>Credential Token</label></div>
+                        <div><label>Credential Tags</label></div>
+                        <div><label>Options</label></div>
+                    </article>
+
+                    <article class='dw-data-grid-item dw-col-3' data-for='@governanceCredentials' slot='true'>
+                        <div><label>{{@token}}</label></div>
+                        <div><label>{{@tags}}</label></div>
+                        <div class='dw-table-options'>
+                            <sl-button data-tag='credential.select' outline>
+                                Copy
+                                <sl-icon name='clipboard' slot='prefix'></sl-icon>
+                            </sl-button>
+                            <sl-button data-tag='credential.inspect' outline variant='primary'>
+                                Inspect
+                                <sl-icon name='eye' slot='prefix'></sl-icon>
+                            </sl-button>
+                            <sl-button data-tag='credential.assign' outline>
+                                Assign
+                                <sl-icon name='plus' slot='prefix'></sl-icon>
+                            </sl-button>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
     </webc-container>
 </template>
 

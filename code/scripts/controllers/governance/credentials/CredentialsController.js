@@ -5,22 +5,17 @@ import { parseJWTSegments } from '../../../services/JWTCredentialService.js';
 const { DwController } = WebCardinal.controllers;
 
 class CredentialsUI {
-  async copyTokenToClipboard(model, target, event) {
-    if (event.target.getAttribute('name') === 'eye') {
-      console.error('credential.inspect triggered');
-      return;
-    }
+  async copyTokenToClipboard(model) {
+    const tempText = document.createElement('input');
+    tempText.value = model.token;
+    document.body.appendChild(tempText);
+    tempText.select();
 
-    const slInputElement = target.querySelector('sl-input');
-    const { value } = slInputElement;
-    await slInputElement.select();
-    await slInputElement.setSelectionRange(0, value.length);
     document.execCommand('copy');
+    document.body.removeChild(tempText);
     await this.ui.showToast(`Credential copied to clipboard!`, {
       duration: 1500
     });
-    await slInputElement.setSelectionRange(0, 0);
-    await slInputElement.blur();
   }
 
   getInitialViewModel() {
@@ -123,6 +118,7 @@ class CredentialsController extends DwController {
         model.json = tags + decodedCredential;
         await this.ui.showDialogFromComponent('dw-dialog-view-credential', model);
       } catch (err) {
+        console.log(err);
         await this.ui.showToast('Encountered error: ' + err.message);
       }
     });
@@ -136,6 +132,7 @@ class CredentialsController extends DwController {
         await this.ui.showToast('Credential deleted: ' + deletedCredential.token);
       } catch (err) {
         console.log(err);
+        await this.ui.showToast('Encountered error: ' + err.message);
       }
     });
   }
