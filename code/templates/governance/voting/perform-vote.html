@@ -25,7 +25,7 @@
         <sl-input label='Partner DID' readonly value='@selectedVotingSession.partnerDID'></sl-input>
         <div class='dw-form-row-inner' data-if='@selectedVotingSession.hasDocumentation'>
           <label>Candidate documentation</label>
-          <sl-button class='dw-action-button' data-tag='vote.document.download' type='primary'>Download candidate
+          <sl-button data-tag='vote.document.download' type='primary'>Download candidate
             documentation
           </sl-button>
         </div>
@@ -50,7 +50,7 @@
   </section>
 
   <div class='dw-form-row dw-form-buttons-right'>
-    <sl-button class='dw-action-button' data-tag='history.go.back' type='success'>Go back</sl-button>
-    <sl-button class='dw-action-button' data-tag='vote.add.submit' type='primary'>Submit your vote</sl-button>
+    <sl-button data-tag='history.go.back'>Go back</sl-button>
+    <sl-button data-tag='vote.add.submit' type='primary'>Submit your vote</sl-button>
   </div>
 </webc-container>

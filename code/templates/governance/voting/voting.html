@@ -6,10 +6,10 @@
     </dw-title>
 
     <div>
-      <sl-button class='dw-action-button' data-tag='toggle.voting.dashboard' type='primary'>
+      <sl-button data-tag='toggle.voting.dashboard' type='primary'>
         Voting Dashboard
       </sl-button>
-      <sl-button class='dw-action-button' data-tag='toggle.voting.new' type='primary'>
+      <sl-button data-tag='toggle.voting.new' type='primary'>
         New Voting Session
         <sl-icon name='plus' slot='prefix'></sl-icon>
       </sl-button>
@@ -49,7 +49,7 @@
               <div><label data-status='@canVote'>{{@status}}</label></div>
               <div><label data-status='@concluded'>{{@overallStatus}}</label></div>
               <div data-if='@option'>
-                <sl-button data-tag='@option.eventTag' outline variant='@option.buttonType'>
+                <sl-button data-tag='@option.eventTag' outline type='@option.buttonType'>
                   {{@option.optionLabel}}
                   <sl-icon name='@option.icon' slot='prefix'></sl-icon>
                 </sl-button>
