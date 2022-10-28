@@ -1,98 +1,117 @@
 /*
    * Outline buttons
    */
-.button--outline {
+sl-button[outline]::part(base) {
     background: none;
     border: solid 1px;
+    font-weight: 500;
 }
+
 /* Default */
-.button--outline.button--default {
-    border-color: var(--sl-color-neutral-300);
-    color: var(--sl-color-neutral-700);
+sl-button[outline][type='default']::part(base) {
+    border-color: rgb(var(--sl-color-neutral-300));
+    color: rgb(var(--sl-color-neutral-700));
 }
-.button--outline.button--default:hover:not(.button--disabled),
-.button--outline.button--default.button--checked:not(.button--disabled) {
-    border-color: var(--sl-color-primary-600);
-    background-color: var(--sl-color-primary-600);
-    color: var(--sl-color-neutral-0);
+
+sl-button[outline][type='default']:hover:not([disabled])::part(base),
+sl-button[outline][type='default'][checked]:not([disabled])::part(base) {
+    border-color: rgb(var(--sl-color-primary-600));
+    background-color: rgb(var(--sl-color-primary-600));
+    color: rgb(var(--sl-color-neutral-1000));
 }
-.button--outline.button--default:active:not(.button--disabled) {
-    border-color: var(--sl-color-primary-700);
-    background-color: var(--sl-color-primary-700);
-    color: var(--sl-color-neutral-0);
+
+sl-button[outline][type='default']:active:not([disabled])::part(base) {
+    border-color: rgb(var(--sl-color-primary-700));
+    background-color: rgb(var(--sl-color-primary-700));
+    color: rgb(var(--sl-color-neutral-1000));
 }
+
 /* Primary */
-.button--outline.button--primary {
-    border-color: var(--sl-color-primary-600);
-    color: var(--sl-color-primary-600);
+sl-button[outline][type='primary']::part(base) {
+    border-color: rgb(var(--sl-color-primary-600));
+    color: rgb(var(--sl-color-primary-600));
 }
-.button--outline.button--primary:hover:not(.button--disabled),
-.button--outline.button--primary.button--checked:not(.button--disabled) {
-    background-color: var(--sl-color-primary-600);
-    color: var(--sl-color-neutral-0);
+
+sl-button[outline][type='primary']:hover:not([disabled])::part(base),
+sl-button[outline][type='primary'][checked]:not([disabled])::part(base) {
+    background-color: rgb(var(--sl-color-primary-600));
+    color: rgb(var(--sl-color-neutral-1000));
 }
-.button--outline.button--primary:active:not(.button--disabled) {
-    border-color: var(--sl-color-primary-700);
-    background-color: var(--sl-color-primary-700);
-    color: var(--sl-color-neutral-0);
+
+sl-button[outline][type='primary']:active:not([disabled])::part(base) {
+    border-color: rgb(var(--sl-color-primary-700));
+    background-color: rgb(var(--sl-color-primary-700));
+    color: rgb(var(--sl-color-neutral-1000));
 }
+
 /* Success */
-.button--outline.button--success {
-    border-color: var(--sl-color-success-600);
-    color: var(--sl-color-success-600);
+sl-button[outline][type='success']::part(base) {
+    border-color: rgb(var(--sl-color-success-600));
+    color: rgb(var(--sl-color-success-600));
 }
-.button--outline.button--success:hover:not(.button--disabled),
-.button--outline.button--success.button--checked:not(.button--disabled) {
-    background-color: var(--sl-color-success-600);
-    color: var(--sl-color-neutral-0);
+
+sl-button[outline][type='success']:hover:not([disabled])::part(base),
+sl-button[outline][type='success'][checked]:not([disabled])::part(base) {
+    background-color: rgb(var(--sl-color-success-600));
+    color: rgb(var(--sl-color-neutral-1000));
 }
-.button--outline.button--success:active:not(.button--disabled) {
-    border-color: var(--sl-color-success-700);
-    background-color: var(--sl-color-success-700);
-    color: var(--sl-color-neutral-0);
+
+sl-button[outline][type='success']:active:not([disabled])::part(base) {
+    border-color: rgb(var(--sl-color-success-700));
+    background-color: rgb(var(--sl-color-success-700));
+    color: rgb(var(--sl-color-neutral-1000));
 }
+
 /* Neutral */
-.button--outline.button--neutral {
-    border-color: var(--sl-color-neutral-600);
-    color: var(--sl-color-neutral-600);
+sl-button[outline][type='neutral']::part(base) {
+    border-color: rgb(var(--sl-color-neutral-600));
+    color: rgb(var(--sl-color-neutral-600));
 }
-.button--outline.button--neutral:hover:not(.button--disabled),
-.button--outline.button--neutral.button--checked:not(.button--disabled) {
-    background-color: var(--sl-color-neutral-600);
-    color: var(--sl-color-neutral-0);
+
+sl-button[outline][type='neutral']:hover:not([disabled])::part(base),
+sl-button[outline][type='neutral'][checked]:not([disabled])::part(base) {
+    background-color: rgb(var(--sl-color-neutral-600));
+    color: rgb(var(--sl-color-neutral-1000));
 }
-.button--outline.button--neutral:active:not(.button--disabled) {
-    border-color: var(--sl-color-neutral-700);
-    background-color: var(--sl-color-neutral-700);
-    color: var(--sl-color-neutral-0);
+
+sl-button[outline][type='neutral']:active:not([disabled])::part(base) {
+    border-color: rgb(var(--sl-color-neutral-700));
+    background-color: rgb(var(--sl-color-neutral-700));
+    color: rgb(var(--sl-color-neutral-1000));
 }
+
 /* Warning */
-.button--outline.button--warning {
-    border-color: var(--sl-color-warning-600);
-    color: var(--sl-color-warning-600);
+sl-button[outline][type='warning']::part(base) {
+    border-color: rgb(var(--sl-color-warning-600));
+    color: rgb(var(--sl-color-warning-600));
 }
-.button--outline.button--warning:hover:not(.button--disabled),
-.button--outline.button--warning.button--checked:not(.button--disabled) {
-    background-color: var(--sl-color-warning-600);
-    color: var(--sl-color-neutral-0);
+
+sl-button[outline][type='warning']:hover:not([disabled])::part(base),
+sl-button[outline][type='warning'][checked]:not([disabled])::part(base) {
+    background-color: rgb(var(--sl-color-warning-600));
+    color: rgb(var(--sl-color-neutral-1000));
 }
-.button--outline.button--warning:active:not(.button--disabled) {
-    border-color: var(--sl-color-warning-700);
-    background-color: var(--sl-color-warning-700);
-    color: var(--sl-color-neutral-0);
+
+sl-button[outline][type='warning']:active:not([disabled])::part(base) {
+    border-color: rgb(var(--sl-color-warning-700));
+    background-color: rgb(var(--sl-color-warning-700));
+    color: rgb(var(--sl-color-neutral-1000));
 }
+
 /* Danger */
-.button--outline.button--danger {
-    border-color: var(--sl-color-danger-600);
-    color: var(--sl-color-danger-600);
+sl-button[outline][type='danger']::part(base) {
+    border-color: rgb(var(--sl-color-danger-600));
+    color: rgb(var(--sl-color-danger-600));
 }
-.button--outline.button--danger:hover:not(.button--disabled),
-.button--outline.button--danger.button--checked:not(.button--disabled) {
-    background-color: var(--sl-color-danger-600);
-    color: var(--sl-color-neutral-0);
+
+sl-button[outline][type='danger']:hover:not([disabled])::part(base),
+sl-button[outline][type='danger'][checked]:not([disabled])::part(base) {
+    background-color: rgb(var(--sl-color-danger-600));
+    color: rgb(var(--sl-color-neutral-1000));
 }
-.button--outline.button--danger:active:not(.button--disabled) {
-    border-color: var(--sl-color-danger-700);
-    background-color: var(--sl-color-danger-700);
-    color: var(--sl-color-neutral-0);
+
+sl-button[outline][type='danger']:active:not([disabled])::part(base) {
+    border-color: rgb(var(--sl-color-danger-700));
+    background-color: rgb(var(--sl-color-danger-700));
+    color: rgb(var(--sl-color-neutral-1000));
 }
