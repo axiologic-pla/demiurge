@@ -44,7 +44,7 @@ class CredentialsController extends DwController {
     this.onTagClick('credential.assign', async (model) => {
       try {
         const group = this.model.selectedGroup;
-        await this.storeCredential(model, group);
+        await this.storeCredential(model, group.did);
         this.model.credentials.push({ ...model });
         await this.shareCredentialWithMembers(group, model.token);
         this.model.isAssignCredentialOpened = false;
@@ -140,6 +140,7 @@ class CredentialsController extends DwController {
    * @param {string} groupDID
    */
   async storeCredential(credentialObj, groupDID) {
+    credentialObj.tags = credentialObj.tags.split(', ');
     await this.sharedStorageService.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromCredential(credentialObj.token), {
       ...credentialObj,
       groupDID

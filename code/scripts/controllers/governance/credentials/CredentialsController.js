@@ -14,7 +14,8 @@ class CredentialsUI {
     document.execCommand('copy');
     document.body.removeChild(tempText);
     await this.ui.showToast(`Credential copied to clipboard!`, {
-      duration: 1500
+      duration: 1500,
+      type: 'success'
     });
   }
 
@@ -119,7 +120,7 @@ class CredentialsController extends DwController {
         await this.ui.showDialogFromComponent('dw-dialog-view-credential', model);
       } catch (err) {
         console.log(err);
-        await this.ui.showToast('Encountered error: ' + err.message);
+        await this.ui.showToast('Encountered error: ' + err.message, {type: 'success'});
       }
     });
 
@@ -129,10 +130,10 @@ class CredentialsController extends DwController {
         this.model.credentials = this.model.credentials.filter(
           (credential) => credential.token !== deletedCredential.token
         );
-        await this.ui.showToast('Credential deleted: ' + deletedCredential.token);
+        await this.ui.showToast('Credential deleted: ' + deletedCredential.token, {type: 'success'});
       } catch (err) {
         console.log(err);
-        await this.ui.showToast('Encountered error: ' + err.message);
+        await this.ui.showToast('Encountered error: ' + err.message, {type: 'success'});
       }
     });
   }

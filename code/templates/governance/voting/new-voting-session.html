@@ -36,7 +36,7 @@
         <div class='dw-form-row-inner'>
           <label>Select Voting Action</label>
           <sl-dropdown id='voting-action'>
-            <sl-button caret slot='trigger'>{{@form.votingActions.placeholder}}</sl-button>
+            <sl-button caret slot='trigger' type='primary'>{{@form.votingActions.placeholder}}</sl-button>
             <sl-menu data-for='@form.votingActions.options'>
               <sl-menu-item value='@value'>{{@label}}</sl-menu-item>
             </sl-menu>

@@ -54,7 +54,7 @@ class ImportCredentialController extends DwController {
         this.storeCredential(tokenModel);
         this.model.credentials.push(tokenModel);
       } catch (e) {
-        await this.ui.showToast('Could not import credential because: ' + e.message);
+        await this.ui.showToast('Could not import credential because: ' + e.message, {type: 'success'});
       }
     });
   }

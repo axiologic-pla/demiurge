@@ -1,7 +1,8 @@
 @import "./components.css";
-@import "./labels.css";
-@import "./tables.css";
-@import "./forms.css";
+@import "./parts/buttons.css";
+@import "./parts/labels.css";
+@import "./parts/tables.css";
+@import "./parts/forms.css";
 
 /* dm-sans-regular - latin-ext_latin */
 @font-face {
@@ -31,7 +32,7 @@
 }
 
 :root {
-    --webc-primary-color: rgb(var(--sl-color-gray-900));
+    --webc-primary-color: rgb(var(--sl-color-neutral-0));
     --webc-font-family: var(--sl-font-sans);
     --dw-menu-width: 250px;
     --dw-container-width: 1000px;
@@ -49,6 +50,16 @@
     --dw-custom-danger-color-015: rgba(210, 13, 13, 0.15);
     --dw-custom-warning-color-100: rgba(198, 155, 24, 1);
     --dw-custom-warning-color-015: rgba(198, 155, 24, 0.15);
+}
+
+sl-tab-group {
+    --indicator-color: var(--dw-custom-success-color-100);
+}
+
+sl-tab-group sl-tab[active]:not([disabled])::part(base),
+sl-tab-group sl-tab:hover::part(base),
+sl-tab-group sl-tab:active::part(base) {
+    color: var(--dw-custom-success-color-100);
 }
 
 [disable-menu] webc-app-menu > .content,
@@ -76,7 +87,7 @@ webc-app-container > .container.before {
 dw-header {
     --items-color: rgb(var(--sl-color-gray-800));
     --border-color: rgb(var(--sl-color-gray-300));
-    --active-color: rgb(var(--sl-color-primary-600));
+    --active-color: rgb(var(--sl-color-neutral-0));
     --title-color: var(--active-color);
 }
 
@@ -87,7 +98,7 @@ dw-menu {
 }
 
 dw-title {
-    --color: rgb(var(--sl-color-gray-900));
+    --color: rgb(var(--sl-color-neutral-0));
     font-size: calc(100% + 0.4vh);
     font-family: 'DM Sans regular';
     line-height: 1;

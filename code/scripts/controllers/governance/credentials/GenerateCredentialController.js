@@ -98,8 +98,10 @@ class GenerateCredentialController extends DwController {
         const tokenModel = { issuer: this.did, token: encodedJWTToken, encodingType: this.selectedEncodingType, tags };
         this.storeCredential(tokenModel);
         this.model.credentials.push(tokenModel);
+        this.model.hasCredentials = this.model.credentials.length > 0;
+        this.model.areCredentialsLoaded = true;
       } catch (err) {
-        await this.ui.showToast('Could not import credential because: ' + err.message);
+        await this.ui.showToast('Could not import credential because: ' + err.message, {type: 'success'});
       }
     });
   }
