@@ -134,7 +134,10 @@ class MembersController extends DwController {
         await ui.hideDialogFromComponent("dw-dialog-group-members-update");
 
       } catch (e) {
-        await ui.hideDialogFromComponent("dw-dialog-group-members-update");
+        try{
+          await ui.hideDialogFromComponent("dw-dialog-group-members-update");
+        }catch (e) {
+        }
         await ui.showToast("Could not add user to the group because: " + e.message);
       }
 

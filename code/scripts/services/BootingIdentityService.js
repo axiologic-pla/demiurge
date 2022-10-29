@@ -1,22 +1,20 @@
 import constants from "../constants.js";
-import utils from "../utils.js";
-
-const promisify = utils.promisify;
-
-const {IDENTITY_PK} = constants;
-const {IDENTITY: IDENTITY_TABLE} = constants.TABLES;
 
 const openDSU = require("opendsu");
 const dbAPI = openDSU.loadAPI("db");
+const scAPI = openDSU.loadAPI("sc");
+const w3cDID = openDSU.loadAPI("w3cdid");
 
 /**
  * @param {string} did - identifier of DIDDocument
  */
-async function setStoredDID(did, username, walletStatus) {
+async function setStoredDID(did, username) {
   const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-
+  if(typeof did!=="string") {
+    did = did.getIdentifier();
+  }
   try {
-    await walletStorage.writeKeyAsync(constants.IDENTITY, {did, username, walletStatus});
+    await walletStorage.writeKeyAsync(constants.IDENTITY, {did, username});
   } catch (err) {
     console.log(err);
   }
@@ -57,7 +55,25 @@ async function getWalletStatus() {
     return undefined;
   }
 
-  return record.walletStatus
+  return record.walletStatus;
 }
 
-export {getStoredDID, setStoredDID, getWalletStatus};
+async function didWasApproved(did) {
+  if (typeof did !== "string") {
+    did = did.getIdentifier();
+  }
+  const didDomain = await $$.promisify(scAPI.getDIDDomain)();
+  const epiAdminGroupDID = `did:${constants.SSI_GROUP_DID_TYPE}:${didDomain}:${constants.EPI_ADMIN_GROUP}`
+  let epiAdminGroupDIDDocument;
+  try{
+    epiAdminGroupDIDDocument = await $$.promisify(w3cDID.resolveDID)(epiAdminGroupDID);
+  }catch (e) {
+    return false;
+  }
+
+  const members = await $$.promisify(epiAdminGroupDIDDocument.listMembersByIdentity)();
+  const index = members.findIndex(member => member === did);
+  return index >= 0;
+}
+
+export {getStoredDID, setStoredDID, getWalletStatus, didWasApproved};

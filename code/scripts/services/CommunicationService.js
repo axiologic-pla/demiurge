@@ -2,11 +2,18 @@ import utils from "../utils.js";
 import constants from "../constants.js";
 
 function CommunicationService() {
+  let isWaitingForMessage = false;
   this.waitForMessage = (did, callback) => {
     const openDSU = require("opendsu");
     const keySSISpace = openDSU.loadAPI("w3cdid");
     const __waitForMessage = () => {
-      did.subscribe(async (err, message) => {
+      isWaitingForMessage = true;
+      did.readMessage(async (err, message) => {
+        if (err) {
+          console.log("Failed to read message", err);
+          return callback(err);
+        }
+        isWaitingForMessage = false;
         message = JSON.parse(message);
         if (message.sender !== did.getIdentifier()) {
           if (message.messageType === "UserLogin") {

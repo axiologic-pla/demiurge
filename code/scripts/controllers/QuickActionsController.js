@@ -4,10 +4,11 @@ export default class QuickActionsController extends DwController {
   constructor(...props) {
     super(...props);
 
-    this.model = {
-      domain: "example.domain",
-    };
+    this.model = {};
 
+    debugger
+    console.log("=====================================================================================================")
+    console.log("=====================================================================================================")
     this.resolveNavigation();
 
     this.onTagClick("configuration.show", async () => {

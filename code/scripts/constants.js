@@ -42,5 +42,10 @@ export default {
   ACCOUNT_STATUS:{
     WAITING_APPROVAL: "waitingForApproval",
     CREATED:"created"
-  }
+  },
+  INITIAL_IDENTITY_PUBLIC_NAME: "initial_demiurge_identity",
+  SSI_NAME_DID_TYPE: "ssi:name",
+  SSI_GROUP_DID_TYPE: "ssi:group",
+  GROUP_MESSAGES_PATH: "/app/messages/createGroup.json",
+  ENCLAVE_MESSAGES_PATH: "/app/messages/createEnclave.json"
 };

@@ -1,6 +1,6 @@
-import {getStoredDID} from "./services/BootingIdentityService.js";
+import {getStoredDID, didWasApproved} from "./services/BootingIdentityService.js";
 import utils from "./utils.js";
-import constants from "./constants.js"
+import {getCommunicationService} from "./services/CommunicationService.js";
 
 const {setConfig, getConfig, addControllers, addHook, navigateToPageTag} = WebCardinal.preload;
 const {define} = WebCardinal.components;
@@ -47,24 +47,6 @@ addHook("beforeAppLoads", async () => {
   wallet.userDetails = await getUserDetails();
   wallet.did = await getStoredDID();
 
-  if (wallet.did) {
-    const communicationService = getCommunicationService();
-    communicationService.waitForMessage(wallet.did, () => {
-    });
-  }
-  // if (wallet.did) {
-  //   const { default: getMessageProcessingService } = await import("./services/MessageProcessingService.js");
-  //   const messageProcessingService = await getMessageProcessingService({ did: wallet.did });
-  //   WebCardinal.wallet.messageProcessingService = messageProcessingService;
-  //   try {
-  //     messageProcessingService.readMessage();
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // }
-
-  // setInitialTheme();
-
   // load Custom Components
   await import("../components/dw-header/dw-header.js");
   await import("../components/dw-menu/dw-menu.js");
@@ -108,20 +90,45 @@ addHook("afterAppLoads", async () => {
 });
 
 addHook("beforePageLoads", "quick-actions", async () => {
-  if (!WebCardinal.wallet.status || WebCardinal.wallet.status !== constants.ACCOUNT_STATUS.CREATED) {
+  const scAPI = require("opendsu").loadAPI("sc");
+  const did = await getStoredDID();
+  if (!did) {
     await navigateToPageTag("booting-identity");
     return;
   }
 
-  try {
-    await utils.addLogMessage(WebCardinal.wallet.did, "login", "ePI Administration Group", "-");
-  } catch (e) {
-    console.log("Could not log user login action ", e)
+  const didApproved = await didWasApproved(did);
+  if (!didApproved) {
+    await navigateToPageTag("booting-identity");
+    return;
   }
-  const activeElement = document.querySelector('webc-app-menu-item[active]');
-  if (activeElement) {
-    activeElement.removeAttribute('active');
+
+  const __logLoginAction = async () => {
+    try {
+      await utils.addLogMessage(did, "login", "ePI Administration Group", "-");
+    } catch (e) {
+      console.log("Could not log user login action ", e)
+    }
+    const activeElement = document.querySelector('webc-app-menu-item[active]');
+    if (activeElement) {
+      activeElement.removeAttribute('active');
+    }
   }
+
+  let sharedEnclave;
+  try{
+    sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  }catch (e) {
+    console.log("Failed to get shared enclave. Waiting for approval message ...");
+  }
+
+  if (!sharedEnclave) {
+    return getCommunicationService().waitForMessage(did, async () => {
+      await __logLoginAction();
+    });
+  }
+
+  await __logLoginAction();
 });
 
 setConfig(getInitialConfig());
