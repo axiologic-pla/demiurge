@@ -1,4 +1,5 @@
-import {getStoredDID} from "./services/BootingIdentityService.js";
+import {getStoredDID, didWasApproved} from "./services/BootingIdentityService.js";
+import {getCommunicationService} from "./services/CommunicationService.js";
 import utils from "./utils.js";
 import constants from "./constants.js";
 
@@ -33,7 +34,6 @@ function setInitialTheme() {
   }
 }
 
-
 addHook("beforeAppLoads", async () => {
   WebCardinal.wallet = {};
   const wallet = WebCardinal.wallet;
@@ -46,24 +46,6 @@ addHook("beforeAppLoads", async () => {
   wallet.vaultDomain = await getVaultDomainAsync();
   wallet.userDetails = await getUserDetails();
   wallet.did = await getStoredDID();
-
-  if (wallet.did) {
-    const communicationService = getCommunicationService();
-    communicationService.waitForMessage(wallet.did, () => {
-    });
-  }
-  // if (wallet.did) {
-  //   const { default: getMessageProcessingService } = await import("./services/MessageProcessingService.js");
-  //   const messageProcessingService = await getMessageProcessingService({ did: wallet.did });
-  //   WebCardinal.wallet.messageProcessingService = messageProcessingService;
-  //   try {
-  //     messageProcessingService.readMessage();
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // }
-
-  // setInitialTheme();
 
   // load Custom Components
   await import("../components/dw-header/dw-header.js");
@@ -120,24 +102,49 @@ addHook("afterAppLoads", async () => {
       item.parentElement.insertBefore(iconDiv, item);
     }
   });
-
-  if (WebCardinal.wallet.did) {
-    const groupName = WebCardinal.wallet.groupName || constants.EPI_ADMIN_GROUP;
-    await utils.addLogMessage(WebCardinal.wallet.did, "login", groupName, "-");
-  }
 });
 
 addHook("beforePageLoads", "quick-actions", async () => {
-  const {wallet} = WebCardinal;
-  if (!wallet.did) {
+  const scAPI = require("opendsu").loadAPI("sc");
+  const did = await getStoredDID();
+  if (!did) {
     await navigateToPageTag("booting-identity");
     return;
   }
 
-  const activeElement = document.querySelector("webc-app-menu-item[active]");
-  if (activeElement) {
-    activeElement.removeAttribute("active");
+  const didApproved = await didWasApproved(did);
+  if (!didApproved) {
+    await navigateToPageTag("booting-identity");
+    return;
   }
+
+  const __logLoginAction = async () => {
+    try {
+      const groupName = WebCardinal.wallet.groupName || constants.EPI_ADMIN_GROUP;
+      await utils.addLogMessage(did, "login", groupName, "-");
+    } catch (e) {
+      console.log("Could not log user login action ", e)
+    }
+    const activeElement = document.querySelector("webc-app-menu-item[active]");
+    if (activeElement) {
+      activeElement.removeAttribute("active");
+    }
+  }
+
+  let sharedEnclave;
+  try{
+    sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  }catch (e) {
+    console.log("Failed to get shared enclave. Waiting for approval message ...");
+  }
+
+  if (!sharedEnclave) {
+    return getCommunicationService().waitForMessage(did, async () => {
+      await __logLoginAction();
+    });
+  }
+
+  await __logLoginAction();
 });
 
 setConfig(getInitialConfig());
