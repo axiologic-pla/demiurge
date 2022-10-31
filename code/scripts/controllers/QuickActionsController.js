@@ -6,9 +6,6 @@ export default class QuickActionsController extends DwController {
 
     this.model = {};
 
-    debugger
-    console.log("=====================================================================================================")
-    console.log("=====================================================================================================")
     this.resolveNavigation();
 
     this.onTagClick("configuration.show", async () => {
