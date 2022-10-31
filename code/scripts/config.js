@@ -64,7 +64,7 @@ addHook("beforeAppLoads", async () => {
 addHook("afterAppLoads", async () => {
   const { getEnvironmentDataAsync } = await import("./hooks/getEnvironmentData.js");
   const envData = await getEnvironmentDataAsync() || {};
-  const hiddenMenuItems = envData.hiddenMenuItems || [];
+  const enableGovernance = envData.enableGovernance || false;
 
   document.querySelectorAll("webc-app-menu-item").forEach(item => {
     if (!item.querySelector("a")) {
@@ -72,11 +72,6 @@ addHook("afterAppLoads", async () => {
     }
 
     const menuItemName = item.querySelector("a").innerHTML;
-    if (hiddenMenuItems.includes(menuItemName)) {
-      item.remove();
-      return;
-    }
-
     item.setAttribute("icon-name", menuItemName);
     if (menuItemName === "My Identities") {
       let iconDiv = document.createElement("div");
@@ -91,6 +86,10 @@ addHook("afterAppLoads", async () => {
     }
 
     if (menuItemName === "Governance") {
+      if(!enableGovernance) {
+        item.remove();
+        return;
+      }
       let iconDiv = document.createElement("div");
       iconDiv.innerHTML = `<sl-icon name="clouds-fill" class="menu-item-icon"></sl-icon>`;
       item.parentElement.insertBefore(iconDiv, item);
