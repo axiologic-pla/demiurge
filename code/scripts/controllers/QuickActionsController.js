@@ -14,19 +14,26 @@ export default class QuickActionsController extends DwController {
   }
 
   async resolveNavigation() {
+    const actionElements = this.querySelectorAll("dw-action[tag]:not([hidden])");
+    Array.from(actionElements).forEach((actionElement) => {
+      actionElement.addEventListener("click", () => {
+        this.navigateToPageTag(actionElement.getAttribute("tag"));
+      });
+    });
+
     const { getEnvironmentDataAsync } = await import("../hooks/getEnvironmentData.js");
     const envData = await getEnvironmentDataAsync() || {};
-    const hiddenMenuItems = envData.hiddenMenuItems || [];
+    const enableGovernance = envData.enableGovernance || false;
 
-    const actionElements = this.querySelectorAll("dw-action[tag]");
-    Array.from(actionElements).forEach((actionElement) => {
-      if (!hiddenMenuItems.includes(actionElement.getAttribute("action"))) {
-        actionElement.removeAttribute("hidden");
+    if (enableGovernance) {
+      const governanceElement = this.querySelector("dw-action[tag='governance']");
+      if (governanceElement) {
+        governanceElement.removeAttribute("hidden");
         actionElement.addEventListener("click", () => {
-          this.navigateToPageTag(actionElement.getAttribute("tag"));
+          this.navigateToPageTag("governance");
         });
       }
-    });
+    }
   }
 }
 
