@@ -97,12 +97,6 @@ addHook("beforePageLoads", "quick-actions", async () => {
     return;
   }
 
-  const didApproved = await didWasApproved(did);
-  if (!didApproved) {
-    await navigateToPageTag("booting-identity");
-    return;
-  }
-
   const __logLoginAction = async () => {
     try {
       await utils.addLogMessage(did, "login", "ePI Administration Group", "-");
@@ -120,6 +114,16 @@ addHook("beforePageLoads", "quick-actions", async () => {
     sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
   }catch (e) {
     console.log("Failed to get shared enclave. Waiting for approval message ...");
+  }
+
+  if(sharedEnclave){
+    return await __logLoginAction();
+  }
+
+  const didApproved = await didWasApproved(did);
+  if (!didApproved) {
+    await navigateToPageTag("booting-identity");
+    return;
   }
 
   if (!sharedEnclave) {
