@@ -200,8 +200,7 @@ class BootingIdentityController extends DwController {
     } catch (e) {
       console.log(e);
     }
-    let adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE || gr.name === "ePI Administration Group") || {};
-    this.groupName = adminGroup.name;
+    let adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE || gr.name === constants.EPI_ADMIN_GROUP_NAME) || {};
     const addMemberToGroupMessage = {
       messageType: "AddMemberToGroup",
       groupDID: adminGroup.did,

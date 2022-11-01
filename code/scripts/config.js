@@ -111,24 +111,26 @@ addHook("beforePageLoads", "quick-actions", async () => {
     return;
   }
 
+  let sharedEnclave;
+  try {
+    sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  } catch (e) {
+    console.log("Failed to get shared enclave. Waiting for approval message ...");
+  }
+
   const __logLoginAction = async () => {
+    let groups = [];
     try {
-      const groupName = WebCardinal.wallet.groupName || constants.EPI_ADMIN_GROUP;
-      await utils.addLogMessage(did, "login", groupName, "-");
+      groups = await $$.promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
+      const adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE || gr.name === constants.EPI_ADMIN_GROUP_NAME) || {};
+      await utils.addLogMessage(did, "login", adminGroup.name, "-");
     } catch (e) {
-      console.log("Could not log user login action ", e)
+      console.log("Could not log user login action ", e);
     }
     const activeElement = document.querySelector("webc-app-menu-item[active]");
     if (activeElement) {
       activeElement.removeAttribute("active");
     }
-  }
-
-  let sharedEnclave;
-  try{
-    sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
-  }catch (e) {
-    console.log("Failed to get shared enclave. Waiting for approval message ...");
   }
 
   if(sharedEnclave){

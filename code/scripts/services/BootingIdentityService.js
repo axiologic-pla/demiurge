@@ -62,16 +62,18 @@ async function didWasApproved(did) {
   if (typeof did !== "string") {
     did = did.getIdentifier();
   }
-  const didDomain = await $$.promisify(scAPI.getDIDDomain)();
-  const epiAdminGroupDID = `did:${constants.SSI_GROUP_DID_TYPE}:${didDomain}:${constants.EPI_ADMIN_GROUP}`
-  let epiAdminGroupDIDDocument;
-  try{
-    epiAdminGroupDIDDocument = await $$.promisify(w3cDID.resolveDID)(epiAdminGroupDID);
-  }catch (e) {
+
+  let adminGroupDIDDocument, groups = [];
+  try {
+    const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+    groups = await $$.promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
+    const adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE || gr.name === constants.EPI_ADMIN_GROUP_NAME) || {};
+    adminGroupDIDDocument = await $$.promisify(w3cDID.resolveDID)(adminGroup.groupDID);
+  } catch (e) {
     return false;
   }
 
-  const members = await $$.promisify(epiAdminGroupDIDDocument.listMembersByIdentity)();
+  const members = await $$.promisify(adminGroupDIDDocument.listMembersByIdentity)();
   const index = members.findIndex(member => member === did);
   return index >= 0;
 }
