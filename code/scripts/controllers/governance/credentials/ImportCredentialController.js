@@ -50,9 +50,11 @@ class ImportCredentialController extends DwController {
         if (tags.trim().length > 0) {
           tags = tags.split(",").map(tag => tag.trim());
         }
-        const tokenModel = { issuer: this.did, token: encodedCredential, encodingType: this.selectedEncodingType };
+        const tokenModel = { issuer: this.did, token: encodedCredential, encodingType: this.selectedEncodingType, tags };
         this.storeCredential(tokenModel);
         this.model.credentials.push(tokenModel);
+        this.model.hasCredentials = this.model.credentials.length > 0;
+        this.model.areCredentialsLoaded = true;
       } catch (e) {
         await this.ui.showToast('Could not import credential because: ' + e.message, {type: 'danger'});
       }

@@ -94,6 +94,8 @@ class CredentialsController extends DwController {
         this.model.credentials = this.model.credentials.filter(
           (credential) => credential.token !== deletedCredential.token
         );
+        this.model.hasCredentials = this.model.credentials.length > 0;
+        this.model.areCredentialsLoaded = true;
         await this.ui.showToast('Credential deleted: ' + deletedCredential.token, {type: 'warning'});
       } catch (err) {
         console.log(err);
