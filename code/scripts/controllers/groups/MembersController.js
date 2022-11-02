@@ -106,6 +106,7 @@ class MembersController extends DwController {
         if (!selectedGroup) {
           selectedGroup = groups.find(group => group.name === this.model.selectedGroup.name);
         }
+        selectedGroup.did = this.model.selectedGroup.did;
 
         let hasGroupTag = selectedGroup.tags.split(',').findIndex(tag => newMemberDid.toLowerCase().includes(tag.trim().toLowerCase())) !== -1;
         if (!hasGroupTag) {
@@ -134,7 +135,7 @@ class MembersController extends DwController {
             disableClosing: true,
           }
         );
-        const member = await this.addMember(this.model.selectedGroup, {did: newMemberDid});
+        const member = await this.addMember(selectedGroup, {did: newMemberDid});
         this.model.members.push(member);
         button.loading = false;
         await ui.hideDialogFromComponent("dw-dialog-group-members-update");

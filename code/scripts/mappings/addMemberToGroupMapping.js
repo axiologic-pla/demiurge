@@ -31,8 +31,7 @@ async function addMemberToGroupMapping(message) {
   const adminDID_Document = await $$.promisify(w3cdid.resolveDID)(adminDID);
   const memberDID_Document = await $$.promisify(w3cdid.resolveDID)(member.did);
 
-  // ePI backward compatibility
-  const enclaveName = message.enclaveName || constants.EPI_SHARED_ENCLAVE;
+  const enclaveName = message.enclaveName;
   let enclave = await sharedEnclave.readKeyAsync(enclaveName);
   const enclaveRecord = {
     enclaveType: enclave.enclaveType,
@@ -40,8 +39,7 @@ async function addMemberToGroupMapping(message) {
     enclaveKeySSI: enclave.enclaveKeySSI
   };
 
-  // ePI backward compatibility
-  if (message.accessMode === constants.READ_ONLY_ACCESS_MODE || groupDIDDocument.getGroupName() === constants.EPI_READ_GROUP) {
+  if (message.accessMode === constants.READ_ONLY_ACCESS_MODE) {
     const keySSISpace = openDSU.loadAPI('keyssi');
     if (typeof enclaveRecord.enclaveKeySSI === 'string') {
       enclaveRecord.enclaveKeySSI = keySSISpace.parse(enclaveRecord.enclaveKeySSI);
