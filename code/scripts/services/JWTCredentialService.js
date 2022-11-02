@@ -69,7 +69,9 @@ function parseJWTSegments(jwt) {
   const jwtPayload = safeParseEncodedJson(segments[1]);
   if (jwtPayload instanceof Error || !jwtPayload) throw new Error(JWT_ERRORS.INVALID_JWT_PAYLOAD);
 
-  const jwtSignature = segments[2];
+  const jwtSignature = base64UrlDecode(segments[2], true);
+  if (jwtSignature instanceof Error || !jwtSignature) throw new Error(JWT_ERRORS.INVALID_JWT_SIGNATURE);
+
   return { jwtHeader, jwtPayload, jwtSignature };
 }
 

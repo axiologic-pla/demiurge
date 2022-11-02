@@ -104,6 +104,7 @@ class CredentialsController extends DwController {
         switch (model.encodingType) {
           case constants.JWT_ENCODING: {
             jsonCredential = parseJWTSegments(model.token);
+            jsonCredential.jwtSignature = $$.Buffer.from(jsonCredential.jwtSignature).toString("base64");
             break;
           }
           case constants.GS1_ENCODING: {
