@@ -145,7 +145,7 @@ class MembersController extends DwController {
           await ui.hideDialogFromComponent("dw-dialog-group-members-update");
         }catch (e) {
         }
-        await ui.showToast("Could not add user to the group because: " + e.message);
+        await ui.showToast("Could not add user to the group because: " + e.message, {type: 'danger'});
       }
 
       const {did} = await ui.page.addMember(model, button);
@@ -183,7 +183,7 @@ class MembersController extends DwController {
       await ui.hideDialogFromComponent("dw-dialog-group-members-update");
 
       if (undeleted.length > 0) {
-        await ui.showToast("Member could not deleted");
+        await ui.showToast("Member could not deleted", {type: 'danger'});
         return;
       }
       this.model.members = this.model.members.filter((member) => member.did !== did);

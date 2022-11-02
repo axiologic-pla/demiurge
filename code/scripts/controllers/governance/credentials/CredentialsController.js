@@ -13,10 +13,7 @@ class CredentialsUI {
 
     document.execCommand('copy');
     document.body.removeChild(tempText);
-    await this.ui.showToast(`Credential copied to clipboard!`, {
-      duration: 1500,
-      type: 'success'
-    });
+    await this.ui.showToast(`Credential copied to clipboard!`, {duration: 1500});
   }
 
   getInitialViewModel() {
@@ -131,7 +128,7 @@ class CredentialsController extends DwController {
         this.model.credentials = this.model.credentials.filter(
           (credential) => credential.token !== deletedCredential.token
         );
-        await this.ui.showToast('Credential deleted: ' + deletedCredential.token, {type: 'success'});
+        await this.ui.showToast('Credential deleted: ' + deletedCredential.token, {type: 'warning'});
       } catch (err) {
         console.log(err);
         await this.ui.showToast('Encountered error: ' + err.message, {type: 'success'});

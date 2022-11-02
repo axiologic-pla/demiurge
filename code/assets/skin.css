@@ -52,6 +52,10 @@
     --dw-custom-warning-color-015: rgba(198, 155, 24, 0.15);
 }
 
+sl-alert::part(base) {
+    color: rgb(var(--sl-color-neutral-700));
+}
+
 sl-tab-group {
     --indicator-color: var(--dw-custom-success-color-100);
 }

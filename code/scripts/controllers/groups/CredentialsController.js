@@ -13,9 +13,7 @@ class CredentialsUI {
 
     document.execCommand('copy');
     document.body.removeChild(tempText);
-    await this.ui.showToast(`Credential copied to clipboard!`, {
-      duration: 1500
-    });
+    await this.ui.showToast(`Credential copied to clipboard!`, {duration: 1500});
   }
 }
 
@@ -48,10 +46,10 @@ class CredentialsController extends DwController {
         this.model.credentials.push({ ...model });
         await this.shareCredentialWithMembers(group, model.token);
         this.model.isAssignCredentialOpened = false;
-        this.ui.showToast('Credential assigned to group!');
+        await this.ui.showToast('Credential assigned to group!', {type: 'success'});
       } catch (err) {
         console.log(err);
-        this.ui.showToast('Encountered error: ' + err);
+        await this.ui.showToast('Encountered error: ' + err, {type: 'danger'});
       }
     });
 
@@ -82,7 +80,7 @@ class CredentialsController extends DwController {
         await this.ui.showDialogFromComponent('dw-dialog-view-credential', model);
       } catch (err) {
         console.log(err);
-        this.ui.showToast('Encountered error: ' + err);
+        await this.ui.showToast('Encountered error: ' + err, {type: 'danger'});
       }
     });
 
@@ -96,10 +94,10 @@ class CredentialsController extends DwController {
         this.model.credentials = this.model.credentials.filter(
           (credential) => credential.token !== deletedCredential.token
         );
-        await this.ui.showToast('Credential deleted: ' + deletedCredential.token);
+        await this.ui.showToast('Credential deleted: ' + deletedCredential.token, {type: 'warning'});
       } catch (err) {
         console.log(err);
-        this.ui.showToast('Encountered error: ' + err);
+        await this.ui.showToast('Encountered error: ' + err, {type: 'danger'});
       }
     });
 

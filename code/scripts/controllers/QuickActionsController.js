@@ -29,7 +29,7 @@ export default class QuickActionsController extends DwController {
       const governanceElement = this.querySelector("dw-action[tag='governance']");
       if (governanceElement) {
         governanceElement.removeAttribute("hidden");
-        actionElement.addEventListener("click", () => {
+        governanceElement.addEventListener("click", () => {
           this.navigateToPageTag("governance");
         });
       }

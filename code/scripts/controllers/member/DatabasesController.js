@@ -29,9 +29,9 @@ class DatabasesController extends DwController {
         await this.storeDatabase(database);
         this.model.databases.push(database);
         await this.shareDatabase(group, member, database);
-        await ui.showToast(database);
+        await ui.showToast(database, {type: 'success'});
       } catch (err) {
-        console.log(err);
+        await ui.showToast("Encountered error: " + err.message, {type: 'danger'});
       }
     });
 
@@ -40,9 +40,9 @@ class DatabasesController extends DwController {
         console.log({ deletedDatabase, props });
         this.model.databases = this.model.databases.filter((database) => database.keySSI !== deletedDatabase.keySSI);
         await this.deleteDatabase(deletedDatabase);
-        await ui.showToast(deletedDatabase);
+        await ui.showToast(deletedDatabase, {type: 'warning'});
       } catch (err) {
-        console.log(err);
+        await ui.showToast("Encountered error: " + err.message, {type: 'danger'});
       }
     });
 

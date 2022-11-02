@@ -101,7 +101,7 @@ class GenerateCredentialController extends DwController {
         this.model.hasCredentials = this.model.credentials.length > 0;
         this.model.areCredentialsLoaded = true;
       } catch (err) {
-        await this.ui.showToast('Could not import credential because: ' + err.message, {type: 'success'});
+        await this.ui.showToast('Could not import credential because: ' + err.message, {type: 'danger'});
       }
     });
   }

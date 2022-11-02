@@ -165,7 +165,7 @@ class NewVotingSessionController extends DwController {
 
         await this.submitVotingSession(modelSubmit);
       } catch (e) {
-        await this.ui.showToast(`Encountered error: ` + e.message);
+        await this.ui.showToast(`Encountered error: ` + e.message, {type: 'danger'});
       }
     });
   }

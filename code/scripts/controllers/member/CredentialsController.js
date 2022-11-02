@@ -28,9 +28,9 @@ class CredentialsController extends DwController {
         await this.storeCredential(member, credential);
         this.model.credentials.push({ token: credential });
         await this.shareCredential(group, member, credential);
-        await ui.showToast(credential);
+        await ui.showToast(credential, {type: 'success'});
       } catch (err) {
-        console.log(err);
+        await ui.showToast("Encountered error: " + err.message, {type: 'danger'});
       }
     });
 
@@ -56,9 +56,9 @@ class CredentialsController extends DwController {
         this.model.credentials = this.model.credentials.filter(
           (credential) => credential.token !== deletedCredential.token
         );
-        await ui.showToast(deletedCredential);
+        await ui.showToast(deletedCredential, {type: 'warning'});
       } catch (err) {
-        console.log(err);
+        await ui.showToast("Encountered error: " + err.message, {type: 'danger'});
       }
     });
 
