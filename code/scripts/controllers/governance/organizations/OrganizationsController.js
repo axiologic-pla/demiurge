@@ -1,28 +1,25 @@
 const { DwController } = WebCardinal.controllers;
 
-class DeploymentUI {
+class OrganizationsUI {
   getInitialViewModel() {
     return {
       canDisplayTemplate: true,
-      templatePath: 'governance/deployment/dashboard-organization',
+      templatePath: 'governance/organizations/dashboard-organization',
       templateMapper: {
-        dashboardOrganization: 'governance/deployment/dashboard-organization',
-        addEditOrganization: 'governance/deployment/add-edit-organization',
-        viewOrganization: 'governance/deployment/view-organization',
-        manageOrganization: 'governance/deployment/dashboard-network',
-        addEditNetwork: 'governance/deployment/add-edit-network',
-        viewNetwork: 'governance/deployment/view-network',
-        manageNetwork: 'governance/deployment/manage-network'
+        dashboardOrganization: 'governance/organizations/dashboard-organization',
+        addEditOrganization: 'governance/organizations/add-edit-organization',
+        viewOrganization: 'governance/organizations/view-organization',
+        manageOrganization: 'governance/organizations/manage-organization'
       }
     };
   }
 }
 
-class DeploymentController extends DwController {
+class OrganizationsController extends DwController {
   constructor(...props) {
     super(...props);
 
-    this.ui.page = new DeploymentUI();
+    this.ui.page = new OrganizationsUI();
     this.model = this.ui.page.getInitialViewModel();
     this.init();
   }
@@ -66,32 +63,6 @@ class DeploymentController extends DwController {
       this.model.selectedOrganization = model;
       this.updateTemplate(this.model.templateMapper.manageOrganization);
     });
-
-    this.onTagClick('toggle.network.add-edit', (model, target, event) => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      if (target.getAttribute('data-edit') === 'edit') {
-        this.model.selectedNetwork = model;
-      }
-      this.updateTemplate(this.model.templateMapper.addEditNetwork);
-    });
-
-    this.onTagClick('toggle.network.view', (model, target, event) => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      this.model.selectedNetwork = model;
-      this.updateTemplate(this.model.templateMapper.viewNetwork);
-    });
-
-    this.onTagClick('toggle.network.manage', (model, target, event) => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      this.model.selectedNetwork = model;
-      this.updateTemplate(this.model.templateMapper.manageNetwork);
-    });
   }
 
   updateTemplate(templatePath) {
@@ -103,5 +74,5 @@ class DeploymentController extends DwController {
   }
 }
 
-export default DeploymentController;
-export { DeploymentUI };
+export default OrganizationsController;
+export { OrganizationsUI };

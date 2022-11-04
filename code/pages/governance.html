@@ -17,10 +17,10 @@
         Credentials
       </sl-tab>
 
-      <sl-tab data-tag='governance.change.tab' data-template-handler='isDeploymentSelected' panel='deployment'
+      <sl-tab data-tag='governance.change.tab' data-template-handler='isOrganizationsSelected' panel='organizations'
               slot='nav'>
         <sl-icon name='key-fill'></sl-icon>
-        Deployment
+        Organizations
       </sl-tab>
 
       <sl-tab data-tag='governance.change.tab' data-template-handler='isVotingSelected' panel='voting' slot='nav'>
@@ -35,10 +35,10 @@
         </section>
       </sl-tab-panel>
 
-      <!-- Deployment Panel -->
-      <sl-tab-panel name='deployment'>
-        <section data-if='@isDeploymentSelected' id='dw-governance-deployment'>
-          <webc-template template='governance/deployment/deployment'></webc-template>
+      <!-- Organizations Panel -->
+      <sl-tab-panel name='organizations'>
+        <section data-if='@isOrganizationsSelected' id='dw-governance-organizations'>
+          <webc-template template='governance/organizations/organizations'></webc-template>
         </section>
       </sl-tab-panel>
 

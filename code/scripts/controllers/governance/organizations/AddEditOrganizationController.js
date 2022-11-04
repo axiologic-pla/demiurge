@@ -105,10 +105,10 @@ class AddEditOrganizationController extends DwController {
         }
 
         await this.sharedStorageService.deleteRecordAsync(constants.TABLES.GOVERNANCE_ORGANIZATIONS, submitModel.pk);
-        await this.ui.showToast(`Organization ${submitModel.name} has been removed!`, {type: 'warning'});
+        this.ui.showToast(`Organization ${submitModel.name} has been removed!`, {type: 'warning'});
         this.goBackToOrganizationsDashboard();
       } catch (e) {
-        await this.ui.showToast(`Encountered error: ` + e.message, {type: 'danger'});
+        this.ui.showToast(`Encountered error: ` + e.message, {type: 'danger'});
       }
     });
   }

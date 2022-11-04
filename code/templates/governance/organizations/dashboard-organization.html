@@ -1,4 +1,4 @@
-<webc-container controller='governance/deployment/DashboardOrganizationController' data-view-model='@'>
+<webc-container controller='governance/organizations/DashboardOrganizationController' data-view-model='@'>
   <div data-if='@areOrganizationsLoaded'>
     <dw-spinner content='Organizations are loading' slot='false'></dw-spinner>
 
@@ -10,15 +10,15 @@
       <article class='dw-data-grid-header dw-col-5-equal' slot='true'>
         <div><label>Organization name</label></div>
         <div><label>Created at</label></div>
-        <div><label>Clusters no.</label></div>
-        <div><label>Blockchain domains</label></div>
+        <div><label>Clusters by</label></div>
+        <div><label>Management</label></div>
         <div><label>Options</label></div>
       </article>
 
       <article class='dw-data-grid-item dw-col-5-equal' data-for='@organizations' slot='true'>
         <div><label>{{@name}}</label></div>
         <div><label>{{@createdAt}}</label></div>
-        <div><label>{{@clustersCount}}</label></div>
+        <div><label>{{@createdBy}}</label></div>
         <div>
           <sl-button data-tag='toggle.organization.manage' type='warning' outline>
             Manage
