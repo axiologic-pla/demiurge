@@ -142,7 +142,7 @@ class CredentialsController extends DwController {
    */
   async storeCredential(credentialObj, groupDID) {
     credentialObj.tags = credentialObj.tags.split(', ');
-    await this.sharedStorageService.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromCredential(credentialObj.token), {
+    await this.sharedStorageService.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromContent(credentialObj.token), {
       ...credentialObj,
       groupDID
     });
@@ -168,7 +168,7 @@ class CredentialsController extends DwController {
    * @param {string} token
    */
   async deleteCredential(token) {
-    await this.sharedStorageService.deleteRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromCredential(token));
+    await this.sharedStorageService.deleteRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromContent(token));
   }
 }
 

@@ -54,7 +54,7 @@ async function addMemberToGroupMapping(message) {
   if (!groupCredential) {
     const credentialService = getCredentialService();
     const groupCredential = await credentialService.createVerifiableCredential(adminDID, message.groupDID);
-    await sharedEnclave.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromCredential(groupCredential), {
+    await sharedEnclave.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromContent(groupCredential), {
       issuer: adminDID,
       groupDID: message.groupDID,
       token: groupCredential,

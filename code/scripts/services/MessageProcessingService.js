@@ -70,7 +70,7 @@ class MessageProcessingService {
             await this.performTableOperation(
               operation,
               constants.TABLES.GROUPS_CREDENTIALS,
-              utils.getPKFromCredential(content),
+              utils.getPKFromContent(content),
               record
             );
             return;
@@ -93,7 +93,7 @@ class MessageProcessingService {
             await this.performTableOperation(
               operation,
               constants.TABLES.USER_CREDENTIALS,
-              utils.getPKFromCredential(content),
+              utils.getPKFromContent(content),
               record
             );
             return;

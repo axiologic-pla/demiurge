@@ -87,7 +87,7 @@ class CredentialsController extends DwController {
    * @param {string} token
    */
   async storeCredential(member, token) {
-    await this.storageService.insertRecordAsync(constants.TABLES.USER_CREDENTIALS, utils.getPKFromCredential(token), {
+    await this.storageService.insertRecordAsync(constants.TABLES.USER_CREDENTIALS, utils.getPKFromContent(token), {
       issuer: this.identity.did,
       memberDID: member.did,
       token,
@@ -98,7 +98,7 @@ class CredentialsController extends DwController {
    * @param {string} token
    */
   async deleteCredential(token) {
-    await this.storageService.deleteRecordAsync(constants.TABLES.USER_CREDENTIALS, utils.getPKFromCredential(token));
+    await this.storageService.deleteRecordAsync(constants.TABLES.USER_CREDENTIALS, utils.getPKFromContent(token));
   }
 
   async shareCredential(group, member, token) {

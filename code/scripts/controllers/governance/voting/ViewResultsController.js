@@ -28,6 +28,15 @@ class ViewResultsController extends DwController {
       this.model.isVoteResultsOpened = false;
       this.model.selectedVotingSession = null;
     });
+
+    this.onTagClick('results.document.download', async (model, target, event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      const { candidateDocumentationName, candidateDocumentationSSI } = model.selectedVotingSession;
+      await this.FileManagementService.prepareDownloadFromDsu(candidateDocumentationSSI, candidateDocumentationName);
+      this.FileManagementService.downloadFileToDevice();
+    });
   }
 
   initProgressBars() {

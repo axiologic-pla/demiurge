@@ -1,5 +1,6 @@
 import constants from '../../../constants.js';
 import utils from '../../../utils.js';
+import FileManagementService from '../../../services/FileManagementService.js';
 
 const { DwController } = WebCardinal.controllers;
 
@@ -31,7 +32,6 @@ class NewVotingSessionUI {
         },
         selectedVotingAction: '',
         partnerDID: '',
-        candidateDocumentation: null,
         candidateDocumentationName: ''
       }
     };
@@ -50,6 +50,8 @@ class NewVotingSessionController extends DwController {
   init() {
     this.attachViewEventListeners();
     this.attachInputEventListeners();
+
+    this.FileManagementService = new FileManagementService();
   }
 
   attachViewEventListeners() {
@@ -157,15 +159,21 @@ class NewVotingSessionController extends DwController {
           };
         });
 
-        const documentation = document.querySelector('#upload-documentation');
-        if (documentation && documentation.files.length) {
-          modelSubmit.candidateDocumentation = documentation.files[0];
-          modelSubmit.candidateDocumentationName = modelSubmit.candidateDocumentation.name;
+        modelSubmit.pk = utils.getPKFromContent(utils.uuidv4());
+        if (this.model.isFixedStructure) {
+          const documentation = document.querySelector('#upload-documentation');
+          if (documentation && documentation.files.length) {
+            const file = documentation.files[0];
+            modelSubmit.candidateDocumentationSSI = await this.FileManagementService.writeFileToDsu(file.name, file);
+            modelSubmit.candidateDocumentationName = file.name;
+          } else {
+            throw new Error('Candidate documentation is mandatory!');
+          }
         }
 
         await this.submitVotingSession(modelSubmit);
       } catch (e) {
-        await this.ui.showToast(`Encountered error: ` + e.message, {type: 'danger'});
+        await this.ui.showToast(`Encountered error: ` + e.message, { type: 'danger' });
       }
     });
   }
@@ -223,7 +231,7 @@ class NewVotingSessionController extends DwController {
   }
 
   async submitVotingSession(model) {
-    await this.sharedStorageService.insertRecordAsync(constants.TABLES.GOVERNANCE_VOTING_SESSIONS, utils.getPKFromCredential(utils.uuidv4()), model);
+    await this.sharedStorageService.insertRecordAsync(constants.TABLES.GOVERNANCE_VOTING_SESSIONS, model.pk, model);
     this.model.form = this.ui.page.getInitialViewModel().form;
     this.model = {
       isNewVotingOpened: false,

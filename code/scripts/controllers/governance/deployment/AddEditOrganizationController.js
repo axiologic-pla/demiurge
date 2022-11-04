@@ -85,7 +85,7 @@ class AddEditOrganizationController extends DwController {
           await this.sharedStorageService.updateRecordAsync(constants.TABLES.GOVERNANCE_ORGANIZATIONS, submitModel.pk, submitModel);
         } else {
           submitModel.createdAt = new Date().toLocaleDateString();
-          await this.sharedStorageService.insertRecordAsync(constants.TABLES.GOVERNANCE_ORGANIZATIONS, utils.getPKFromCredential(submitModel.uid), submitModel);
+          await this.sharedStorageService.insertRecordAsync(constants.TABLES.GOVERNANCE_ORGANIZATIONS, utils.getPKFromContent(submitModel.uid), submitModel);
         }
 
         this.goBackToOrganizationsDashboard();

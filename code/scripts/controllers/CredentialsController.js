@@ -71,7 +71,7 @@ class CredentialsController extends DwController {
 
       await this.storageService.deleteRecordAsync(
         constants.TABLES.GROUPS_CREDENTIALS,
-        utils.getPKFromCredential(deletedCredential.credential)
+        utils.getPKFromContent(deletedCredential.credential)
       );
 
       // await ui.showToast(deletedCredential);

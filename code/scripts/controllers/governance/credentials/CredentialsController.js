@@ -146,7 +146,7 @@ class CredentialsController extends DwController {
    * @param {string} token
    */
   async deleteCredential(token) {
-    await this.sharedStorageService.deleteRecordAsync(constants.TABLES.GOVERNANCE_CREDENTIALS, utils.getPKFromCredential(token));
+    await this.sharedStorageService.deleteRecordAsync(constants.TABLES.GOVERNANCE_CREDENTIALS, utils.getPKFromContent(token));
   }
 }
 

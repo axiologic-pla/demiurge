@@ -107,7 +107,7 @@ class GenerateCredentialController extends DwController {
   }
 
   async storeCredential(model) {
-    await this.sharedStorageService.insertRecordAsync(constants.TABLES.GOVERNANCE_CREDENTIALS, utils.getPKFromCredential(model.token), model);
+    await this.sharedStorageService.insertRecordAsync(constants.TABLES.GOVERNANCE_CREDENTIALS, utils.getPKFromContent(model.token), model);
   }
 }
 

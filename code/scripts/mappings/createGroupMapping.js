@@ -46,7 +46,7 @@ async function createGroup(message) {
 
     const credentialService = getCredentialService();
     const groupCredential = await credentialService.createVerifiableCredential(adminDID.did, group.did);
-    await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromCredential(groupCredential), {
+    await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromContent(groupCredential), {
       issuer: adminDID.did,
       groupDID: group.did,
       token: groupCredential,

@@ -20,7 +20,7 @@ function promisify(fun) {
   };
 }
 
-function getPKFromCredential(credential) {
+function getPKFromContent(credential) {
   const crypto = require("opendsu").loadAPI("crypto");
   return crypto.sha256(credential);
 }
@@ -136,7 +136,7 @@ async function isValidDID(stringDID) {
 
 export default {
   promisify,
-  getPKFromCredential,
+  getPKFromContent,
   sendGroupMessage,
   sendUserMessage,
   addSharedEnclaveToEnv,

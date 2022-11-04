@@ -1,5 +1,6 @@
 import constants from '../../../constants.js';
 import utils from '../../../utils.js';
+import FileManagementService from '../../../services/FileManagementService.js';
 
 const { DwController } = WebCardinal.controllers;
 
@@ -21,6 +22,8 @@ class PerformVoteController extends DwController {
   init() {
     this.attachViewEventListeners();
 
+    this.FileManagementService = new FileManagementService();
+
     const selectedVotingSession = this.model.toObject('selectedVotingSession') || {};
     this.model.selectedVotingSession.isFixedStructure = selectedVotingSession.submitVotingType === 'fixed';
     this.model.selectedVotingSession.hasDocumentation = selectedVotingSession.candidateDocumentationName
@@ -36,11 +39,13 @@ class PerformVoteController extends DwController {
       this.model.selectedVotingSession = null;
     });
 
-    this.onTagClick('vote.document.download', (model, target, event) => {
+    this.onTagClick('vote.document.download', async (model, target, event) => {
       event.preventDefault();
       event.stopImmediatePropagation();
 
-      console.log('\n\n[DOWNLOAD] Download triggered:', model);
+      const { candidateDocumentationName, candidateDocumentationSSI } = model.selectedVotingSession;
+      await this.FileManagementService.prepareDownloadFromDsu(candidateDocumentationSSI, candidateDocumentationName);
+      this.FileManagementService.downloadFileToDevice();
     });
 
     this.onTagClick('vote.add.submit', async (model, target, event) => {
@@ -83,13 +88,13 @@ class PerformVoteController extends DwController {
         });
         await this.submitVote(myVoteModel, voteSessionModel);
       } catch (e) {
-        await this.ui.showToast(`Encountered error: ` + e.message, {type: 'danger'});
+        await this.ui.showToast(`Encountered error: ` + e.message, { type: 'danger' });
       }
     });
   }
 
   async submitVote(myVoteModel, voteSessionModel) {
-    await this.storageService.insertRecordAsync(constants.TABLES.GOVERNANCE_MY_VOTES, utils.getPKFromCredential(myVoteModel.uid), myVoteModel);
+    await this.storageService.insertRecordAsync(constants.TABLES.GOVERNANCE_MY_VOTES, utils.getPKFromContent(myVoteModel.uid), myVoteModel);
     await this.sharedStorageService.updateRecordAsync(constants.TABLES.GOVERNANCE_VOTING_SESSIONS, voteSessionModel.pk, voteSessionModel);
     this.model = {
       isNewVotingOpened: false,
