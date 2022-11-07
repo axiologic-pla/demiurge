@@ -27,9 +27,7 @@ class ViewOrganizationController extends DwController {
       setTimeout(async () => {
         const scAPI = require('opendsu').loadAPI('sc');
         if (scAPI.sharedEnclaveExists()) {
-          console.log('Shared enclave exists');
           this.model.votingSessions = await this.fetchVotingSessions();
-          console.log('Model: ', this.model.toObject());
         } else {
           waitForSharedEnclave();
         }

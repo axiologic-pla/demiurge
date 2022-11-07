@@ -41,7 +41,6 @@ class CredentialsController extends DwController {
       setTimeout(async () => {
         const scAPI = require('opendsu').loadAPI('sc');
         if (scAPI.sharedEnclaveExists()) {
-          console.log('Shared enclave exists');
           const credentials = await this.fetchCredentials();
           this.model.credentials = credentials.map(el => {
             const tags = (el.tags || []).join(', ');
@@ -49,7 +48,6 @@ class CredentialsController extends DwController {
           });
           this.model.hasCredentials = this.model.credentials.length > 0;
           this.model.areCredentialsLoaded = true;
-          console.log('Model: ', this.model.toObject());
         } else {
           waitForSharedEnclave();
         }

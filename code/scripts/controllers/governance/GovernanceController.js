@@ -8,8 +8,7 @@ class GovernanceDashboardUI extends DwController {
   getInitialViewModel() {
     return {
       isCredentialsSelected: true,
-      isOrganizationsSelected: false,
-      isVotingSelected: false
+      isOrganizationsSelected: false
     };
   }
 }
@@ -32,8 +31,7 @@ class GovernanceController extends DwController {
       const activePanelHandler = target.getAttribute('data-template-handler');
       this.model = {
         isCredentialsSelected: false,
-        isOrganizationsSelected: false,
-        isVotingSelected: false
+        isOrganizationsSelected: false
       };
       this.model[activePanelHandler] = true;
     });

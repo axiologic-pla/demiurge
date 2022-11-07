@@ -34,7 +34,6 @@ class OrganizationsController extends DwController {
       event.stopImmediatePropagation();
 
       this.model.selectedOrganization = null;
-      this.model.selectedNetwork = null;
       this.updateTemplate(this.model.templateMapper.dashboardOrganization);
     });
 
@@ -44,6 +43,8 @@ class OrganizationsController extends DwController {
 
       if (target.getAttribute('data-edit') === 'edit') {
         this.model.selectedOrganization = model;
+      } else {
+        this.model.selectedOrganization = null;
       }
       this.updateTemplate(this.model.templateMapper.addEditOrganization);
     });

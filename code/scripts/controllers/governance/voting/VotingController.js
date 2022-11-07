@@ -23,6 +23,10 @@ class VotingController extends DwController {
 
     this.ui.page = new VotingUI();
     this.model = this.ui.page.getInitialViewModel();
+
+    this.selectedOrganization = this.model.toObject('selectedOrganization');
+    console.log("organization data: ", this.selectedOrganization);
+
     this.init();
   }
 
@@ -32,9 +36,7 @@ class VotingController extends DwController {
       setTimeout(async () => {
         const scAPI = require('opendsu').loadAPI('sc');
         if (scAPI.sharedEnclaveExists()) {
-          console.log('Shared enclave exists');
           this.model.votingSessions = await this.fetchVotingSessions();
-          console.log('Model: ', this.model.toObject());
         } else {
           waitForSharedEnclave();
         }

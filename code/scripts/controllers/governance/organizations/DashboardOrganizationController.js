@@ -27,9 +27,7 @@ class DashboardOrganizationController extends DwController {
       setTimeout(async () => {
         const scAPI = require('opendsu').loadAPI('sc');
         if (scAPI.sharedEnclaveExists()) {
-          console.log('Shared enclave exists');
           await this.fetchOrganizations();
-          console.log('Model: ', this.model.toObject());
         } else {
           waitForSharedEnclave();
         }

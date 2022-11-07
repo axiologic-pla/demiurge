@@ -65,6 +65,10 @@ dw-clipboard-input > sl-input > sl-icon::part(base) {
     text-align: center;
 }
 
+.dw-manage-organization-container {
+    margin: 0 -1.5rem;
+}
+
 @media screen and (max-width: 420px) {
     .dw-container {
         padding: 0 1em;

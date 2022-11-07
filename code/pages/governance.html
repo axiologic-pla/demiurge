@@ -23,11 +23,6 @@
         Organizations
       </sl-tab>
 
-      <sl-tab data-tag='governance.change.tab' data-template-handler='isVotingSelected' panel='voting' slot='nav'>
-        <sl-icon name='key-fill'></sl-icon>
-        Voting
-      </sl-tab>
-
       <!-- Credentials Panel -->
       <sl-tab-panel name='credentials'>
         <section data-if='@isCredentialsSelected' id='dw-governance-credentials'>
@@ -39,13 +34,6 @@
       <sl-tab-panel name='organizations'>
         <section data-if='@isOrganizationsSelected' id='dw-governance-organizations'>
           <webc-template template='governance/organizations/organizations'></webc-template>
-        </section>
-      </sl-tab-panel>
-
-      <!-- Voting Panel -->
-      <sl-tab-panel name='voting'>
-        <section data-if='@isVotingSelected' id='dw-governance-voting'>
-          <webc-template template='governance/voting/voting'></webc-template>
         </section>
       </sl-tab-panel>
     </sl-tab-group>
