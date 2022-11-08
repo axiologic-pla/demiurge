@@ -53,7 +53,8 @@ class ViewResultsController extends DwController {
       let rating = '0%';
       const votesNumber = allResults.filter(r => r === answer.uid).length;
       if (votesNumber > 0) {
-        rating = `${votesNumber * 100 / votesCount}%`;
+        const result = votesNumber * 100 / votesCount;
+        rating = `${Math.round((result + Number.EPSILON) * 100) / 100}%`;
       }
 
       this.model.selectedVotingSession.voteResults.push({
