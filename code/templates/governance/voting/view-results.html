@@ -21,7 +21,7 @@
 
       <div data-if='@selectedVotingSession.isFixedStructure'>
         <div class='dw-form-row dw-col-3-equal'>
-          <sl-input label='Voting action to be performed:' readonly
+          <sl-input label='Voting action:' readonly
                     value='@selectedVotingSession.selectedVotingAction.label'></sl-input>
           <sl-input label='Partner DID' readonly value='@selectedVotingSession.partnerDID'></sl-input>
           <div class='dw-form-row-inner' data-if='@selectedVotingSession.hasDocumentation'>

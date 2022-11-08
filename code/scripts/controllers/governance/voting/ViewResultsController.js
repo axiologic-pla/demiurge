@@ -14,6 +14,11 @@ class ViewResultsController extends DwController {
     this.votingService = getVotingServiceInstance();
     this.fileManagementService = new FileManagementService();
 
+    const selectedVotingSession = this.model.toObject('selectedVotingSession') || {};
+    this.model.selectedVotingSession.isFixedStructure = selectedVotingSession.submitVotingType === 'fixed';
+    this.model.selectedVotingSession.hasDocumentation = selectedVotingSession.candidateDocumentationName
+      && selectedVotingSession.candidateDocumentationName.trim().length > 0;
+
     this.initVotingResultsModel();
     this.attachViewEventListeners();
     this.initProgressBars();
