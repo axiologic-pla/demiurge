@@ -20,9 +20,9 @@ function promisify(fun) {
   };
 }
 
-function getPKFromContent(credential) {
+function getPKFromContent(stringContent) {
   const crypto = require("opendsu").loadAPI("crypto");
-  return crypto.sha256(credential);
+  return crypto.sha256(stringContent);
 }
 
 async function sendGroupMessage(sender, group, content, contentType, recipientType, groupOperation) {
@@ -124,6 +124,18 @@ function uuidv4() {
   });
 }
 
+function waitForEnclave(enclave, callback) {
+  if (enclave.isInitialised()) {
+    console.log('[DONE] Enclave is initialized!');
+    return callback(undefined);
+  }
+
+  console.log('Enclave is not yet initialized!');
+  setTimeout(() => {
+    waitForEnclave(enclave, callback);
+  }, 10);
+}
+
 async function isValidDID(stringDID) {
   try {
     const w3cdid = require("opendsu").loadAPI("w3cdid");
@@ -144,5 +156,6 @@ export default {
   fetchGroups,
   addLogMessage,
   uuidv4,
-  isValidDID
+  isValidDID,
+  waitForEnclave
 };

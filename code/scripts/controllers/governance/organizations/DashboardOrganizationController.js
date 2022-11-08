@@ -47,14 +47,8 @@ class DashboardOrganizationController extends DwController {
       return;
     }
 
-    this.model.organizations.forEach(async (organization, index) => {
-      const networks = await this.sharedStorageService.filterAsync(constants.TABLES.GOVERNANCE_NETWORKS, `organizationUid == ${organization.uid}`);
-      this.model.organizations[index].clustersCount = networks.length;
-
-      if (index + 1 === this.model.organizations.length) {
-        this.model.areOrganizationsLoaded = true;
-      }
-    });
+    // TODO: Process the voting sessions for the organization to display details
+    this.model.areOrganizationsLoaded = true;
   }
 }
 

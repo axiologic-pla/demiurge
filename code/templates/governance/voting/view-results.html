@@ -1,8 +1,8 @@
 <webc-container controller='governance/voting/ViewResultsController' data-view-model='@'>
   <section class='dw-credentials--header'>
     <dw-title>
-      <p slot='subheader'>Perform Vote</p>
-      <p slot='subheader'>The voting results will be available after at the end of the voting period.</p>
+      <p slot='subheader'>Voting Results</p>
+      <p slot='subheader'></p>
     </dw-title>
   </section>
 
@@ -37,7 +37,7 @@
     <article>
       <div class='dw-form-row'>
         <label>Vote result:</label>
-        <div class='dw-col-2-equal rating-container' data-for='@selectedVotingSession.possibleAnswers'>
+        <div class='dw-col-2-equal rating-container' data-for='@selectedVotingSession.voteResults'>
           <label title='@uid'>{{@label}}</label>
           <div class='progress-wrapper'>
             <div class='progress-bar' data-width='@rating'>{{@rating}}</div>

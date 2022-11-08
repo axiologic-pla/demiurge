@@ -1,4 +1,5 @@
 import constants from '../../../constants.js';
+import { getVotingServiceInstance } from '../../../services/VotingService.js';
 
 const { DwController } = WebCardinal.controllers;
 
@@ -23,9 +24,7 @@ class VotingController extends DwController {
 
     this.ui.page = new VotingUI();
     this.model = this.ui.page.getInitialViewModel();
-
-    this.selectedOrganization = this.model.toObject('selectedOrganization');
-    console.log("organization data: ", this.selectedOrganization);
+    this.votingService = getVotingServiceInstance();
 
     this.init();
   }
@@ -94,9 +93,9 @@ class VotingController extends DwController {
   async fetchVotingSessions() {
     this.model.areVotingSessionsLoaded = false;
     let myVotes = await this.storageService.filterAsync(constants.TABLES.GOVERNANCE_MY_VOTES);
-    let votingSessions = await this.sharedStorageService.filterAsync(constants.TABLES.GOVERNANCE_VOTING_SESSIONS);
-    // Prepare options according to status, due date etc...
-    votingSessions = votingSessions.map(vote => {
+    const votingSessionsEnclaveSSI = this.model.selectedOrganization.votingSessions || [];
+    const votingSessionsDetails = await this.votingService.getVotingSessionsDetails(votingSessionsEnclaveSSI);
+    const votingSessionsModel = votingSessionsDetails.map(vote => {
       const hasVoted = myVotes.filter(v => v.uid === vote.uid)?.length > 0;
       const isConcluded = Date.now() > new Date(vote.deadline).getTime();
 
@@ -129,9 +128,9 @@ class VotingController extends DwController {
       return vote;
     });
 
-    this.model.hasVotingSessions = votingSessions.length > 0;
+    this.model.hasVotingSessions = votingSessionsModel.length > 0;
     this.model.areVotingSessionsLoaded = true;
-    return votingSessions;
+    return votingSessionsModel;
   }
 }
 

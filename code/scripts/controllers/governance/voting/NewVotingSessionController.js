@@ -1,6 +1,7 @@
 import constants from '../../../constants.js';
 import utils from '../../../utils.js';
 import FileManagementService from '../../../services/FileManagementService.js';
+import { getVotingServiceInstance } from '../../../services/VotingService.js';
 
 const { DwController } = WebCardinal.controllers;
 
@@ -22,7 +23,6 @@ class NewVotingSessionUI {
         uid: utils.uuidv4(),
         question: '',
         possibleAnswers: [],
-        numberOfVotes: 0,
         deadline: null,
         isUniqueAnswer: false,
         votingActions: {
@@ -51,7 +51,8 @@ class NewVotingSessionController extends DwController {
     this.attachViewEventListeners();
     this.attachInputEventListeners();
 
-    this.FileManagementService = new FileManagementService();
+    this.votingService = getVotingServiceInstance();
+    this.fileManagementService = new FileManagementService();
   }
 
   attachViewEventListeners() {
@@ -154,17 +155,14 @@ class NewVotingSessionController extends DwController {
         }
 
         modelSubmit.possibleAnswers = possibleAnswers.map(answer => {
-          return {
-            label: answer, uid: utils.uuidv4(), count: 0
-          };
+          return { label: answer, uid: utils.uuidv4() };
         });
 
-        modelSubmit.pk = utils.getPKFromContent(utils.uuidv4());
         if (this.model.isFixedStructure) {
           const documentation = document.querySelector('#upload-documentation');
           if (documentation && documentation.files.length) {
             const file = documentation.files[0];
-            modelSubmit.candidateDocumentationSSI = await this.FileManagementService.writeFileToDsu(file.name, file);
+            modelSubmit.candidateDocumentationSSI = await this.fileManagementService.writeFileToDsu(file.name, file);
             modelSubmit.candidateDocumentationName = file.name;
           } else {
             throw new Error('Candidate documentation is mandatory!');
@@ -231,7 +229,11 @@ class NewVotingSessionController extends DwController {
   }
 
   async submitVotingSession(model) {
-    await this.sharedStorageService.insertRecordAsync(constants.TABLES.GOVERNANCE_VOTING_SESSIONS, model.pk, model);
+    const votingSessionEnclaveSSI = await this.votingService.createVotingSession(model);
+    this.model.selectedOrganization.votingSessions.push(votingSessionEnclaveSSI);
+    const selectedOrganization = this.model.toObject('selectedOrganization');
+    await this.sharedStorageService.updateRecordAsync(constants.TABLES.GOVERNANCE_ORGANIZATIONS, selectedOrganization.pk, selectedOrganization);
+
     this.model.form = this.ui.page.getInitialViewModel().form;
     this.model = {
       isNewVotingOpened: false,

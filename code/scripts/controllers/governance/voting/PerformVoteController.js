@@ -1,6 +1,7 @@
 import constants from '../../../constants.js';
 import utils from '../../../utils.js';
 import FileManagementService from '../../../services/FileManagementService.js';
+import { getVotingServiceInstance } from '../../../services/VotingService.js';
 
 const { DwController } = WebCardinal.controllers;
 
@@ -22,7 +23,8 @@ class PerformVoteController extends DwController {
   init() {
     this.attachViewEventListeners();
 
-    this.FileManagementService = new FileManagementService();
+    this.votingService = getVotingServiceInstance();
+    this.fileManagementService = new FileManagementService();
 
     const selectedVotingSession = this.model.toObject('selectedVotingSession') || {};
     this.model.selectedVotingSession.isFixedStructure = selectedVotingSession.submitVotingType === 'fixed';
@@ -44,8 +46,8 @@ class PerformVoteController extends DwController {
       event.stopImmediatePropagation();
 
       const { candidateDocumentationName, candidateDocumentationSSI } = model.selectedVotingSession;
-      await this.FileManagementService.prepareDownloadFromDsu(candidateDocumentationSSI, candidateDocumentationName);
-      this.FileManagementService.downloadFileToDevice();
+      await this.fileManagementService.prepareDownloadFromDsu(candidateDocumentationSSI, candidateDocumentationName);
+      this.fileManagementService.downloadFileToDevice();
     });
 
     this.onTagClick('vote.add.submit', async (model, target, event) => {
@@ -78,24 +80,17 @@ class PerformVoteController extends DwController {
           uid: this.model.selectedVotingSession.uid,
           answers: [...checkedAnswers]
         };
-        const voteSessionModel = this.model.toObject('selectedVotingSession');
-        voteSessionModel.numberOfVotes = voteSessionModel.numberOfVotes + 1;
-        voteSessionModel.possibleAnswers.map(answer => {
-          if (checkedAnswers.includes(answer.uid)) {
-            answer.count = answer.count + 1;
-          }
-          return answer;
-        });
-        await this.submitVote(myVoteModel, voteSessionModel);
+        await this.submitVote(myVoteModel, checkedAnswers);
       } catch (e) {
         await this.ui.showToast(`Encountered error: ` + e.message, { type: 'danger' });
       }
     });
   }
 
-  async submitVote(myVoteModel, voteSessionModel) {
+  async submitVote(myVoteModel, checkedAnswers) {
     await this.storageService.insertRecordAsync(constants.TABLES.GOVERNANCE_MY_VOTES, utils.getPKFromContent(myVoteModel.uid), myVoteModel);
-    await this.sharedStorageService.updateRecordAsync(constants.TABLES.GOVERNANCE_VOTING_SESSIONS, voteSessionModel.pk, voteSessionModel);
+    // TODO: Check if other details should be provided
+    await this.votingService.addVoteToSession(this.model.selectedVotingSession.enclaveSSI, { answers: checkedAnswers });
     this.model = {
       isNewVotingOpened: false,
       isAddVoteOpened: false,

@@ -1,21 +1,20 @@
-const { DwController } = WebCardinal.controllers;
+import { getVotingServiceInstance } from '../../../services/VotingService.js';
+import FileManagementService from '../../../services/FileManagementService.js';
 
-class ViewResultsUI {
-  getInitialViewModel() {
-    return {};
-  }
-}
+const { DwController } = WebCardinal.controllers;
 
 class ViewResultsController extends DwController {
   constructor(...props) {
     super(...props);
 
-    this.ui.page = new ViewResultsUI();
-    this.model = this.ui.page.getInitialViewModel();
     this.init();
   }
 
   init() {
+    this.votingService = getVotingServiceInstance();
+    this.fileManagementService = new FileManagementService();
+
+    this.initVotingResultsModel();
     this.attachViewEventListeners();
     this.initProgressBars();
   }
@@ -34,20 +33,29 @@ class ViewResultsController extends DwController {
       event.stopImmediatePropagation();
 
       const { candidateDocumentationName, candidateDocumentationSSI } = model.selectedVotingSession;
-      await this.FileManagementService.prepareDownloadFromDsu(candidateDocumentationSSI, candidateDocumentationName);
-      this.FileManagementService.downloadFileToDevice();
+      await this.fileManagementService.prepareDownloadFromDsu(candidateDocumentationSSI, candidateDocumentationName);
+      this.fileManagementService.downloadFileToDevice();
     });
   }
 
   initProgressBars() {
-    this.model.selectedVotingSession.possibleAnswers.map((answer) => {
-      if (this.model.selectedVotingSession.numberOfVotes === 0) {
-        answer.rating = `0%`;
-        return answer;
+    const selectedSession = this.model.toObject('selectedVotingSession');
+    this.model.selectedVotingSession.voteResults = [];
+    const votesCount = selectedSession.votes.length;
+    let allResults = selectedSession.votes.map(vote => vote.answers);
+    allResults = [].concat(...allResults);
+    selectedSession.possibleAnswers.forEach((answer) => {
+      let rating = '0%';
+      const votesNumber = allResults.filter(r => r === answer.uid).length;
+      if (votesNumber > 0) {
+        rating = `${votesNumber * 100 / votesCount}%`;
       }
 
-      answer.rating = `${answer.count * 100 / this.model.selectedVotingSession.numberOfVotes}%`;
-      return answer;
+      this.model.selectedVotingSession.voteResults.push({
+        uid: answer.uid,
+        label: answer.label,
+        rating
+      });
     });
 
     setTimeout(() => {
@@ -59,7 +67,9 @@ class ViewResultsController extends DwController {
       }
     }, 100);
   }
+
+  initVotingResultsModel() {
+  }
 }
 
 export default ViewResultsController;
-export { ViewResultsUI };

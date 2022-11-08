@@ -10,11 +10,12 @@ export default {
     USER_DATABASES: "user_databases_table",
     LOGS_TABLE: "demiurge_logs_table",
     GOVERNANCE_CREDENTIALS: "governance_credentials",
-    GOVERNANCE_VOTING_SESSIONS: "governance_voting_sessions",
     GOVERNANCE_MY_VOTES: "governance_my_votes",
-    GOVERNANCE_NETWORKS: "governance_networks",
-    GOVERNANCE_ORGANIZATIONS: "governance_organizations"
+    GOVERNANCE_ORGANIZATIONS: "governance_organizations",
+    VOTING_DATA_TABLE: "voting_data",
+    VOTES_LIST_TABLE: "votes_list"
   },
+  VOTING_DATA_PK: "voting_data_pk",
   CONTENT_TYPE: {
     CREDENTIAL: "credential",
     DATABASE: "db",
@@ -68,9 +69,9 @@ export default {
     WALLET_AUTHORIZATION: "WALLET_AUTHORIZATION"
   },
 
-  ACCOUNT_STATUS:{
+  ACCOUNT_STATUS: {
     WAITING_APPROVAL: "waitingForApproval",
-    CREATED:"created"
+    CREATED: "created"
   },
   INITIAL_IDENTITY_PUBLIC_NAME: "initial_demiurge_identity",
   SSI_NAME_DID_TYPE: "ssi:name",
