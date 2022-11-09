@@ -84,6 +84,7 @@ class AddEditOrganizationController extends DwController {
         if (this.model.isEditing) {
           await this.sharedStorageService.updateRecordAsync(constants.TABLES.GOVERNANCE_ORGANIZATIONS, submitModel.pk, submitModel);
         } else {
+          submitModel.createdBy = this.did;
           submitModel.votingSessions = [];
           submitModel.members = [];
           submitModel.createdAt = new Date().toLocaleDateString();
@@ -102,10 +103,6 @@ class AddEditOrganizationController extends DwController {
 
       try {
         const submitModel = this.model.toObject('form');
-        if (submitModel.clustersCount !== 0) {
-          throw new Error('The organization cannot be removed! There are blockchain networks defined into the organization!');
-        }
-
         await this.sharedStorageService.deleteRecordAsync(constants.TABLES.GOVERNANCE_ORGANIZATIONS, submitModel.pk);
         this.ui.showToast(`Organization ${submitModel.name} has been removed!`, {type: 'warning'});
         this.goBackToOrganizationsDashboard();
