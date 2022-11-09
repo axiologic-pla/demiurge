@@ -49,9 +49,7 @@ class DwClipboardInput extends HTMLElement {
 
       inputElement.setSelectionRange(0, 0);
       inputElement.blur();
-      await showToast(`Copied to clipboard!`, {
-        duration: 1500,
-      });
+      await showToast(`Copied to clipboard!`);
     };
 
     this.inputElement.updateComplete.then(() => {
