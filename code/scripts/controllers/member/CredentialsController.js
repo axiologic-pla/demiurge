@@ -1,7 +1,7 @@
-import { CredentialsUI } from "../groups/CredentialsController.js";
+import { CredentialsUI } from '../groups/CredentialsController.js';
 import { parseJWTSegments } from '../../services/JWTCredentialService.js';
-import constants from "../../constants.js";
-import utils from "../../utils.js";
+import constants from '../../constants.js';
+import utils from '../../utils.js';
 
 const { DwController } = WebCardinal.controllers;
 
@@ -28,33 +28,34 @@ class CredentialsController extends DwController {
       this.model.isAssignCredentialOpened = !this.model.isAssignCredentialOpened;
     });
 
-    this.onTagClick("credential.assign", async (model) => {
+    this.onTagClick('member.credential.assign', async (model) => {
       try {
         const group = this.model.selectedGroup;
         const member = this.model.selectedMember;
         await this.storeCredential(model, member.did);
         this.model.credentials.push({ ...model });
         await this.shareCredential(group, member, model.token);
+        await this.deleteCredentialFromGovernanceTable(model.token);
         this.model.hasCredentials = true;
         this.model.isAssignCredentialOpened = false;
-        await this.ui.showToast('Credential assigned to member!', {type: 'success'});
+        await this.ui.showToast('Credential assigned to member!', { type: 'success' });
       } catch (err) {
         console.log(err);
-        await this.ui.showToast('Encountered error: ' + err, {type: 'danger'});
+        await this.ui.showToast('Encountered error: ' + err, { type: 'danger' });
       }
     });
 
-    this.onTagClick("credential.select", async (...props) => {
+    this.onTagClick('member.credential.select', async (...props) => {
       await ui.page.copyTokenToClipboard.apply(this, props);
     });
 
-    this.onTagClick('credential.inspect', async (model) => {
+    this.onTagClick('member.credential.inspect', async (model) => {
       let jsonCredential = {};
       try {
         switch (model.encodingType) {
           case constants.JWT_ENCODING: {
             jsonCredential = parseJWTSegments(model.token);
-            jsonCredential.jwtSignature = $$.Buffer.from(jsonCredential.jwtSignature).toString("base64");
+            jsonCredential.jwtSignature = $$.Buffer.from(jsonCredential.jwtSignature).toString('base64');
             break;
           }
           case constants.GS1_ENCODING: {
@@ -71,11 +72,11 @@ class CredentialsController extends DwController {
         await this.ui.showDialogFromComponent('dw-dialog-view-credential', model);
       } catch (err) {
         console.log(err);
-        await this.ui.showToast('Encountered error: ' + err, {type: 'danger'});
+        await this.ui.showToast('Encountered error: ' + err, { type: 'danger' });
       }
     });
 
-    this.onTagClick('credential.delete', async (deletedCredential) => {
+    this.onTagClick('member.credential.delete', async (deletedCredential) => {
       try {
         if (deletedCredential.credentialType === constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION) {
           throw new Error('Wallet Authorization credential cannot be deleted!');
@@ -87,10 +88,10 @@ class CredentialsController extends DwController {
         );
         this.model.hasCredentials = this.model.credentials.length > 0;
         this.model.areCredentialsLoaded = true;
-        await this.ui.showToast('Credential deleted: ' + deletedCredential.token, {type: 'warning'});
+        await this.ui.showToast('Credential deleted: ' + deletedCredential.token, { type: 'warning' });
       } catch (err) {
         console.log(err);
-        await this.ui.showToast('Encountered error: ' + err, {type: 'danger'});
+        await this.ui.showToast('Encountered error: ' + err, { type: 'danger' });
       }
     });
 
@@ -133,6 +134,14 @@ class CredentialsController extends DwController {
       ...credentialObj,
       memberDID: memberDID
     });
+  }
+
+  async deleteCredentialFromGovernanceTable(token) {
+    await this.sharedStorageService.deleteRecordAsync(constants.TABLES.GOVERNANCE_CREDENTIALS, utils.getPKFromContent(token));
+    this.model.governanceCredentials = this.model.governanceCredentials.filter(
+      (credential) => credential.token !== token
+    );
+    this.model.hasGovernanceCredentials = this.model.governanceCredentials.length > 0;
   }
 
   /**

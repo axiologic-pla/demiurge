@@ -45,6 +45,7 @@ class CredentialsController extends DwController {
         await this.storeCredential(model, group.did);
         this.model.credentials.push({ ...model });
         await this.shareCredentialWithMembers(group, model.token);
+        await this.deleteCredentialFromGovernanceTable(model.token);
         this.model.hasCredentials = true;
         this.model.isAssignCredentialOpened = false;
         await this.ui.showToast('Credential assigned to group!', {type: 'success'});
@@ -163,6 +164,14 @@ class CredentialsController extends DwController {
       constants.RECIPIENT_TYPES.GROUP_RECIPIENT,
       constants.OPERATIONS.ADD
     );
+  }
+
+  async deleteCredentialFromGovernanceTable(token) {
+    await this.sharedStorageService.deleteRecordAsync(constants.TABLES.GOVERNANCE_CREDENTIALS, utils.getPKFromContent(token));
+    this.model.governanceCredentials = this.model.governanceCredentials.filter(
+      (credential) => credential.token !== token
+    );
+    this.model.hasGovernanceCredentials = this.model.governanceCredentials.length > 0;
   }
 
   /**
