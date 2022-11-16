@@ -1,9 +1,9 @@
 import { CredentialsUI } from "../groups/CredentialsController.js";
+import { parseJWTSegments } from '../../services/JWTCredentialService.js';
 import constants from "../../constants.js";
 import utils from "../../utils.js";
 
 const { DwController } = WebCardinal.controllers;
-const { promisify } = utils;
 
 class CredentialsController extends DwController {
   constructor(...props) {
@@ -17,20 +17,30 @@ class CredentialsController extends DwController {
       selectedGroup,
       selectedMember,
       credentials: [],
+      governanceCredentials: [],
+      hasCredentials: false,
       areCredentialsLoaded: false,
+      isAssignCredentialOpened: false,
+      hasGovernanceCredentials: false
     };
 
-    this.onTagClick("credential.add", async () => {
+    this.onTagClick('toggle.credential.assign', () => {
+      this.model.isAssignCredentialOpened = !this.model.isAssignCredentialOpened;
+    });
+
+    this.onTagClick("credential.assign", async (model) => {
       try {
         const group = this.model.selectedGroup;
         const member = this.model.selectedMember;
-        const credential = await this.generateCredential(member);
-        await this.storeCredential(member, credential);
-        this.model.credentials.push({ token: credential });
-        await this.shareCredential(group, member, credential);
-        await ui.showToast(credential, {type: 'success'});
+        await this.storeCredential(model, member.did);
+        this.model.credentials.push({ ...model });
+        await this.shareCredential(group, member, model.token);
+        this.model.hasCredentials = true;
+        this.model.isAssignCredentialOpened = false;
+        await this.ui.showToast('Credential assigned to member!', {type: 'success'});
       } catch (err) {
-        await ui.showToast("Encountered error: " + err.message, {type: 'danger'});
+        console.log(err);
+        await this.ui.showToast('Encountered error: ' + err, {type: 'danger'});
       }
     });
 
@@ -38,59 +48,90 @@ class CredentialsController extends DwController {
       await ui.page.copyTokenToClipboard.apply(this, props);
     });
 
-    this.onTagClick("credential.inspect", async (model) => {
+    this.onTagClick('credential.inspect', async (model) => {
+      let jsonCredential = {};
       try {
-        const crypto = require("opendsu").loadAPI("crypto");
-        const jsonCredential = await promisify(crypto.parseJWTSegments)(model.token);
-        jsonCredential.signature = $$.Buffer.from(jsonCredential.signature).toString("base64");
-        model.json = JSON.stringify(jsonCredential, null, 4);
-        await ui.showDialogFromComponent("dw-dialog-view-credential", model, { parentElement: this.element });
+        switch (model.encodingType) {
+          case constants.JWT_ENCODING: {
+            jsonCredential = parseJWTSegments(model.token);
+            jsonCredential.jwtSignature = $$.Buffer.from(jsonCredential.jwtSignature).toString("base64");
+            break;
+          }
+          case constants.GS1_ENCODING: {
+            // TODO: Check how to decode GS1 credentials
+            break;
+          }
+          default:
+            throw new Error('Encoding type not recognized! Cannot inspect the token!');
+        }
+
+        const tags = `Credential Tags:\n${model.tags}\n\n`;
+        const decodedCredential = JSON.stringify(jsonCredential, null, 4);
+        model.json = tags + decodedCredential;
+        await this.ui.showDialogFromComponent('dw-dialog-view-credential', model);
       } catch (err) {
         console.log(err);
+        await this.ui.showToast('Encountered error: ' + err, {type: 'danger'});
       }
     });
 
-    this.onTagClick("credential.delete", async (deletedCredential) => {
+    this.onTagClick('credential.delete', async (deletedCredential) => {
       try {
+        if (deletedCredential.credentialType === constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION) {
+          throw new Error('Wallet Authorization credential cannot be deleted!');
+        }
+
         await this.deleteCredential(deletedCredential.token);
         this.model.credentials = this.model.credentials.filter(
           (credential) => credential.token !== deletedCredential.token
         );
-        await ui.showToast(deletedCredential, {type: 'warning'});
+        this.model.hasCredentials = this.model.credentials.length > 0;
+        this.model.areCredentialsLoaded = true;
+        await this.ui.showToast('Credential deleted: ' + deletedCredential.token, {type: 'warning'});
       } catch (err) {
-        await ui.showToast("Encountered error: " + err.message, {type: 'danger'});
+        console.log(err);
+        await this.ui.showToast('Encountered error: ' + err, {type: 'danger'});
       }
     });
 
     setTimeout(async () => {
-      this.model.credentials = await this.fetchCredentials();
+      this.model.credentials = await this.fetchCredentials(this.model.selectedMember.did);
+      this.model.governanceCredentials = await this.fetchGovernanceCredentials();
+      this.model.hasCredentials = this.model.credentials.length > 0;
+      this.model.hasGovernanceCredentials = this.model.governanceCredentials.length > 0;
       this.model.areCredentialsLoaded = true;
     });
   }
 
-  async fetchCredentials() {
-    return await this.storageService.filterAsync(constants.TABLES.USER_CREDENTIALS);
+  async fetchCredentials(memberDID) {
+    const memberCredentials = await this.storageService.filterAsync(constants.TABLES.USER_CREDENTIALS, `memberDID == ${memberDID}`);
+    return memberCredentials.map(el => {
+      const tags = (el.tags || []).join(', ');
+      return { ...el, tags };
+    });
   }
 
   /**
-   * @param {object} member
-   * @param {string} member.did
+   * @returns {Promise<*>}
    */
-  async generateCredential(member) {
-    const crypto = require("opendsu").loadAPI("crypto");
-    return await promisify(crypto.createCredentialForDID)(this.identity.did, member.did);
+  async fetchGovernanceCredentials() {
+    const governanceCredentials = await this.sharedStorageService.filterAsync(constants.TABLES.GOVERNANCE_CREDENTIALS);
+    return governanceCredentials.map(el => {
+      const tags = (el.tags || []).join(', ');
+      return { ...el, tags };
+    });
   }
 
   /**
-   * @param {object} member
-   * @param {string} member.did
-   * @param {string} token
+   * @param {object} credentialObj
+   * @param {string} credentialObj.token
+   * @param {string} memberDID
    */
-  async storeCredential(member, token) {
-    await this.storageService.insertRecordAsync(constants.TABLES.USER_CREDENTIALS, utils.getPKFromContent(token), {
-      issuer: this.identity.did,
-      memberDID: member.did,
-      token,
+  async storeCredential(credentialObj, memberDID) {
+    credentialObj.tags = credentialObj.tags.split(', ');
+    await this.storageService.insertRecordAsync(constants.TABLES.USER_CREDENTIALS, utils.getPKFromContent(credentialObj.token), {
+      ...credentialObj,
+      memberDID: memberDID
     });
   }
 
@@ -103,7 +144,7 @@ class CredentialsController extends DwController {
 
   async shareCredential(group, member, token) {
     await utils.sendUserMessage(
-      this.identity.did,
+      this.did,
       group,
       member,
       token,

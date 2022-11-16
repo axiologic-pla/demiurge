@@ -45,6 +45,7 @@ class CredentialsController extends DwController {
         await this.storeCredential(model, group.did);
         this.model.credentials.push({ ...model });
         await this.shareCredentialWithMembers(group, model.token);
+        this.model.hasCredentials = true;
         this.model.isAssignCredentialOpened = false;
         await this.ui.showToast('Credential assigned to group!', {type: 'success'});
       } catch (err) {
