@@ -90,7 +90,10 @@ class PerformVoteController extends DwController {
   async submitVote(myVoteModel, checkedAnswers) {
     await this.storageService.insertRecordAsync(constants.TABLES.GOVERNANCE_MY_VOTES, utils.getPKFromContent(myVoteModel.uid), myVoteModel);
     // TODO: Check if other details should be provided
-    await this.votingService.addVoteToSession(this.model.selectedVotingSession.enclaveSSI, { answers: checkedAnswers });
+    await this.votingService.addVoteToSession(this.model.selectedVotingSession.enclaveSSI, {
+      answers: checkedAnswers,
+      voterDID: this.did
+    });
     this.model = {
       isNewVotingOpened: false,
       isAddVoteOpened: false,

@@ -7,8 +7,7 @@ class ManageOrganizationUI extends DwController {
 
   getInitialViewModel() {
     return {
-      isVotingSelected: true,
-      isMonitoringSelected: false
+      isMonitoringSelected: true
     };
   }
 }
@@ -20,9 +19,6 @@ class ManageOrganizationController extends DwController {
     this.ui.page = new ManageOrganizationUI(...props);
     this.model = this.ui.page.getInitialViewModel();
 
-    this.selectedOrganization = this.model.toObject('selectedOrganization');
-    console.log("organization data: ", this.selectedOrganization);
-
     this.attachEventListeners();
   }
 
@@ -33,7 +29,6 @@ class ManageOrganizationController extends DwController {
 
       const activePanelHandler = target.getAttribute('data-template-handler');
       this.model = {
-        isVotingSelected: false,
         isMonitoringSelected: false
       };
       this.model[activePanelHandler] = true;

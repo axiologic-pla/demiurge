@@ -1,11 +1,8 @@
-import constants from '../../../constants.js';
-
 const { DwController } = WebCardinal.controllers;
 
 class ViewOrganizationUI {
   getInitialViewModel() {
     return {
-      votingSessions: [],
       areVotingSessionsLoaded: false,
       hasVotingSessions: false
     };
@@ -27,7 +24,8 @@ class ViewOrganizationController extends DwController {
       setTimeout(async () => {
         const scAPI = require('opendsu').loadAPI('sc');
         if (scAPI.sharedEnclaveExists()) {
-          this.model.votingSessions = await this.fetchVotingSessions();
+          // Fetch required data to populate the page
+          // Voting sessions, members etc
         } else {
           waitForSharedEnclave();
         }
@@ -35,15 +33,6 @@ class ViewOrganizationController extends DwController {
     };
 
     waitForSharedEnclave();
-  }
-
-  async fetchVotingSessions() {
-    this.model.areVotingSessionsLoaded = false;
-    const votingSessions = await this.sharedStorageService
-      .filterAsync(constants.TABLES.GOVERNANCE_VOTING_SESSIONS, `organizationUid == ${this.model.selectedOrganization.uid}`);
-    this.model.hasVotingSessions = votingSessions.length > 0;
-    this.model.areVotingSessionsLoaded = true;
-    return votingSessions;
   }
 }
 

@@ -12,6 +12,7 @@ export default {
     GOVERNANCE_CREDENTIALS: "governance_credentials",
     GOVERNANCE_MY_VOTES: "governance_my_votes",
     GOVERNANCE_ORGANIZATIONS: "governance_organizations",
+    VOTING_SESSIONS: "voting_sessions",
     VOTING_DATA_TABLE: "voting_data",
     VOTES_LIST_TABLE: "votes_list"
   },

@@ -93,7 +93,8 @@ class VotingController extends DwController {
   async fetchVotingSessions() {
     this.model.areVotingSessionsLoaded = false;
     let myVotes = await this.storageService.filterAsync(constants.TABLES.GOVERNANCE_MY_VOTES);
-    const votingSessionsEnclaveSSI = this.model.selectedOrganization.votingSessions || [];
+    let votingSessions = await this.sharedStorageService.filterAsync(constants.TABLES.VOTING_SESSIONS);
+    const votingSessionsEnclaveSSI = votingSessions.map(session => session.votingSessionEnclaveSSI);
     const votingSessionsDetails = await this.votingService.getVotingSessionsDetails(votingSessionsEnclaveSSI);
     const votingSessionsModel = votingSessionsDetails.map(vote => {
       const hasVoted = myVotes.filter(v => v.uid === vote.uid)?.length > 0;
