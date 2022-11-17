@@ -208,6 +208,8 @@ class BootingIdentityController extends DwController {
       memberDID: did,
       memberName: userDetails
     };
+    await utils.addLogMessage(did, constants.OPERATIONS.SHARED_ENCLAVE_CREATE, adminGroup.name, this.userName || "-");
+
     await this.processMessages(sharedEnclave, addMemberToGroupMessage);
   }
 

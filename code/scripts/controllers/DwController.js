@@ -1,13 +1,13 @@
-import { escapeHTML, isHTMLElement } from "../../components/utils.js";
+import {escapeHTML, isHTMLElement} from "../../components/utils.js";
 
-const { WebcController } = WebCardinal.controllers;
+const {WebcController} = WebCardinal.controllers;
 
 class DwController extends WebcController {
   constructor(...props) {
     super(...props);
     this._ui = new DwUI(...props);
 
-    for (const item of ["did", "userDetails", "messageProcessingService"]) {
+    for (const item of ["did", "userDetails", "userName", "messageProcessingService"]) {
       this[item] = WebCardinal.wallet[item];
     }
     this.domain = WebCardinal.wallet.vaultDomain;
@@ -127,22 +127,22 @@ class DwUI {
         return reject("'sl-form' element not found!");
       }
 
-      function listener (event) {
+      function listener(event) {
         const result = {};
-        const { formControls } = event.detail;
+        const {formControls} = event.detail;
 
         for (const element of formControls) {
-          const { name } = element;
+          const {name} = element;
           if (!name) {
             continue;
           }
           result[name] = element.value;
           if (element.tagName === "SL-INPUT") {
             const inputElement = element.shadowRoot.querySelector(
-                "[part=input]"
+              "[part=input]"
             );
             const baseElement = element.shadowRoot.querySelector(
-                "[part=clear-button]"
+              "[part=clear-button]"
             );
             if (inputElement) {
               element.value = "";
@@ -152,7 +152,7 @@ class DwUI {
               baseElement.remove();
             }
           }
-          return resolve({ ...result, event });
+          return resolve({...result, event});
         }
       }
 
@@ -169,7 +169,7 @@ class DwUI {
    * @param {'primary' | 'success' | 'info' | 'warning' | 'danger'} [type]
    * @param {boolean} [closable]
    */
-  showToast(message, { duration, icon, type, closable } = {}) {
+  showToast(message, {duration, icon, type, closable} = {}) {
     if (typeof message === "object") {
       message = JSON.stringify(message, null, 4);
     }
@@ -226,9 +226,10 @@ class DwUI {
    * @param {boolean} [options.disableClosing]
    */
   async showDialogFromComponent(component, attributes = {}, options = {}) {
-    let { parentElement, onClose, disableClosing } = options;
+    let {parentElement, onClose, disableClosing} = options;
     if (typeof onClose !== "function") {
-      onClose = () => {};
+      onClose = () => {
+      };
     }
 
     if (!isHTMLElement(parentElement)) {
@@ -299,4 +300,4 @@ class DwUI {
   }
 }
 
-export { DwController, DwUI };
+export {DwController, DwUI};

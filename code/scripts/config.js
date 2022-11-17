@@ -5,6 +5,7 @@ import constants from "./constants.js";
 
 const {setConfig, getConfig, addControllers, addHook, navigateToPageTag} = WebCardinal.preload;
 const {define} = WebCardinal.components;
+let userName = "-"
 
 function getInitialConfig() {
   const config = getConfig();
@@ -44,7 +45,11 @@ addHook("beforeAppLoads", async () => {
   const {getCommunicationService} = await import("./services/CommunicationService.js");
 
   wallet.vaultDomain = await getVaultDomainAsync();
-  wallet.userDetails = await getUserDetails();
+  let userData = await getUserDetails();
+
+  wallet.userDetails = userData.userAppDetails;
+  wallet.userName = userData.userName;
+  userName = userData.userName;
   wallet.did = await getStoredDID();
 
   // load Custom Components
@@ -62,7 +67,7 @@ addHook("beforeAppLoads", async () => {
 });
 
 addHook("afterAppLoads", async () => {
-  const { getEnvironmentDataAsync } = await import("./hooks/getEnvironmentData.js");
+  const {getEnvironmentDataAsync} = await import("./hooks/getEnvironmentData.js");
   const envData = await getEnvironmentDataAsync() || {};
   const enableGovernance = envData.enableGovernance || false;
 
@@ -86,7 +91,7 @@ addHook("afterAppLoads", async () => {
     }
 
     if (menuItemName === "Governance") {
-      if(!enableGovernance) {
+      if (!enableGovernance) {
         item.remove();
         return;
       }
@@ -123,7 +128,7 @@ addHook("beforePageLoads", "quick-actions", async () => {
     try {
       groups = await $$.promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
       const adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE || gr.name === constants.EPI_ADMIN_GROUP_NAME) || {};
-      await utils.addLogMessage(did, "login", adminGroup.name, "-");
+      await utils.addLogMessage(did, constants.OPERATIONS.LOGIN, adminGroup.name, userName);
     } catch (e) {
       console.log("Could not log user login action ", e);
     }
@@ -133,7 +138,7 @@ addHook("beforePageLoads", "quick-actions", async () => {
     }
   }
 
-  if(sharedEnclave){
+  if (sharedEnclave) {
     return await __logLoginAction();
   }
 

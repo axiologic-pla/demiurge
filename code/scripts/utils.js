@@ -107,7 +107,7 @@ async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, pr
   let logService = new LogService(constants.TABLES.LOGS_TABLE);
   let logMsg = {
     logPk: logPk,
-    actionUserId: actionUserId || WebCardinal.wallet.userDetails,
+    actionUserId: actionUserId || WebCardinal.wallet.userName,
     userDID: userDID || "-",
     action: action,
     group: userGroup,
