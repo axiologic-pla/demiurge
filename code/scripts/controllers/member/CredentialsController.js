@@ -69,7 +69,7 @@ class CredentialsController extends DwController {
         const tags = `Credential Tags:\n${model.tags}\n\n`;
         const decodedCredential = JSON.stringify(jsonCredential, null, 4);
         model.json = tags + decodedCredential;
-        await this.ui.showDialogFromComponent('dw-dialog-view-credential', model);
+        await this.ui.showDialogFromComponent('dw-dialog-view-credential', model, { parentElement: this.element });
       } catch (err) {
         console.log(err);
         await this.ui.showToast('Encountered error: ' + err, { type: 'danger' });
