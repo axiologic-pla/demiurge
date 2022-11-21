@@ -31,10 +31,11 @@ export default {
     GROUP_RECIPIENT: "group"
   },
   OPERATIONS: {
-    REMOVE: "remove",
-    ADD: "add",
-    DEACTIVATE: "deactivate",
-    LOGIN: "login"
+    REMOVE: "Remove user",
+    ADD: "Add user",
+    DEACTIVATE: "Deactivate user",
+    LOGIN: "Access wallet ",
+    SHARED_ENCLAVE_CREATE: "Create identity "
   },
   SHARED_ENCLAVE: "demiurgeSharedEnclave",
   ADMIN_ACCESS_MODE: "admin",

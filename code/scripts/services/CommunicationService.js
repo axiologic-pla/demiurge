@@ -17,7 +17,7 @@ function CommunicationService() {
         message = JSON.parse(message);
         if (message.sender !== did.getIdentifier()) {
           if (message.messageType === "UserLogin") {
-            await utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, "ePI Write Group", "-", message.messageId);
+            await utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroupName, message.userId || "-", message.messageId);
             return callback();
           }
           await utils.addSharedEnclaveToEnv(message.enclave.enclaveType, message.enclave.enclaveDID, message.enclave.enclaveKeySSI);

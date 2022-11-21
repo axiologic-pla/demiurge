@@ -6,7 +6,10 @@ async function getUserDetails() {
     const openDSU = require("opendsu");
     const config = openDSU.loadAPI("config");
     let appName = await $$.promisify(config.getEnv)("appName");
-    return `${appName || "-"}/${returnResult}`
+    return {
+      userAppDetails: `${appName || "-"}/${returnResult}`,
+      userName: jsonResult.username
+    }
   } catch (err) {
     console.error(`Failed to get user's details`, err);
     return {};
