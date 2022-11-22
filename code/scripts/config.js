@@ -59,7 +59,7 @@ addHook("beforeAppLoads", async () => {
   await import("../components/dw-title/dw-title.js");
   await import("../components/dw-data-grid/dw-data-grid.js");
   await import("../components/dw-clipboard-input/dw-clipboard-input.js");
-  await import("../components/did-generator/did-generator.js");
+
 
   // load Demiurge base Controller
   const {DwController} = await import("./controllers/DwController.js");
@@ -67,6 +67,7 @@ addHook("beforeAppLoads", async () => {
 });
 
 addHook("afterAppLoads", async () => {
+  await import("../components/did-generator/did-generator.js");
   const {getEnvironmentDataAsync} = await import("./hooks/getEnvironmentData.js");
   const envData = await getEnvironmentDataAsync() || {};
   const enableGovernance = envData.enableGovernance || false;
@@ -108,55 +109,6 @@ addHook("afterAppLoads", async () => {
   });
 });
 
-addHook("beforePageLoads", "quick-actions", async () => {
-  const scAPI = require("opendsu").loadAPI("sc");
-  const did = await getStoredDID();
-  if (!did) {
-    await navigateToPageTag("booting-identity");
-    return;
-  }
-
-  let sharedEnclave;
-  try {
-    sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
-  } catch (e) {
-    console.log("Failed to get shared enclave. Waiting for approval message ...");
-  }
-
-  const __logLoginAction = async () => {
-    let groups = [];
-    try {
-      groups = await $$.promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
-      const adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE || gr.name === constants.EPI_ADMIN_GROUP_NAME) || {};
-      await utils.addLogMessage(did, constants.OPERATIONS.LOGIN, adminGroup.name, userName);
-    } catch (e) {
-      console.log("Could not log user login action ", e);
-    }
-    const activeElement = document.querySelector("webc-app-menu-item[active]");
-    if (activeElement) {
-      activeElement.removeAttribute("active");
-    }
-  }
-
-  if (sharedEnclave) {
-    return await __logLoginAction();
-  }
-
-  const didApproved = await didWasApproved(did);
-  if (!didApproved) {
-    await navigateToPageTag("booting-identity");
-    return;
-  }
-
-  if (!sharedEnclave) {
-    return getCommunicationService().waitForMessage(did, async () => {
-      await __logLoginAction();
-    });
-  }
-
-  await __logLoginAction();
-});
-
 setConfig(getInitialConfig());
 
 
@@ -168,4 +120,5 @@ define("dw-dialog-booting-identity");
 define("dw-dialog-add-domain");
 define("dw-dialog-waiting-approval");
 define("dw-dialog-initialising");
+define("dw-dialog-break-glass-recovery");
 define("dw-dialog-group-members-update");

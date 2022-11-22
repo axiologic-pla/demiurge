@@ -34,7 +34,8 @@ export default {
     ADD: "Add user",
     DEACTIVATE: "Deactivate user",
     LOGIN: "Access wallet ",
-    SHARED_ENCLAVE_CREATE: "Create identity "
+    SHARED_ENCLAVE_CREATE: "Create identity ",
+    BREAK_GLASS_RECOVERY: "Wallet recovered with The Break Glass Recovery Code"
   },
   SHARED_ENCLAVE: "demiurgeSharedEnclave",
   ADMIN_ACCESS_MODE: "admin",

@@ -1,0 +1,58 @@
+<link href="./assets/pages/quick-actions.css" rel="stylesheet"/>
+<link rel="stylesheet" href="./assets/pages/booting-identity.css">
+
+<webc-container controller="HomeController" id="home-page" class="dw-container">
+    <div data-if="@showBootingIdentity">
+        <div id="booting-page" slot="true">
+            <dw-title>Booting Identity</dw-title>
+
+            <sl-alert open type='primary'>
+                <sl-icon slot="icon" name="exclamation-triangle"></sl-icon>
+                <strong>You do not have a DID, so we will create one.<br>
+                    Choose the DID type and press Create identity button.
+                </strong>
+            </sl-alert>
+
+            <did-generator
+                    domain="@domain" name="@username"
+                    default="did:ssi:name"
+                    readonly="did:ssi:name, did:ssi:key"
+                    disable="did:ssi:group, did:web"
+                    data-tag="did-component">
+            </did-generator>
+        </div>
+
+        <div id="quick-actions-page" slot="false">
+            <!--  <dw-title shadow>Domain</dw-title>-->
+            <!--  <div class="dw-domain">-->
+            <!--    <span>Current location:</span>-->
+            <!--    <sl-tag size="large" type="info">{{ @domain }}</sl-tag>-->
+            <!--  </div>-->
+
+            <dw-title shadow>Quick actions</dw-title>
+            <main class="dw-actions">
+                <dw-action action="My Identities" icon="person-fill" tag="my-identities"
+                           tooltip="My Identities"></dw-action>
+                <dw-action action="Groups" icon="people-fill" tag="groups" tooltip="Groups"></dw-action>
+                <dw-action action="Governance" hidden icon="clouds-fill" tag="governance"
+                           tooltip="Governance"></dw-action>
+                <dw-action action="Audit" icon="person-lines-fill" tag="audit" tooltip="Audit"></dw-action>
+
+                <!--hide because not implemented yet -->
+                <!--*******************-->
+                <!--        <dw-action action="BDNS" icon="diagram-3" tag="bdns" tooltip="BDNS"></dw-action>-->
+                <!--        <dw-action action="My Keys" icon="key" tag="my-keys" tooltip="My Keys"></dw-action>-->
+                <!--        <dw-action action="Workspaces" icon="collection" tag="workspaces" tooltip="Workspaces"></dw-action>-->
+                <!--        <dw-action action="Contracts" icon="journal-code" tag="contracts" tooltip="Contracts"></dw-action>-->
+                <!--        <dw-action action="Subdomains" icon="diagram-3" tag="subdomains" tooltip="Subdomains"></dw-action>-->
+                <!--*******************-->
+
+
+                <!--    <dw-action data-tag="configuration.show" action="Configuration" icon="gear" tooltip="Configuration"></dw-action>-->
+
+                <!--    <dw-action tag="tokens" action="Tokens" icon="coin" tooltip="Tokens"></dw-action>-->
+                <!--    <dw-action tag="keys" action="Keys" icon="lock" tooltip="Keys"></dw-action>-->
+            </main>
+        </div>
+    </div>
+</webc-container>

@@ -8,7 +8,7 @@ class LogsDataSource extends DataSource {
   constructor(...props) {
     const [customOptions, ...defaultOptions] = props;
     super(...defaultOptions);
-    this.itemsOnPage = 15;
+    this.itemsOnPage = 5;
     this.dsuStorage = customOptions.dsuStorage;
     this.tableName = customOptions.tableName;
     this.searchField = customOptions.searchField;
@@ -122,7 +122,9 @@ class LogsDataSource extends DataSource {
     }
 
     if (resultData.length === 0) {
-      document.querySelector(".search-container").hidden = true;
+      if(document.querySelector(".search-container")){
+        document.querySelector(".search-container").hidden = true;
+      }
     }
 
     return this.getMappedResult(resultData);
