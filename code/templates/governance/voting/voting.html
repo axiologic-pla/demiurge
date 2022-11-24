@@ -48,16 +48,10 @@
               <div><label>{{@deadline}}</label></div>
               <div><label data-status='@canVote'>{{@status}}</label></div>
               <div><label data-status='@concluded'>{{@overallStatus}}</label></div>
-              <div>
-                <div data-if='@option'>
-                  <sl-button data-tag='@option.eventTag' outline type='@option.buttonType'>
-                    {{@option.optionLabel}}
-                    <sl-icon name='@option.icon' slot='prefix'></sl-icon>
-                  </sl-button>
-                </div>
-                <sl-button data-tag='toggle.voting.results' outline type='primary'>
-                  View Results
-                  <sl-icon name='eye' slot='prefix'></sl-icon>
+              <div data-if='@option'>
+                <sl-button data-tag='@option.eventTag' outline type='@option.buttonType'>
+                  {{@option.optionLabel}}
+                  <sl-icon name='@option.icon' slot='prefix'></sl-icon>
                 </sl-button>
               </div>
             </article>
