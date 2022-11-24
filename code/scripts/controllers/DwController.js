@@ -13,8 +13,8 @@ class DwController extends WebcController {
     this.domain = WebCardinal.wallet.vaultDomain;
 
     if (!this.did) {
-      if (WebCardinal.state.page.tag !== "booting-identity") {
-        this.navigateToPageTag("booting-identity");
+      if (WebCardinal.state.page.tag !== "home") {
+        this.navigateToPageTag("home");
         return;
       }
     }
@@ -274,10 +274,24 @@ class DwUI {
       [component]: slElement,
     };
 
-    slElement.addEventListener("sl-hide", async () => {
-      dialogElement.remove();
+    slElement.addEventListener("sl-request-close", async (event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    });
+
+    slElement.addEventListener("sl-hide", async (event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
       await onClose();
     });
+
+    if (slElement.querySelector("sl-icon-button[close]")) {
+      slElement.querySelector("sl-icon-button[close]").addEventListener("click", async () => {
+        dialogElement.remove();
+        await onClose();
+      })
+    }
+
 
     setTimeout(async () => {
       await slElement.show();

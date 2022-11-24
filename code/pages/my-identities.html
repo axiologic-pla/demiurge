@@ -4,14 +4,4 @@
     <dw-title>Current identity</dw-title>
 
     <dw-clipboard-input value="@did" readonly></dw-clipboard-input>
-
-    <dw-title>Recovery Code</dw-title>
-    <div data-if="@notAuthorized">
-        <div slot="true">
-            <p>Not able to display recovery code since the user hasn't been authorized.</p>
-        </div>
-        <div slot="false">
-            <dw-clipboard-input type="password" value="@sharedEnclaveKeySSI" disabled="@notAuthorized" readonly></dw-clipboard-input>
-        </div>
-    </div>
 </webc-container>

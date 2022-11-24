@@ -1,6 +1,6 @@
 {
     "name": "demiurge",
-    "version": "v1.2.1",
+    "version": "v1.2.2",
     "description": "",
     "scripts": {
         "build": "node ./../node_modules/octopus/scripts/buildDSU.js",

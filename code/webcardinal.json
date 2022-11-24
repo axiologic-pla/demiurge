@@ -32,7 +32,6 @@
       "tag": "workspaces",
       "indexed": false
     },
-
     {
       "name": "Member",
       "path": "/groups/member",
@@ -41,14 +40,9 @@
     },
     {
       "path": "/",
-      "name": "Quick Actions",
-      "tag": "quick-actions",
-      "src": "quick-actions.html",
-      "indexed": false
-    },
-    {
-      "name": "Booting Identity",
-      "tag": "booting-identity",
+      "name": "Home",
+      "tag": "home",
+      "src": "home.html",
       "indexed": false
     },
     {

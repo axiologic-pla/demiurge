@@ -1,0 +1,21 @@
+.dw-dialog {
+    --width: 40rem;
+}
+
+.dw-dialog-break-glass-recovery header {
+    padding-bottom: var(--sl-spacing-medium);
+}
+
+.dw-dialog-break-glass-recovery main {
+    padding: var(--sl-spacing-medium);
+    margin-bottom: var(--sl-spacing-medium);
+}
+
+.dw-dialog-break-glass-recovery #recovery-div {
+    margin-bottom: 16px;
+    padding-bottom: 20px;
+}
+
+.dw-paste::part(base):hover {
+    color: rgb(var(--sl-color-primary-50));
+}
