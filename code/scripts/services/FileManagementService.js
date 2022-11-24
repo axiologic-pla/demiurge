@@ -41,8 +41,8 @@ export default class FileManagementService {
 
     window.URL = window.URL || window.webkitURL;
     if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-      const file = new File([file.rawBlob], file.fileName);
-      window.navigator.msSaveOrOpenBlob(file);
+      const fileBlob = new File([file.rawBlob], file.fileName);
+      window.navigator.msSaveOrOpenBlob(fileBlob);
       return;
     }
 
