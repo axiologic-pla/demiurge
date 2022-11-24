@@ -1,21 +1,9 @@
 <webc-container controller='governance/organizations/ManageOrganizationController' data-view-model='@'>
   <sl-tab-group class='dw-governance-content dw-manage-organization-container'>
-    <sl-tab data-tag='organization.change.tab' data-template-handler='isVotingSelected' panel='voting' slot='nav'>
-      <sl-icon name='key-fill'></sl-icon>
-      Voting
-    </sl-tab>
-
     <sl-tab data-tag='organization.change.tab' data-template-handler='isMonitoringSelected' panel='monitoring' slot='nav'>
       <sl-icon name='key-fill'></sl-icon>
       Monitoring
     </sl-tab>
-
-    <!-- Voting Panel -->
-    <sl-tab-panel name='voting'>
-      <section data-if='@isVotingSelected'>
-        <webc-template template='governance/voting/voting'></webc-template>
-      </section>
-    </sl-tab-panel>
 
     <!-- Monitoring Panel -->
     <sl-tab-panel name='monitoring'>

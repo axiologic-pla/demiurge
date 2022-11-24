@@ -154,6 +154,7 @@ class NewVotingSessionController extends DwController {
           throw new Error('No answers defined');
         }
 
+        modelSubmit.organizerDID = this.did;
         modelSubmit.possibleAnswers = possibleAnswers.map(answer => {
           return { label: answer, uid: utils.uuidv4() };
         });
@@ -230,9 +231,9 @@ class NewVotingSessionController extends DwController {
 
   async submitVotingSession(model) {
     const votingSessionEnclaveSSI = await this.votingService.createVotingSession(model);
-    this.model.selectedOrganization.votingSessions.push(votingSessionEnclaveSSI);
-    const selectedOrganization = this.model.toObject('selectedOrganization');
-    await this.sharedStorageService.updateRecordAsync(constants.TABLES.GOVERNANCE_ORGANIZATIONS, selectedOrganization.pk, selectedOrganization);
+    await this.sharedStorageService.insertRecordAsync(constants.TABLES.VOTING_SESSIONS, utils.getPKFromContent(votingSessionEnclaveSSI), {
+      votingSessionEnclaveSSI: votingSessionEnclaveSSI
+    });
 
     this.model.form = this.ui.page.getInitialViewModel().form;
     this.model = {

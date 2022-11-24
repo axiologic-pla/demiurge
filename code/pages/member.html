@@ -41,31 +41,84 @@
             <dw-title>
               <p slot="subheader">Manage credentials of member "{{ @selectedMember.username }}"</p>
             </dw-title>
-            <sl-button type="primary" data-tag="credential.add" class="dw-action-button">
-              Generate credential
-              <sl-icon slot="prefix" name="hammer"></sl-icon>
+
+            <sl-button type="success" data-tag="toggle.credential.assign" class="dw-action-button">
+              Assign credential to Member
+              <sl-icon slot="prefix" name="plus"></sl-icon>
             </sl-button>
           </section>
 
-          <section class="dw-credentials dw-data-grid" data-for="@credentials">
-            <article class="dw-data-grid-item">
-              <sl-menu-item value="@token" data-tag="credential.select">
-                <div class="dw-group-credential-data">
-                  <sl-input dir="rtl" value="@token" readonly></sl-input>
-                </div>
-                <sl-tooltip slot="suffix" content="Click on credential to copy it">
-                  <sl-icon name="clipboard"></sl-icon>
-                </sl-tooltip>
-              </sl-menu-item>
-              <sl-icon-button name="eye" data-tag="credential.inspect"></sl-icon-button>
+          <div class='dw-credentials dw-data-grid'>
+            <div class='dw-data-table' data-if='@hasCredentials'>
+              <div class='no-data' data-if='@areCredentialsLoaded' slot='false'>
+                <dw-spinner content='Credentials are loading' slot='false'></dw-spinner>
+                <p class='no-data' slot='true'>There are no credentials generated for this member!</p>
+              </div>
 
-              <sl-icon-button data-tag="credential.delete" name="trash"></sl-icon-button>
-            </article>
-            <div slot="no-data" data-if="@areCredentialsLoaded">
-              <dw-spinner slot="false" content="Credentials are loading"></dw-spinner>
-              <p slot="true" class="no-data">There are no credentials generated for this member!</p>
+              <article class='dw-data-grid-header dw-col-3' slot='true'>
+                <div><label>Credential Token</label></div>
+                <div><label>Credential Tags</label></div>
+                <div><label>Options</label></div>
+              </article>
+
+              <article class='dw-data-grid-item dw-col-3' data-for='@credentials' slot='true'>
+                <div><label>{{@token}}</label></div>
+                <div><label>{{@tags}}</label></div>
+                <div class='dw-table-options'>
+                  <sl-button data-tag='member.credential.select' outline type='success'>
+                    <sl-icon name='clipboard' slot='prefix'></sl-icon>
+                  </sl-button>
+                  <sl-button data-tag='member.credential.inspect' outline type='primary'>
+                    <sl-icon name='eye' slot='prefix'></sl-icon>
+                  </sl-button>
+                  <sl-button data-tag='member.credential.delete' outline type='danger'>
+                    <sl-icon name='trash' slot='prefix'></sl-icon>
+                  </sl-button>
+                </div>
+              </article>
             </div>
-          </section>
+          </div>
+
+          <div data-if="@isAssignCredentialOpened">
+            <section class="dw-credentials--header">
+              <dw-title>
+                <p slot="subheader">List of credentials that can be assigned</p>
+                <p slot="subheader"></p>
+              </dw-title>
+            </section>
+
+            <div class='dw-credentials dw-data-grid'>
+              <div class='dw-data-table' data-if='@hasGovernanceCredentials'>
+                <div class='no-data' data-if='@areCredentialsLoaded' slot='false'>
+                  <dw-spinner content='Credentials are loading' slot='false'></dw-spinner>
+                  <p class='no-data' slot='true'>There are no credentials generated!</p>
+                </div>
+
+                <article class='dw-data-grid-header dw-col-3' slot='true'>
+                  <div><label>Credential Token</label></div>
+                  <div><label>Credential Tags</label></div>
+                  <div><label>Options</label></div>
+                </article>
+
+                <article class='dw-data-grid-item dw-col-3' data-for='@governanceCredentials' slot='true'>
+                  <div><label>{{@token}}</label></div>
+                  <div><label>{{@tags}}</label></div>
+                  <div class='dw-table-options'>
+                    <sl-button data-tag='member.credential.select' outline type='success'>
+                      <sl-icon name='clipboard' slot='prefix'></sl-icon>
+                    </sl-button>
+                    <sl-button data-tag='member.credential.inspect' outline type='primary'>
+                      <sl-icon name='eye' slot='prefix'></sl-icon>
+                    </sl-button>
+                    <sl-button data-tag='member.credential.assign' outline type='warning'>
+                      <sl-icon name='plus' slot='prefix'></sl-icon>
+                    </sl-button>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+
         </webc-container>
       </sl-tab-panel>
       <sl-tab-panel name="databases">
