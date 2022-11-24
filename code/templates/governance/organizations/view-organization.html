@@ -11,10 +11,15 @@
       <label>Organization name: <strong>{{@selectedOrganization.name}}</strong></label>
       <label>Created by: <strong>{{@selectedOrganization.createdBy}}</strong></label>
       <label>Created at: <strong>{{@selectedOrganization.createdAt}}</strong></label>
-      <label>Number of members: <strong>{{@selectedOrganization.membersCount}}</strong></label>
-      <label>Number of voting sessions: <strong>{{@selectedOrganization.votingSessionCount}}</strong></label>
-      <label>Number of ongoing voting sessions:
-        <strong>{{@selectedOrganization.ongoingVotingSessionCount}}</strong></label>
+      <label>Main Domain: <strong>{{@selectedOrganization.mainDomain}}</strong></label>
+      <label>Subdomain: <strong>{{@selectedOrganization.subDomain}}</strong></label>
+      <label>Admin Domain: <strong>{{@selectedOrganization.adminDomain}}</strong></label>
+      <label>DNS Domain: <strong>{{@selectedOrganization.dnsDomain}}</strong></label>
+      <label>Wallet environment file path: <strong>{{@selectedOrganization.envPath}}</strong></label>
+      <div class='dw-form-row'>
+        <label>Environment Data Content:</label>
+        <sl-textarea readonly rows='6' value='@selectedOrganization.envData'></sl-textarea>
+      </div>
     </div>
   </section>
 

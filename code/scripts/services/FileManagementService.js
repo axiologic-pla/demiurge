@@ -34,17 +34,21 @@ export default class FileManagementService {
     return fileContent;
   }
 
-  downloadFileToDevice = () => {
+  downloadFileToDevice = (file) => {
+    if (!file) {
+      file = this.file;
+    }
+
     window.URL = window.URL || window.webkitURL;
     if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-      const file = new File([this.file.rawBlob], this.file.fileName);
+      const file = new File([file.rawBlob], file.fileName);
       window.navigator.msSaveOrOpenBlob(file);
       return;
     }
 
     const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(this.file.rawBlob);
-    link.download = this.file.fileName;
+    link.href = window.URL.createObjectURL(file.rawBlob);
+    link.download = file.fileName;
     link.click();
   };
 
@@ -69,19 +73,29 @@ export default class FileManagementService {
     return dsuSSI;
   }
 
+  getFileContentAsText(file, callback) {
+    let fileReader = new FileReader();
+    fileReader.onload = function() {
+      let arrayBuffer = fileReader.result;
+      callback(undefined, arrayBuffer);
+    };
+
+    fileReader.readAsText(file);
+  }
+
+  getFileContentAsBuffer(file, callback) {
+    let fileReader = new FileReader();
+    fileReader.onload = function() {
+      let arrayBuffer = fileReader.result;
+      callback(undefined, arrayBuffer);
+    };
+
+    fileReader.readAsArrayBuffer(file);
+  }
+
   _uploadFile(dsuInstance, path, file) {
-    function getFileContentAsBuffer(file, callback) {
-      let fileReader = new FileReader();
-      fileReader.onload = function() {
-        let arrayBuffer = fileReader.result;
-        callback(undefined, arrayBuffer);
-      };
-
-      fileReader.readAsArrayBuffer(file);
-    }
-
     return new Promise((resolve, reject) => {
-      getFileContentAsBuffer(file, (err, arrayBuffer) => {
+      this.getFileContentAsBuffer(file, (err, arrayBuffer) => {
         if (err) {
           return reject('Could not get file as a Buffer');
         }

@@ -12,6 +12,7 @@
 
 .dw-form-row-inner {
     display: grid;
+    min-height: 80px;
 }
 
 .dw-form-buttons-right,
