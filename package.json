@@ -10,9 +10,6 @@
         "type": "git",
         "url": "git+https://github.com/OpenDSU/demiurge.git"
     },
-    "dependencies": {
-        "jsoneditor": "^9.4.1"
-    },
     "keywords": [
         "ssapp"
     ],
