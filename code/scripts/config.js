@@ -1,4 +1,4 @@
-import {getStoredDID, didWasApproved} from "./services/BootingIdentityService.js";
+import {getStoredDID, didWasApproved, getWalletStatus} from "./services/BootingIdentityService.js";
 import {getCommunicationService} from "./services/CommunicationService.js";
 import utils from "./utils.js";
 import constants from "./constants.js";
@@ -41,7 +41,6 @@ addHook("beforeAppLoads", async () => {
 
   const {getVaultDomainAsync} = await import("./hooks/getVaultDomain.js");
   const {getUserDetails} = await import("./hooks/getUserDetails.js");
-  const {getStoredDID} = await import("./services/BootingIdentityService.js");
   const {getCommunicationService} = await import("./services/CommunicationService.js");
 
   wallet.vaultDomain = await getVaultDomainAsync();
@@ -51,6 +50,8 @@ addHook("beforeAppLoads", async () => {
   wallet.userName = userData.userName;
   userName = userData.userName;
   wallet.did = await getStoredDID();
+  wallet.status = await getWalletStatus();
+
 
   // load Custom Components
   await import("../components/dw-header/dw-header.js");

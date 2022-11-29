@@ -8,13 +8,13 @@ const w3cDID = openDSU.loadAPI("w3cdid");
 /**
  * @param {string} did - identifier of DIDDocument
  */
-async function setStoredDID(did, username) {
+async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING_APPROVAL) {
   const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-  if(typeof did!=="string") {
+  if (typeof did !== "string") {
     did = did.getIdentifier();
   }
   try {
-    await walletStorage.writeKeyAsync(constants.IDENTITY, {did, username});
+    await walletStorage.writeKeyAsync(constants.IDENTITY, {did, walletStatus});
   } catch (err) {
     console.log(err);
   }
@@ -37,6 +37,18 @@ async function getStoredDID() {
   }
 
   return record.did;
+}
+
+async function setWalletStatus(did, walletStatus) {
+  const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
+  if (typeof did !== "string") {
+    did = did.getIdentifier();
+  }
+  try {
+    await walletStorage.writeKeyAsync(constants.IDENTITY, {did, walletStatus});
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 async function getWalletStatus() {
@@ -78,4 +90,4 @@ async function didWasApproved(did) {
   return index >= 0;
 }
 
-export {getStoredDID, setStoredDID, getWalletStatus, didWasApproved};
+export {getStoredDID, setStoredDID, getWalletStatus, didWasApproved, setWalletStatus};

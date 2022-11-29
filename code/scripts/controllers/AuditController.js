@@ -8,7 +8,7 @@ class LogsDataSource extends DataSource {
   constructor(...props) {
     const [customOptions, ...defaultOptions] = props;
     super(...defaultOptions);
-    this.itemsOnPage = 5;
+    this.itemsOnPage = 15;
     this.dsuStorage = customOptions.dsuStorage;
     this.tableName = customOptions.tableName;
     this.searchField = customOptions.searchField;

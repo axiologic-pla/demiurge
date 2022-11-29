@@ -53,3 +53,7 @@
     gap: var(--sl-spacing-small);
     margin-left: 6px;
 }
+
+sl-button.submit--did::part(base) {
+    border-radius: unset;
+}

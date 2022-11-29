@@ -18,11 +18,15 @@
             </h3>
             <br>
             <h4>Paste your recovery code here to gain access.</h4>
-            <sl-input name="recovery-code" placeholder="recovery code" id="add-member-input" type="password" required clearable>
+            <sl-input name="recovery-code" placeholder="recovery code" id="add-member-input" type="password" required
+                      clearable>
                 <sl-button slot="suffix" type="text" data-tag="paste-from-clipboard" class="dw-paste">
                     Paste
                 </sl-button>
-                <sl-icon slot="suffix" name="arrow-right-short" data-tag="continue"></sl-icon>
+                <sl-button data-tag="continue" type="primary" slot="suffix" class="submit--did dw-action-button">
+                    <sl-icon slot="suffix" name="arrow-right-short"></sl-icon>
+                </sl-button>
+
             </sl-input>
         </div>
     </main>

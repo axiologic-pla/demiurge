@@ -1,5 +1,5 @@
 import {getCommunicationService} from "../services/CommunicationService.js";
-import {getStoredDID, setStoredDID} from "../services/BootingIdentityService.js";
+import {getStoredDID, setStoredDID, setWalletStatus} from "../services/BootingIdentityService.js";
 import constants from "../constants.js";
 import utils from "../utils.js";
 import MessagesService from "../services/MessagesService.js";
@@ -20,7 +20,7 @@ class HomeController extends DwController {
 
     const {ui} = this;
 
-    if (!this.did) {
+    if (this.status !== constants.ACCOUNT_STATUS.CREATED) {
       ui.disableMenu();
       this.model.showBootingIdentity = true;
       this.isFirstAdmin().then(async isFirstAdmin => {
@@ -37,11 +37,17 @@ class HomeController extends DwController {
             await this.showInitDialog();
             await this.createEnclaves();
             await this.createGroups();
-            await this.addFirstAdminToAdministrationGroup(didDocument, this.userDetails);
+            await this.firstOrRecoveryAdminToAdministrationGroup(didDocument, this.userDetails);
 
             getCommunicationService().waitForMessage(didDocument, async (err) => {
+              if (err) {
+                console.log("Error on waitformessage: ", err);
+                this.ui.showToast(`Failed to create wallet.`);
+                return;
+              }
               await this.ui.hideDialogFromComponent("dw-dialog-initialising");
               submitElement.loading = false;
+              await setWalletStatus(this.did, constants.ACCOUNT_STATUS.CREATED);
               await this.ui.showDialogFromComponent("dw-dialog-break-glass-recovery", {
                 sharedEnclaveKeySSI: this.keySSI,
               }, {
@@ -68,27 +74,22 @@ class HomeController extends DwController {
         await ui.showToast("Error on getting wallet status: " + e.message);
       });
     } else {
-
       this.showQuickActions();
       getCommunicationService().waitForMessage(this.did, async (err) => {
       });
-
     }
   }
 
   showQuickActions() {
     this.model.showBootingIdentity = false;
     this.ui.enableMenu();
-
     this.resolveNavigation().then((enableGovernance) => {
-
       if (enableGovernance) {
         const governanceElement = this.querySelector("dw-action[tag='governance']");
         if (governanceElement) {
           governanceElement.removeAttribute("hidden");
         }
       }
-
       const actionElements = this.querySelectorAll("dw-action[tag]:not([hidden])");
       Array.from(actionElements).forEach((actionElement) => {
         actionElement.addEventListener("click", () => {
@@ -144,7 +145,13 @@ class HomeController extends DwController {
     }
     this.did = did;
     getCommunicationService().waitForMessage(did, async (err) => {
+      if (err) {
+        console.log("Error on waitformessage: ", err);
+        this.ui.showToast(`Failed to create wallet.`);
+        return;
+      }
       await this.ui.hideDialogFromComponent("dw-dialog-waiting-approval");
+      await setWalletStatus(this.did, constants.ACCOUNT_STATUS.CREATED);
       this.showQuickActions();
     });
     await this.ui.showDialogFromComponent("dw-dialog-waiting-approval", {
@@ -153,20 +160,27 @@ class HomeController extends DwController {
       parentElement: this.element, disableClosing: true
     });
 
-    this.onTagClick("continue", async () => {
-      if (document.getElementById("add-member-input").value === "") {
-        await this.showToast(`Please insert a recovery code.`);
+    this.onTagClick("continue", async (model, target, event) => {
+      try {
+        const recoveryCode = document.getElementById("add-member-input").value;
+        if (recoveryCode === "") {
+          this.ui.showToast(`Please insert a recovery code.`);
+          return;
+        }
+
+        target.loading = true;
+        await this.setSharedEnclaveKeySSI(recoveryCode);
+        let sharedEnclave = await this.getSharedEnclave();
+        this.keySSI = await this.getSharedEnclaveKeySSI(sharedEnclave);
+        await this.storeDID(this.did);
+        await this.firstOrRecoveryAdminToAdministrationGroup(this.did, this.userDetails, constants.OPERATIONS.BREAK_GLASS_RECOVERY);
+        target.loading = false;
+      } catch (e) {
+        console.log("Error on getting wallet with recovery code", e)
+        this.ui.showToast("Couldn't recover wallet for inserted recovery code.");
+        target.loading = false;
         return;
       }
-      const recoveryCode = document.getElementById("add-member-input").value;
-      await this.setSharedEnclaveKeySSI(recoveryCode);
-      let sharedEnclave = await this.getSharedEnclave();
-      this.keySSI = await this.getSharedEnclaveKeySSI(sharedEnclave);
-      await this.storeDID(this.did);
-      await this.ui.hideDialogFromComponent("dw-dialog-waiting-approval");
-      let adminGroup = await this.getAdminGroup(sharedEnclave);
-      await utils.addLogMessage(this.did, constants.OPERATIONS.BREAK_GLASS_RECOVERY, adminGroup.name, this.userName);
-      this.showQuickActions();
     })
   }
 
@@ -176,22 +190,16 @@ class HomeController extends DwController {
       const scAPI = openDSU.loadAPI("sc");
       const keySSI = openDSU.loadAPI("keyssi");
       const enclaveAPI = openDSU.loadAPI("enclave");
-
       try {
         keySSI.parse(recoveryCode); // parse and check if the recoveryCode has the right format for a sharedEnclaveKeySSI
+        const sharedEnclave = enclaveAPI.initialiseWalletDBEnclave(recoveryCode);
+        sharedEnclave.on("initialised", async () => {
+          await $$.promisify(scAPI.setSharedEnclave)(sharedEnclave);
+          return resolve();
+        });
       } catch (err) {
         return reject(err);
       }
-
-      const sharedEnclave = enclaveAPI.initialiseWalletDBEnclave(recoveryCode);
-      sharedEnclave.on("initialised", async () => {
-        try {
-          await $$.promisify(scAPI.setSharedEnclave)(sharedEnclave);
-          resolve();
-        } catch (e) {
-          reject("Failed to set shared enclave.");
-        }
-      });
     });
   }
 
@@ -298,7 +306,7 @@ class HomeController extends DwController {
     return keySSI;
   }
 
-  async addFirstAdminToAdministrationGroup(did, userDetails) {
+  async firstOrRecoveryAdminToAdministrationGroup(did, userDetails, logAction = constants.OPERATIONS.SHARED_ENCLAVE_CREATE) {
     if (typeof did !== "string") {
       did = did.getIdentifier();
     }
@@ -312,7 +320,7 @@ class HomeController extends DwController {
       memberName: userDetails
     };
     this.did = did;
-    await utils.addLogMessage(did, constants.OPERATIONS.SHARED_ENCLAVE_CREATE, adminGroup.name, this.userName || "-");
+    await utils.addLogMessage(did, logAction, adminGroup.name, this.userName || "-");
 
     await this.processMessages(sharedEnclave, addMemberToGroupMessage);
   }

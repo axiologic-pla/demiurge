@@ -7,7 +7,7 @@ class DwController extends WebcController {
     super(...props);
     this._ui = new DwUI(...props);
 
-    for (const item of ["did", "userDetails", "userName", "messageProcessingService"]) {
+    for (const item of ["did", "userDetails", "userName", "status", "messageProcessingService"]) {
       this[item] = WebCardinal.wallet[item];
     }
     this.domain = WebCardinal.wallet.vaultDomain;
