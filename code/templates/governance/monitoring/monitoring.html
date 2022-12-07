@@ -4,20 +4,26 @@
       <p slot='subheader'>Monitoring Dashboard</p>
       <p slot='subheader'>Monitoring solution for your deployed applications.</p>
     </dw-title>
-
-    <div>
-      <!--      Buttons here if needed -->
-      <!--      <sl-button data-tag='toggle.organization.dashboard' type='success'>-->
-      <!--        Organizations Dashboard-->
-      <!--      </sl-button>-->
-    </div>
   </section>
 
   <div class='dw-credentials dw-data-grid'>
-    <p>Manage organization</p>
-    <p>Add members to organization</p>
-    <p>Voting sessions management</p>
-    <p>?? Members can send requests to enter organizations ??</p>
-    <p>Integrate some apihub and quorum grafana dashboards</p>
+    <sl-form class='monitoring'>
+      <sl-input clearable id='url-input' label='Enter URL to Monitoring Dashboard' name='url-input' required>
+        <sl-button class='dw-paste' data-tag='url.paste' slot='suffix' type='text'>
+          Paste
+        </sl-button>
+      </sl-input>
+      <sl-button class='position-baseline' data-tag='url.add' type='primary'>Set / Update URL
+      </sl-button>
+
+      <div class='position-baseline' data-if='@hasUrl'>
+        <sl-button data-tag='url.remove' outline type='danger'>Clear URL</sl-button>
+      </div>
+    </sl-form>
+
+    <div data-if='@hasUrl' style='display: flex; width: 100%;'>
+      <iframe frameborder='0' src='@displayUrl' style='width: 100%;height: 800px;padding: 1rem;' title='Monitoring'>
+      </iframe>
+    </div>
   </div>
 </webc-container>
