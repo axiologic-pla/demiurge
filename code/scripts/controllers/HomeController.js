@@ -179,7 +179,6 @@ class HomeController extends DwController {
         console.log("Error on getting wallet with recovery code", e)
         this.ui.showToast("Couldn't recover wallet for inserted recovery code.");
         target.loading = false;
-        return;
       }
     })
   }
@@ -193,6 +192,9 @@ class HomeController extends DwController {
       try {
         keySSI.parse(recoveryCode); // parse and check if the recoveryCode has the right format for a sharedEnclaveKeySSI
         const sharedEnclave = enclaveAPI.initialiseWalletDBEnclave(recoveryCode);
+        sharedEnclave.on("error", err => {
+          return reject(err);
+        });
         sharedEnclave.on("initialised", async () => {
           await $$.promisify(scAPI.setSharedEnclave)(sharedEnclave);
           return resolve();
