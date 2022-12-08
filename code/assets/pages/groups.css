@@ -364,6 +364,10 @@ sl-menu-item::part(base):hover {
     background: #ffffff;
 }
 
+*[disabled_feature] {
+    display: none !important;
+}
+
 /* media-queries */
 
 @media screen and (max-width: 895px) {

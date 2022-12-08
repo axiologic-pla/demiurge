@@ -89,8 +89,13 @@ class MembersController extends DwController {
       areMembersLoaded: false,
     };
 
+    let managedFeaturesArr = Object.keys(this.managedFeatures);
+    for (let i = 0; i < managedFeaturesArr.length; i++) {
+      this.model[managedFeaturesArr[i]] = this.managedFeatures[managedFeaturesArr[i]];
+    }
     ui.page = new MembersUI(...props);
     ui.page.addPasteMemberDIDFromClipboardListener();
+
 
     this.onTagClick("member.add", async (model, button) => {
       let inputElement = document.querySelector("#add-member-input");
@@ -141,9 +146,9 @@ class MembersController extends DwController {
         await ui.hideDialogFromComponent("dw-dialog-group-members-update");
 
       } catch (e) {
-        try{
+        try {
           await ui.hideDialogFromComponent("dw-dialog-group-members-update");
-        }catch (e) {
+        } catch (e) {
         }
         await ui.showToast("Could not add user to the group because: " + e.message, {type: 'danger'});
       }
@@ -209,8 +214,11 @@ class MembersController extends DwController {
           if (err) {
             return reject(err);
           }
-
-          return resolve(members);
+          let result = members.map((member) => {
+            member["enable_deactivate_group_member_feature"] = this.model.enable_deactivate_group_member_feature;
+            return member;
+          })
+          return resolve(result);
         });
       });
     });

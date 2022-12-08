@@ -73,22 +73,18 @@ async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
   scAPI.refreshSecurityContext();
 }
 
-async function getDisabledFeatures() {
+async function getManagedFeatures() {
   const openDSU = require("opendsu");
   const config = openDSU.loadAPI("config");
-  let disabledFeaturesArr = [];
+  let managedFeatures = {};
   try {
-    let disabledFeaturesList = await $$.promisify(config.getEnv)("disabledFeatures");
-    if (disabledFeaturesList) {
-      let disabledCodesArr = disabledFeaturesList.split(",");
-      disabledCodesArr.forEach(item => {
-        disabledFeaturesArr.push(item.trim());
-      });
+    for (let i = 0; i < constants.MANAGED_FEATURES_ARR.length; i++) {
+      managedFeatures[constants.MANAGED_FEATURES_ARR[i]] = await $$.promisify(config.getEnv)(constants.MANAGED_FEATURES_ARR[i]);
     }
   } catch (e) {
     console.log("Couldn't load disabledFeatures");
   }
-  return disabledFeaturesArr;
+  return managedFeatures;
 }
 
 async function fetchGroups() {
@@ -118,7 +114,7 @@ async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, pr
 }
 
 function uuidv4() {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
     var r = Math.random() * 16 | 0, v = c === "x" ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
@@ -152,7 +148,7 @@ export default {
   sendGroupMessage,
   sendUserMessage,
   addSharedEnclaveToEnv,
-  getDisabledFeatures,
+  getManagedFeatures,
   fetchGroups,
   addLogMessage,
   uuidv4,
