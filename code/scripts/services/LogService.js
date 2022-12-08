@@ -17,7 +17,7 @@ export default class LogService {
 
     let log = {
       ...logDetails,
-      logPk: logDetails.logPk || new Date().getTime()
+      logPk: logDetails.logPk || require("opendsu").loadAPI("crypto").generateRandom(32).toString("hex")
     };
 
     this.getSharedStorage((err, storageService)=>{
@@ -32,7 +32,7 @@ export default class LogService {
           if (err) {
             return callback(err);
           }
-          callback(undefined, true);
+          callback(undefined, log);
         });
       });
     })
