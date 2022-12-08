@@ -71,7 +71,6 @@ export default {
   CREDENTIAL_TYPES: {
     WALLET_AUTHORIZATION: "WALLET_AUTHORIZATION"
   },
-
   ACCOUNT_STATUS: {
     WAITING_APPROVAL: "waitingForApproval",
     CREATED: "created"
@@ -80,5 +79,10 @@ export default {
   SSI_NAME_DID_TYPE: "ssi:name",
   SSI_GROUP_DID_TYPE: "ssi:group",
   GROUP_MESSAGES_PATH: "/app/messages/createGroup.json",
-  ENCLAVE_MESSAGES_PATH: "/app/messages/createEnclave.json"
+  ENCLAVE_MESSAGES_PATH: "/app/messages/createEnclave.json",
+  /*MANAGED_FEATURES_ARR should be in sync with environment.js */
+  MANAGED_FEATURES_ARR: [
+    "enable_credentials_management",
+    "enable_enclaves_management",
+    "enable_deactivate_group_member_feature"]
 };

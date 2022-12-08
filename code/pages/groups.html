@@ -26,13 +26,13 @@
                 <sl-menu-item value="@">{{ @name }}</sl-menu-item>
             </sl-select>
 
-<!--            <sl-form data-loaded="@areGroupsLoaded" class="feature-add-group">
-                <sl-input label="Group name" help-text="DID will be automatically generated" name="name"
-                          clearable></sl-input>
-                <sl-button type="primary" data-tag="group.add"> New group
-                    <sl-icon slot="prefix" name="plus-lg"></sl-icon>
-                </sl-button>
-            </sl-form>-->
+            <!--            <sl-form data-loaded="@areGroupsLoaded" class="feature-add-group">
+                            <sl-input label="Group name" help-text="DID will be automatically generated" name="name"
+                                      clearable></sl-input>
+                            <sl-button type="primary" data-tag="group.add"> New group
+                                <sl-icon slot="prefix" name="plus-lg"></sl-icon>
+                            </sl-button>
+                        </sl-form>-->
         </section>
 
         <!--        <section class="dw-data-grid" data-for="@groups" data-if="@areGroupsLoaded">
@@ -42,7 +42,6 @@
                     </div>
                 </section>-->
     </main>
-
     <section id="dw-group-content">
         <!-- Group content is injected here -->
     </section>
@@ -50,36 +49,42 @@
 
 <!-- Group content -->
 <template id="dw-group-content--template">
-    <sl-tab-group class="dw-group-content">
-        <sl-tab slot="nav" panel="members">
-            <sl-icon name="people-fill"></sl-icon>
-            Members
-        </sl-tab>
-        <sl-tab slot="nav" panel="credentials">
-            <sl-icon name="key-fill"></sl-icon>
-            Credentials
-        </sl-tab>
-        <sl-tab slot="nav" panel="databases">
-            <sl-icon name="hdd-stack-fill"></sl-icon>
-            Enclaves
-        </sl-tab>
+    <webc-container controller="groups/GroupFeaturesController">
+        <sl-tab-group class="dw-group-content">
+            <sl-tab slot="nav" panel="members">
+                <sl-icon name="people-fill"></sl-icon>
+                Members
+            </sl-tab>
+            <sl-tab slot="nav" panel="credentials" disabled_feature="@disable_credentials_management">
+                <sl-icon name="key-fill"></sl-icon>
+                Credentials
+            </sl-tab>
+            <sl-tab slot="nav" panel="databases" disabled_feature="@disable_enclaves_management">
+                <sl-icon name="hdd-stack-fill"></sl-icon>
+                Enclaves
+            </sl-tab>
 
-        <sl-tab-panel name="members">
-            <section id="dw-group-members">
-                <!-- Group members are injected here -->
-            </section>
-        </sl-tab-panel>
-        <sl-tab-panel name="credentials">
-            <section id="dw-group-credentials">
-                <!-- Group credentials are injected here -->
-            </section>
-        </sl-tab-panel>
-        <sl-tab-panel name="databases">
-            <section id="dw-group-databases">
-                <!-- Group databases are injected here -->
-            </section>
-        </sl-tab-panel>
-    </sl-tab-group>
+            <sl-tab-panel name="members">
+                <section id="dw-group-members">
+                    <!-- Group members are injected here -->
+                </section>
+            </sl-tab-panel>
+
+            <sl-tab-panel name="credentials">
+                <section id="dw-group-credentials" disabled_feature="@disable_credentials_management">
+                    <!-- Group credentials are injected here -->
+                </section>
+            </sl-tab-panel>
+
+
+            <sl-tab-panel name="databases">
+                <section id="dw-group-databases" disabled_feature="@disable_enclaves_management">
+                    <!-- Group databases are injected here -->
+                </section>
+            </sl-tab-panel>
+
+        </sl-tab-group>
+    </webc-container>
 </template>
 
 <!-- Group members -->
@@ -116,9 +121,12 @@
                 <sl-tooltip content="Delete group member">
                     <sl-icon-button data-tag="member.delete" name="trash"></sl-icon-button>
                 </sl-tooltip>
-                <sl-tooltip content="Deactivate group member">
-                    <sl-icon-button data-tag="member.deactivate" name="person-x"></sl-icon-button>
-                </sl-tooltip>
+                <section data-if="@enable_deactivate_group_member_feature">
+                    <sl-tooltip content="Deactivate group member" slot="true">
+                        <sl-icon-button data-tag="member.deactivate" name="person-x"></sl-icon-button>
+                    </sl-tooltip>
+                </section>
+
             </article>
             <div slot="no-data" data-if="@areMembersLoaded" class="no-data">
                 <dw-spinner slot="false" content="Members are loading"></dw-spinner>

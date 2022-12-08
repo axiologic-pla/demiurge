@@ -169,6 +169,10 @@ dw-subdomains {
     align-items: flex-end !important;
 }
 
+*[disabled_feature] {
+    display: none !important;
+}
+
 /*:root .sl-theme-dark {*/
 /*    --webc-primary-color: rgb(var(--sl-color-gray-50));*/
 /*    --sl-input-label-color: rgb(var(--sl-color-gray-50));*/

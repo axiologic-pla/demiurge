@@ -51,6 +51,7 @@ addHook("beforeAppLoads", async () => {
   userName = userData.userName;
   wallet.did = await getStoredDID();
   wallet.status = await getWalletStatus();
+  wallet.managedFeatures = await utils.getManagedFeatures();
 
 
   // load Custom Components

@@ -70,6 +70,7 @@ class GroupsUI extends DwController {
         parentElement.append(cloneTemplate(subPart));
       }
 
+
       rootElement.hidden = true;
       rootElement.append(documentFragment);
 
@@ -122,14 +123,7 @@ class GroupsController extends DwController {
   constructor(...props) {
     super(...props);
     const {ui} = this;
-    utils.getDisabledFeatures().then((disabledFeatures) => {
-      this.model.disabledFeatures = disabledFeatures;
-      disabledFeatures.forEach(disabledFeature => {
-        let selector = ".feature-" + disabledFeature;
-        this.querySelector(selector).hidden = true;
-      })
 
-    })
     this.model = {
       // blockchainDomain: "example.domain",
       groups: [],
@@ -140,6 +134,7 @@ class GroupsController extends DwController {
     ui.page = new GroupsUI(...props);
     // ui.page.addBlockchainDomainListener();
     ui.page.addGroupContentListener.call(this);
+
 
     this.onTagClick("group.add", async (...props) => {
       try {
