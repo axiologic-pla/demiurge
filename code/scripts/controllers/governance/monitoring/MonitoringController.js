@@ -83,6 +83,7 @@ class MonitoringController extends DwController {
   updateModel() {
     const selectedOrganization = this.model.toObject('selectedOrganization');
     this.model.url = selectedOrganization.monitoringUrl || '';
+    this.model.displayUrl = selectedOrganization.monitoringUrl || '';
     this.model.hasUrl = this.model.url.trim().length > 0;
   }
 
