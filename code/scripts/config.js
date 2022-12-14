@@ -34,25 +34,6 @@ function setInitialTheme() {
   }
 }
 
-function onUserLoginMessage(message) {
-  utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
-      .then(() => {
-      })
-      .catch(err => console.log(err));
-}
-
-function onUserRemovedMessage(message) {
-  utils.addLogMessage(message.userDID, constants.OPERATIONS.REMOVE, message.userGroup, message.userId || "-", message.messageId)
-      .then(() => {
-        utils.removeSharedEnclaveFromEnv()
-            .then(()=>{
-              setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL)
-                  .then(() => $$.history.go("home"));
-            })
-      })
-      .catch(err => console.log(err));
-}
-
 addHook("beforeAppLoads", async () => {
   WebCardinal.wallet = {};
   const wallet = WebCardinal.wallet;
@@ -72,7 +53,32 @@ addHook("beforeAppLoads", async () => {
   const openDSU = require("opendsu");
   const didAPI = openDSU.loadAPI("w3cdid");
   const typicalBusinessLogicHub = didAPI.getTypicalBusinessLogicHub();
+  function onUserLoginMessage(message) {
+    console.log("================== Login =======================")
+    debugger
+    utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
+        .then(() => {
+        })
+        .catch(err => console.log(err));
+  }
+
   typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_LOGIN, onUserLoginMessage);
+
+  function onUserRemovedMessage(message) {
+    console.log("================== User removed =======================")
+
+          debugger
+    utils.addLogMessage(message.userDID, constants.OPERATIONS.REMOVE, message.userGroup, message.userId || "-", message.messageId)
+        .then(() => {
+          utils.removeSharedEnclaveFromEnv()
+              .then(()=>{
+                setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL)
+                    .then(() => $$.history.go("home"));
+              })
+        })
+        .catch(err => console.log(err));
+  }
+
   typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_REMOVED, onUserRemovedMessage);
 
 

@@ -9,118 +9,133 @@ const openDSU = require("opendsu");
 const scAPI = openDSU.loadAPI("sc");
 const w3cDID = openDSU.loadAPI("w3cdid");
 const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();
-class HomeController extends DwController {
-  constructor(...props) {
-    super(...props);
+const UI = {
+  showConfigurationDialog: async (container) => {
+    const dialogElement = document.createElement("dw-dialog-configuration");
+    dialogElement.setAttribute("controller", "ConfigurationController");
+    container.append(dialogElement);
+    await dialogElement.componentOnReady();
 
-    this.model = {
-      domain: this.domain, username: this.userDetails
-    };
+    const slElement = dialogElement.querySelector("sl-dialog");
+    setTimeout(() => {
+      slElement.show();
+    }, 25);
 
-    const {ui} = this
-    getWalletStatus().then(async status=>{
-      if (status !== constants.ACCOUNT_STATUS.CREATED) {
-        ui.disableMenu();
-        this.model.showBootingIdentity = true;
-        const isFirstAdmin = await this.isFirstAdmin();
-          // const didWasCreated = await this.didWasCreated();
-          const did = await $$.promisify(typicalBusinessLogicHub.mainDIDCreated)();
-          if (isFirstAdmin) {
-            if (did) {
-              return;
-            }
-
-            this.createDID(async (err, model) => {
-              const {didDocument, submitElement} = model;
-              await $$.promisify(typicalBusinessLogicHub.setMainDID)(didDocument.getIdentifier());
-              submitElement.loading = true;
-              await this.createInitialDID();
-              await this.showInitDialog();
-              await this.createEnclaves();
-              await this.createGroups();
-              typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, this.onReceivedInitMessage.bind(this))
-              await this.firstOrRecoveryAdminToAdministrationGroup(didDocument, this.userDetails);
-            });
-          } else {
-            if (did) {
-              await this.waitForApproval(did);
-              return;
-            }
-            this.createDID(async (err, model) => {
-              const {didDocument, submitElement} = model;
-              submitElement.loading = true;
-              await $$.promisify(typicalBusinessLogicHub.setMainDID)(didDocument.getIdentifier());
-              await this.waitForApproval(didDocument);
-              submitElement.loading = false;
-            });
-          }
-      } else {
-        this.showQuickActions();
-      }
-    }).catch(async e => {
-      await ui.showToast("Error on getting wallet status: " + e.message);
+    slElement.addEventListener("sl-hide", () => {
+      dialogElement.remove();
     });
-  }
+  },
+};
 
-  onReceivedInitMessage (message) {
-    this.ui.hideDialogFromComponent("dw-dialog-initialising").then( () => {
-      setWalletStatus(constants.ACCOUNT_STATUS.CREATED).then(()=>{
-        this.ui.showDialogFromComponent("dw-dialog-break-glass-recovery", {
-          sharedEnclaveKeySSI: this.keySSI,
+function HomeController(...props) {
+  let self = new DwController(...props);
+  self.model = {
+    domain: self.domain, username: self.userDetails
+  };
+
+  const {ui} = self
+  getWalletStatus().then(async status=>{
+    debugger
+    if (status !== constants.ACCOUNT_STATUS.CREATED) {
+      ui.disableMenu();
+      self.model.showBootingIdentity = true;
+      const isFirstAdmin = await self.isFirstAdmin();
+      // const didWasCreated = await self.didWasCreated();
+      const did = await $$.promisify(typicalBusinessLogicHub.mainDIDCreated)();
+      if (isFirstAdmin) {
+        if (did) {
+          return;
+        }
+
+        self.createDID(async (err, model) => {
+          const {didDocument, submitElement} = model;
+          await $$.promisify(typicalBusinessLogicHub.setMainDID)(didDocument.getIdentifier());
+          submitElement.loading = true;
+          await self.createInitialDID();
+          await self.showInitDialog();
+          await self.createEnclaves();
+          await self.createGroups();
+          typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onReceivedInitMessage)
+          await self.firstOrRecoveryAdminToAdministrationGroup(didDocument, self.userDetails);
+        });
+      } else {
+        if (did) {
+          await self.waitForApproval(did);
+          return;
+        }
+        self.createDID(async (err, model) => {
+          const {didDocument, submitElement} = model;
+          submitElement.loading = true;
+          await $$.promisify(typicalBusinessLogicHub.setMainDID)(didDocument.getIdentifier());
+          await self.waitForApproval(didDocument);
+          submitElement.loading = false;
+        });
+      }
+    } else {
+      self.showQuickActions();
+    }
+  }).catch(async e => {
+    await ui.showToast("Error on getting wallet status: " + e.message);
+  });
+
+  self.onReceivedInitMessage = (message) => {
+    self.ui.hideDialogFromComponent("dw-dialog-initialising").then(() => {
+      setWalletStatus(constants.ACCOUNT_STATUS.CREATED).then(() => {
+        self.ui.showDialogFromComponent("dw-dialog-break-glass-recovery", {
+          sharedEnclaveKeySSI: self.keySSI,
         }, {
-          parentElement: this.element, disableClosing: false, onClose: () => {
-            this.showQuickActions();
+          parentElement: self.element, disableClosing: false, onClose: () => {
+            self.showQuickActions();
           }
-        }).then(()=>{
+        }).then(() => {
           console.log("Finished processing message", message);
         })
       })
-    })
+    }).catch(console.log);
     // submitElement.loading = false;
 
   }
-
-  onAccessGranted(message){
-      utils.addSharedEnclaveToEnv(message.enclave.enclaveType, message.enclave.enclaveDID, message.enclave.enclaveKeySSI)
-          .then( ()=>{
-        this.ui.hideDialogFromComponent("dw-dialog-waiting-approval")
-            .then(()=>{
-              setWalletStatus(constants.ACCOUNT_STATUS.CREATED)
-                  .then(() => this.showQuickActions());
-            })
-      })
+  self.onAccessGranted = (message)=>{
+    utils.addSharedEnclaveToEnv(message.enclave.enclaveType, message.enclave.enclaveDID, message.enclave.enclaveKeySSI)
+        .then(()=> {
+          self.ui.hideDialogFromComponent("dw-dialog-waiting-approval")
+              .then(()=>{
+                setWalletStatus(constants.ACCOUNT_STATUS.CREATED)
+                    .then(() => self.showQuickActions());
+              })
+        }).catch(console.log)
   }
 
-  showQuickActions() {
-    this.model.showBootingIdentity = false;
-    this.ui.enableMenu();
-    this.resolveNavigation().then((enableGovernance) => {
+  self.showQuickActions = () => {
+    self.model.showBootingIdentity = false;
+    self.ui.enableMenu();
+    self.resolveNavigation().then((enableGovernance) => {
       if (enableGovernance) {
-        const governanceElement = this.querySelector("dw-action[tag='governance']");
+        const governanceElement = self.querySelector("dw-action[tag='governance']");
         if (governanceElement) {
           governanceElement.removeAttribute("hidden");
         }
       }
-      const actionElements = this.querySelectorAll("dw-action[tag]:not([hidden])");
+      const actionElements = self.querySelectorAll("dw-action[tag]:not([hidden])");
       Array.from(actionElements).forEach((actionElement) => {
         actionElement.addEventListener("click", () => {
-          this.navigateToPageTag(actionElement.getAttribute("tag"));
+          self.navigateToPageTag(actionElement.getAttribute("tag"));
         });
       });
     });
-    this.onTagClick("configuration.show", async () => {
-      await UI.showConfigurationDialog(this.element);
+    self.onTagClick("configuration.show", async () => {
+      await UI.showConfigurationDialog(self.element);
     });
 
 
-    this.getSharedEnclave().then(async (sharedEnclave) => {
-      let adminGroup = await this.getAdminGroup(sharedEnclave);
-      await utils.addLogMessage(this.did, constants.OPERATIONS.LOGIN, adminGroup.name, this.userName);
+    self.getSharedEnclave().then(async (sharedEnclave) => {
+      let adminGroup = await self.getAdminGroup(sharedEnclave);
+      await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, adminGroup.name, self.userName);
     }).catch(e => console.log("Could not log user login action ", e));
 
   }
 
-  async getAdminGroup(sharedEnclave) {
+  self.getAdminGroup = async (sharedEnclave) => {
     let groups = [];
     try {
       groups = await utils.promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
@@ -132,7 +147,7 @@ class HomeController extends DwController {
     return adminGroup;
   }
 
-  async resolveNavigation() {
+  self.resolveNavigation = async () => {
 
     const {getEnvironmentDataAsync} = await import("../hooks/getEnvironmentData.js");
     const envData = await getEnvironmentDataAsync() || {};
@@ -141,51 +156,51 @@ class HomeController extends DwController {
 
   }
 
-  async showInitDialog(did) {
+  self.showInitDialog = async (did) => {
     if (typeof did === "object") {
       did = did.getIdentifier();
     }
-    await this.ui.showDialogFromComponent("dw-dialog-initialising", {did}, {
-      parentElement: this.element, disableClosing: true,
+    await self.ui.showDialogFromComponent("dw-dialog-initialising", {did}, {
+      parentElement: self.element, disableClosing: true,
     });
   }
 
-  async waitForApproval(did) {
+  self.waitForApproval = async (did) => {
     if (typeof did !== "string") {
       did = did.getIdentifier();
     }
-    this.did = did;
-    typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, this.onAccessGranted.bind(this));
-    await this.ui.showDialogFromComponent("dw-dialog-waiting-approval", {
+    self.did = did;
+    typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onAccessGranted);
+    await self.ui.showDialogFromComponent("dw-dialog-waiting-approval", {
       did: did,
     }, {
-      parentElement: this.element, disableClosing: true
+      parentElement: self.element, disableClosing: true
     });
 
-    this.onTagClick("continue", async (model, target, event) => {
+    self.onTagClick("continue", async (model, target, event) => {
       try {
         const recoveryCode = document.getElementById("add-member-input").value;
         if (recoveryCode === "") {
-          this.ui.showToast(`Please insert a recovery code.`);
+          self.ui.showToast(`Please insert a recovery code.`);
           return;
         }
 
         target.loading = true;
-        await this.setSharedEnclaveKeySSI(recoveryCode);
-        let sharedEnclave = await this.getSharedEnclave();
-        this.keySSI = await this.getSharedEnclaveKeySSI(sharedEnclave);
-        await this.storeDID(this.did);
-        await this.firstOrRecoveryAdminToAdministrationGroup(this.did, this.userDetails, constants.OPERATIONS.BREAK_GLASS_RECOVERY);
+        await self.setSharedEnclaveKeySSI(recoveryCode);
+        let sharedEnclave = await self.getSharedEnclave();
+        self.keySSI = await self.getSharedEnclaveKeySSI(sharedEnclave);
+        await self.storeDID(self.did);
+        await self.firstOrRecoveryAdminToAdministrationGroup(self.did, self.userDetails, constants.OPERATIONS.BREAK_GLASS_RECOVERY);
         target.loading = false;
       } catch (e) {
         console.log("Error on getting wallet with recovery code", e)
-        this.ui.showToast("Couldn't recover wallet for inserted recovery code.");
+        self.ui.showToast("Couldn't recover wallet for inserted recovery code.");
         target.loading = false;
       }
     })
   }
 
-  async setSharedEnclaveKeySSI(recoveryCode) {
+  self.setSharedEnclaveKeySSI = async (recoveryCode) => {
     return new Promise((resolve, reject) => {
       const openDSU = require("opendsu");
       const scAPI = openDSU.loadAPI("sc");
@@ -207,11 +222,11 @@ class HomeController extends DwController {
     });
   }
 
-  async storeDID(did) {
-    await setStoredDID(did, this.model.username);
+  self.storeDID = async (did) => {
+    await setStoredDID(did, self.model.username);
   }
 
-  async didWasCreated() {
+  self.didWasCreated = async () => {
     let didRecord;
     try {
       didRecord = await getStoredDID();
@@ -226,39 +241,39 @@ class HomeController extends DwController {
     return true;
   }
 
-  createDID(callback) {
-    this.onTagEvent("did-component", "did-generate", async (model) => {
-      await this.storeDID(model.didDocument);
+  self.createDID = async (callback) => {
+    self.onTagEvent("did-component", "did-generate", async (model) => {
+      await self.storeDID(model.didDocument);
       callback(undefined, model);
     });
   }
 
-  async getDIDDomain() {
-    if (!this.didDomain) {
-      this.didDomain = await $$.promisify(scAPI.getDIDDomain)();
+  self.getDIDDomain = async () => {
+    if (!self.didDomain) {
+      self.didDomain = await $$.promisify(scAPI.getDIDDomain)();
     }
 
-    return this.didDomain;
+    return self.didDomain;
   }
 
-  async getMainEnclave() {
-    if (!this.mainEnclave) {
-      this.mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
+  self.getMainEnclave = async () => {
+    if (!self.mainEnclave) {
+      self.mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
     }
 
-    return this.mainEnclave;
+    return self.mainEnclave;
   }
 
-  async getSharedEnclave() {
-    if (!this.sharedEnclave) {
-      this.sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  self.getSharedEnclave = async () => {
+    if (!self.sharedEnclave) {
+      self.sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
     }
 
-    return this.sharedEnclave;
+    return self.sharedEnclave;
   }
 
-  async isFirstAdmin() {
-    const didDomain = await this.getDIDDomain();
+  self.isFirstAdmin = async () => {
+    const didDomain = await self.getDIDDomain();
     try {
       await $$.promisify(w3cDID.resolveDID)(`did:${constants.SSI_NAME_DID_TYPE}:${didDomain}:${constants.INITIAL_IDENTITY_PUBLIC_NAME}`);
     } catch (e) {
@@ -268,42 +283,42 @@ class HomeController extends DwController {
     return false;
   }
 
-  async createInitialDID() {
-    const didDomain = await this.getDIDDomain();
+  self.createInitialDID = async () => {
+    const didDomain = await self.getDIDDomain();
     await $$.promisify(w3cDID.createIdentity)(constants.SSI_NAME_DID_TYPE, didDomain, constants.INITIAL_IDENTITY_PUBLIC_NAME);
   }
 
-  async createGroups() {
-    const sharedEnclave = await this.getSharedEnclave();
-    const messages = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(constants.GROUP_MESSAGES_PATH);
-    await this.processMessages(sharedEnclave, messages);
+  self.createGroups=async () => {
+    const sharedEnclave = await self.getSharedEnclave();
+    const messages = await $$.promisify(self.DSUStorage.getObject.bind(self.DSUStorage))(constants.GROUP_MESSAGES_PATH);
+    await self.processMessages(sharedEnclave, messages);
   }
 
-  async createEnclaves() {
-    const mainEnclave = await this.getMainEnclave();
-    const messages = await $$.promisify(this.DSUStorage.getObject.bind(this.DSUStorage))(constants.ENCLAVE_MESSAGES_PATH);
-    await this.processMessages(mainEnclave, messages);
+  self.createEnclaves = async () => {
+    const mainEnclave = await self.getMainEnclave();
+    const messages = await $$.promisify(self.DSUStorage.getObject.bind(self.DSUStorage))(constants.ENCLAVE_MESSAGES_PATH);
+    await self.processMessages(mainEnclave, messages);
     console.log("Processed create enclave messages");
     const enclaveRecord = await mainEnclave.readKeyAsync(constants.SHARED_ENCLAVE);
     await $$.promisify(typicalBusinessLogicHub.setSharedEnclave)(enclaveRecord.enclaveKeySSI);
     await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
-    await this.storeSharedEnclaves();
+    await self.storeSharedEnclaves();
   }
 
-  async storeSharedEnclaves() {
-    const mainEnclave = await this.getMainEnclave();
+  self.storeSharedEnclaves= async () => {
+    const mainEnclave = await self.getMainEnclave();
     const enclaves = await $$.promisify(mainEnclave.getAllRecords)(constants.TABLES.GROUP_ENCLAVES);
-    const sharedEnclave = await this.getSharedEnclave();
+    const sharedEnclave = await self.getSharedEnclave();
 
     for (let i = 0; i < enclaves.length; i++) {
       await sharedEnclave.writeKeyAsync(enclaves[i].enclaveName, enclaves[i]);
       await sharedEnclave.insertRecordAsync(constants.TABLES.GROUP_ENCLAVES, enclaves[i].enclaveDID, enclaves[i]);
     }
-    this.keySSI = await this.getSharedEnclaveKeySSI(sharedEnclave);
+    self.keySSI = await self.getSharedEnclaveKeySSI(sharedEnclave);
 
   }
 
-  async getSharedEnclaveKeySSI(sharedEnclave) {
+  self.getSharedEnclaveKeySSI = async (sharedEnclave) => {
     let keySSI = await sharedEnclave.getKeySSIAsync();
     if (typeof keySSI !== "string" && keySSI.getIdentifier) {
       keySSI = keySSI.getIdentifier();
@@ -311,12 +326,12 @@ class HomeController extends DwController {
     return keySSI;
   }
 
-  async firstOrRecoveryAdminToAdministrationGroup(did, userDetails, logAction = constants.OPERATIONS.SHARED_ENCLAVE_CREATE) {
+  self.firstOrRecoveryAdminToAdministrationGroup = async (did, userDetails, logAction = constants.OPERATIONS.SHARED_ENCLAVE_CREATE) => {
     if (typeof did !== "string") {
       did = did.getIdentifier();
     }
-    const sharedEnclave = await this.getSharedEnclave();
-    let adminGroup = await this.getAdminGroup(sharedEnclave);
+    const sharedEnclave = await self.getSharedEnclave();
+    let adminGroup = await self.getAdminGroup(sharedEnclave);
     const addMemberToGroupMessage = {
       messageType: "AddMemberToGroup",
       groupDID: adminGroup.did,
@@ -324,13 +339,13 @@ class HomeController extends DwController {
       memberDID: did,
       memberName: userDetails
     };
-    this.did = did;
-    await utils.addLogMessage(did, logAction, adminGroup.name, this.userName || "-");
+    self.did = did;
+    await utils.addLogMessage(did, logAction, adminGroup.name, self.userName || "-");
 
-    await this.processMessages(sharedEnclave, addMemberToGroupMessage);
+    await self.processMessages(sharedEnclave, addMemberToGroupMessage);
   }
 
-  async processMessages(storageService, messages) {
+  self.processMessages = async (storageService, messages) => {
     if (!messages) {
       return
     }
@@ -348,23 +363,6 @@ class HomeController extends DwController {
     }
   }
 
+  return self;
 }
-
-const UI = {
-  showConfigurationDialog: async (container) => {
-    const dialogElement = document.createElement("dw-dialog-configuration");
-    dialogElement.setAttribute("controller", "ConfigurationController");
-    container.append(dialogElement);
-    await dialogElement.componentOnReady();
-
-    const slElement = dialogElement.querySelector("sl-dialog");
-    setTimeout(() => {
-      slElement.show();
-    }, 25);
-
-    slElement.addEventListener("sl-hide", () => {
-      dialogElement.remove();
-    });
-  },
-};
 export default HomeController;
