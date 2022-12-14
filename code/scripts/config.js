@@ -137,6 +137,18 @@ addHook("afterAppLoads", async () => {
       item.parentElement.insertBefore(iconDiv, item);
     }
   });
+
+  //go to home page and clear selected menu item
+  try {
+    document.querySelector(".logo-container").addEventListener("click", async () => {
+      document.querySelector("webc-app-menu-item[active]").removeAttribute("active");
+      await navigateToPageTag("home");
+    })
+  } catch (e) {
+    console.log("Menu not initialized yet.", e);
+  }
+
+
 });
 
 setConfig(getInitialConfig());
