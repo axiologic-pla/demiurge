@@ -39,13 +39,10 @@ async function getStoredDID() {
   return record.did;
 }
 
-async function setWalletStatus(did, walletStatus) {
+async function setWalletStatus(walletStatus) {
   const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-  if (typeof did !== "string") {
-    did = did.getIdentifier();
-  }
   try {
-    await walletStorage.writeKeyAsync(constants.IDENTITY, {did, walletStatus});
+    await walletStorage.writeKeyAsync(constants.WALLET_STATUS,  walletStatus);
   } catch (err) {
     console.log(err);
   }
@@ -57,17 +54,12 @@ async function getWalletStatus() {
   let record;
 
   try {
-    record = await walletStorage.readKeyAsync(constants.IDENTITY);
+    record = await walletStorage.readKeyAsync(constants.WALLET_STATUS);
   } catch (err) {
     // TODO: wait for a future improvement of db from OpenDSU SDK
   }
 
-  if (!record) {
-    console.log("Wallet identity not finished yet");
-    return undefined;
-  }
-
-  return record.walletStatus;
+  return record;
 }
 
 async function didWasApproved(did) {

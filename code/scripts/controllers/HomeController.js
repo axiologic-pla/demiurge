@@ -1,5 +1,4 @@
-import {getCommunicationService} from "../services/CommunicationService.js";
-import {getStoredDID, setStoredDID, setWalletStatus} from "../services/BootingIdentityService.js";
+import {getStoredDID, setStoredDID, setWalletStatus, getWalletStatus} from "../services/BootingIdentityService.js";
 import constants from "../constants.js";
 import utils from "../utils.js";
 import MessagesService from "../services/MessagesService.js";
@@ -9,7 +8,7 @@ const {DwController} = WebCardinal.controllers;
 const openDSU = require("opendsu");
 const scAPI = openDSU.loadAPI("sc");
 const w3cDID = openDSU.loadAPI("w3cdid");
-
+const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();
 class HomeController extends DwController {
   constructor(...props) {
     super(...props);
@@ -18,66 +17,78 @@ class HomeController extends DwController {
       domain: this.domain, username: this.userDetails
     };
 
-    const {ui} = this;
+    const {ui} = this
+    getWalletStatus().then(async status=>{
+      if (status !== constants.ACCOUNT_STATUS.CREATED) {
+        ui.disableMenu();
+        this.model.showBootingIdentity = true;
+        const isFirstAdmin = await this.isFirstAdmin();
+          // const didWasCreated = await this.didWasCreated();
+          const did = await $$.promisify(typicalBusinessLogicHub.mainDIDCreated)();
+          if (isFirstAdmin) {
+            if (did) {
+              return;
+            }
 
-    if (this.status !== constants.ACCOUNT_STATUS.CREATED) {
-      ui.disableMenu();
-      this.model.showBootingIdentity = true;
-      this.isFirstAdmin().then(async isFirstAdmin => {
-        const didWasCreated = await this.didWasCreated();
-        if (isFirstAdmin) {
-          if (didWasCreated) {
-            return;
-          }
-
-          this.createDID(async (err, model) => {
-            const {didDocument, submitElement} = model;
-            submitElement.loading = true;
-            await this.createInitialDID();
-            await this.showInitDialog();
-            await this.createEnclaves();
-            await this.createGroups();
-            await this.firstOrRecoveryAdminToAdministrationGroup(didDocument, this.userDetails);
-
-            getCommunicationService().waitForMessage(didDocument, async (err) => {
-              if (err) {
-                console.log("Error on waitformessage: ", err);
-                this.ui.showToast(`Failed to create wallet.`);
-                return;
-              }
-              await this.ui.hideDialogFromComponent("dw-dialog-initialising");
+            this.createDID(async (err, model) => {
+              const {didDocument, submitElement} = model;
+              await $$.promisify(typicalBusinessLogicHub.setMainDID)(didDocument.getIdentifier());
+              submitElement.loading = true;
+              await this.createInitialDID();
+              await this.showInitDialog();
+              await this.createEnclaves();
+              await this.createGroups();
+              typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, this.onReceivedInitMessage.bind(this))
+              await this.firstOrRecoveryAdminToAdministrationGroup(didDocument, this.userDetails);
+            });
+          } else {
+            if (did) {
+              await this.waitForApproval(did);
+              return;
+            }
+            this.createDID(async (err, model) => {
+              const {didDocument, submitElement} = model;
+              submitElement.loading = true;
+              await $$.promisify(typicalBusinessLogicHub.setMainDID)(didDocument.getIdentifier());
+              await this.waitForApproval(didDocument);
               submitElement.loading = false;
-              await setWalletStatus(this.did, constants.ACCOUNT_STATUS.CREATED);
-              await this.ui.showDialogFromComponent("dw-dialog-break-glass-recovery", {
-                sharedEnclaveKeySSI: this.keySSI,
-              }, {
-                parentElement: this.element, disableClosing: false, onClose: () => {
-                  this.showQuickActions();
-                }
-              });
-            })
-          });
-        } else {
-          if (didWasCreated) {
-            const did = await getStoredDID();
-            await this.waitForApproval(did);
-            return;
+            });
           }
-          this.createDID(async (err, model) => {
-            const {didDocument, submitElement} = model;
-            submitElement.loading = true;
-            await this.waitForApproval(didDocument);
-            submitElement.loading = false;
-          });
-        }
-      }).catch(async e => {
-        await ui.showToast("Error on getting wallet status: " + e.message);
-      });
-    } else {
-      this.showQuickActions();
-      getCommunicationService().waitForMessage(this.did, async (err) => {
-      });
-    }
+      } else {
+        this.showQuickActions();
+      }
+    }).catch(async e => {
+      await ui.showToast("Error on getting wallet status: " + e.message);
+    });
+  }
+
+  onReceivedInitMessage (message) {
+    this.ui.hideDialogFromComponent("dw-dialog-initialising").then( () => {
+      setWalletStatus(constants.ACCOUNT_STATUS.CREATED).then(()=>{
+        this.ui.showDialogFromComponent("dw-dialog-break-glass-recovery", {
+          sharedEnclaveKeySSI: this.keySSI,
+        }, {
+          parentElement: this.element, disableClosing: false, onClose: () => {
+            this.showQuickActions();
+          }
+        }).then(()=>{
+          console.log("Finished processing message", message);
+        })
+      })
+    })
+    // submitElement.loading = false;
+
+  }
+
+  onAccessGranted(message){
+      utils.addSharedEnclaveToEnv(message.enclave.enclaveType, message.enclave.enclaveDID, message.enclave.enclaveKeySSI)
+          .then( ()=>{
+        this.ui.hideDialogFromComponent("dw-dialog-waiting-approval")
+            .then(()=>{
+              setWalletStatus(constants.ACCOUNT_STATUS.CREATED)
+                  .then(() => this.showQuickActions());
+            })
+      })
   }
 
   showQuickActions() {
@@ -144,16 +155,7 @@ class HomeController extends DwController {
       did = did.getIdentifier();
     }
     this.did = did;
-    getCommunicationService().waitForMessage(did, async (err) => {
-      if (err) {
-        console.log("Error on waitformessage: ", err);
-        this.ui.showToast(`Failed to create wallet.`);
-        return;
-      }
-      await this.ui.hideDialogFromComponent("dw-dialog-waiting-approval");
-      await setWalletStatus(this.did, constants.ACCOUNT_STATUS.CREATED);
-      this.showQuickActions();
-    });
+    typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, this.onAccessGranted.bind(this));
     await this.ui.showDialogFromComponent("dw-dialog-waiting-approval", {
       did: did,
     }, {
@@ -283,6 +285,7 @@ class HomeController extends DwController {
     await this.processMessages(mainEnclave, messages);
     console.log("Processed create enclave messages");
     const enclaveRecord = await mainEnclave.readKeyAsync(constants.SHARED_ENCLAVE);
+    await $$.promisify(typicalBusinessLogicHub.setSharedEnclave)(enclaveRecord.enclaveKeySSI);
     await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
     await this.storeSharedEnclaves();
   }

@@ -2,7 +2,7 @@ import {createGroup} from "../mappings/createGroupMapping.js";
 import {deleteGroup} from "../mappings/deleteGroupMapping.js";
 import {addMemberToGroupMapping} from "../mappings/addMemberToGroupMapping.js";
 import {createEnclave} from "../mappings/createEnclaveMapping.js";
-import {removeMembersFromGroup} from "../mappings/removeMembersFromGroupMapping.js";
+import {removeMemberFromGroup} from "../mappings/removeMembersFromGroupMapping.js";
 import {deactivateMember} from "../mappings/deactivateMemberMapping.js";
 import {getMessageQueuingServiceInstance} from "./MessageQueuingService.js";
 import utils from "../utils.js";

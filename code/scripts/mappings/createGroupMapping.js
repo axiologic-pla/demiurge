@@ -42,8 +42,6 @@ async function createGroup(message) {
     await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS, group.did, group);
 
     const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
-    const adminDID_Document = await $$.promisify(w3cdid.resolveDID)(adminDID.did);
-
     const credentialService = getCredentialService();
     const groupCredential = await credentialService.createVerifiableCredential(adminDID.did, group.did);
     await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromContent(groupCredential), {
@@ -54,11 +52,6 @@ async function createGroup(message) {
       encodingType: constants.JWT_ENCODING,
       tags: [group.name, constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION]
     });
-
-    const msg = {
-      sender: adminDID.did,
-    };
-    await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), adminDID_Document);
   }
 }
 

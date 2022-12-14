@@ -217,7 +217,7 @@ class GroupsController extends DwController {
         const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
 
         const addMemberToGroupMessage = {
-          messageType: "AddMemberToGroup",
+          messageType: constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP,
           groupDID: group.did,
           memberDID: adminDID.did,
           memberName: adminDID.username,

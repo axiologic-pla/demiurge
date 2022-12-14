@@ -105,13 +105,13 @@ class CredentialsController extends DwController {
       }
     });
 
-    setTimeout(async () => {
-      this.model.credentials = await this.fetchGroupCredentials(this.model.selectedGroup.did);
-      this.model.governanceCredentials = await this.fetchGovernanceCredentials();
-      this.model.hasCredentials = this.model.credentials.length > 0;
-      this.model.hasGovernanceCredentials = this.model.governanceCredentials.length > 0;
-      this.model.areCredentialsLoaded = true;
-    });
+    // setTimeout(async () => {
+    //   this.model.credentials = await this.fetchGroupCredentials(this.model.selectedGroup.did);
+    //   this.model.governanceCredentials = await this.fetchGovernanceCredentials();
+    //   this.model.hasCredentials = this.model.credentials.length > 0;
+    //   this.model.hasGovernanceCredentials = this.model.governanceCredentials.length > 0;
+    //   this.model.areCredentialsLoaded = true;
+    // });
   }
 
   /**

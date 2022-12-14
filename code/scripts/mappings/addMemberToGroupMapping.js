@@ -5,7 +5,7 @@ import utils from "../utils.js";
 const promisify = utils.promisify;
 
 function checkIfAddMemberToGroupMessage(message) {
-  return message.messageType === "AddMemberToGroup";
+  return message.messageType === constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP;
 }
 
 async function addMemberToGroupMapping(message) {
@@ -19,7 +19,6 @@ async function addMemberToGroupMapping(message) {
   const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
   const vaultDomain = await promisify(scAPI.getVaultDomain)();
   const dsu = await this.createDSU(vaultDomain, "seed");
-
   const member = {
     username: message.memberName,
     did: message.memberDID,
@@ -65,9 +64,10 @@ async function addMemberToGroupMapping(message) {
   }
 
   const msg = {
-    messageType: "AddMemberToGroup",
+    messageType: constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP,
     credential: groupCredential,
     enclave: enclaveRecord,
+    sender: adminDID
   };
 
   await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), memberDID_Document);
