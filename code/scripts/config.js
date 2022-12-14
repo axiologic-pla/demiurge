@@ -54,8 +54,6 @@ addHook("beforeAppLoads", async () => {
   const didAPI = openDSU.loadAPI("w3cdid");
   const typicalBusinessLogicHub = didAPI.getTypicalBusinessLogicHub();
   function onUserLoginMessage(message) {
-    console.log("================== Login =======================")
-    debugger
     utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
         .then(() => {
         })
@@ -65,9 +63,6 @@ addHook("beforeAppLoads", async () => {
   typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_LOGIN, onUserLoginMessage);
 
   function onUserRemovedMessage(message) {
-    console.log("================== User removed =======================")
-
-          debugger
     utils.addLogMessage(message.userDID, constants.OPERATIONS.REMOVE, message.userGroup, message.userId || "-", message.messageId)
         .then(() => {
           utils.removeSharedEnclaveFromEnv()
