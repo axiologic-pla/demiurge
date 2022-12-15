@@ -35,7 +35,6 @@ function HomeController(...props) {
 
   const {ui} = self
   getWalletStatus().then(async status=>{
-    debugger
     if (status !== constants.ACCOUNT_STATUS.CREATED) {
       ui.disableMenu();
       self.model.showBootingIdentity = true;
