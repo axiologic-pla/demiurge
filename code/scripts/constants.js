@@ -88,14 +88,10 @@ export default {
     "enable_deactivate_group_member_feature"
   ],
   MESSAGE_TYPES: {
-    DSU_FABRIC_LOGIN: "dsuFabricLogin",
-    DEMIURGE_LOGIN: "demiurgeLogin",
     USER_LOGIN: "userLogin",
     USER_REMOVED: "userRemoved",
-    INIT: "init",
     RECEIVED_APPROVAL: "receivedApproval",
     DID_CREATED: "didCreated",
     ADD_MEMBER_TO_GROUP: "AddMemberToGroup"
-  },
-  DID_CREATED_CHANNEL: "didCreatedChannel"
+  }
 };
