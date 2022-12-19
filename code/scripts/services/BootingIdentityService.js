@@ -59,6 +59,17 @@ async function getWalletStatus() {
     // TODO: wait for a future improvement of db from OpenDSU SDK
   }
 
+  if (!record) {
+    try {
+      record = await walletStorage.readKeyAsync(constants.IDENTITY);
+      if (record) {
+        record = record.walletStatus;
+      }
+    } catch (err) {
+      // TODO: wait for a future improvement of db from OpenDSU SDK
+    }
+  }
+
   return record;
 }
 
