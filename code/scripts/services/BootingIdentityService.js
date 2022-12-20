@@ -51,23 +51,21 @@ async function setWalletStatus(walletStatus) {
 async function getWalletStatus() {
   let walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
 
+  let sharedEnclave;
+  try {
+    sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  } catch (err) {
+  }
+
+  if (sharedEnclave) {
+    return constants.ACCOUNT_STATUS.CREATED;
+  }
+
   let record;
 
   try {
     record = await walletStorage.readKeyAsync(constants.WALLET_STATUS);
   } catch (err) {
-    // TODO: wait for a future improvement of db from OpenDSU SDK
-  }
-
-  if (!record) {
-    try {
-      record = await walletStorage.readKeyAsync(constants.IDENTITY);
-      if (record) {
-        record = record.walletStatus;
-      }
-    } catch (err) {
-      // TODO: wait for a future improvement of db from OpenDSU SDK
-    }
   }
 
   return record;

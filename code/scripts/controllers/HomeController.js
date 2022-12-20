@@ -71,6 +71,13 @@ function HomeController(...props) {
         });
       }
     } else {
+      let did;
+      try {
+        did = await getStoredDID();
+      } catch (err) {}
+      if (did) {
+        await $$.promisify(typicalBusinessLogicHub.setMainDID)(did);
+      }
       self.showQuickActions();
     }
   }).catch(async e => {
