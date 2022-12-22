@@ -47,7 +47,6 @@ class DashboardOrganizationController extends DwController {
       return;
     }
 
-    // TODO: Process the voting sessions for the organization to display details
     this.model.areOrganizationsLoaded = true;
   }
 }
