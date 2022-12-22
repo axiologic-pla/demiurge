@@ -26,6 +26,7 @@ export default {
   SECURITY_CONTEXT_KEY_SSI_PATH: "security-context",
   IDENTITY_PK: "identity_pk",
   IDENTITY: "identity",
+  WALLET_STATUS:"walletStatus",
   RECIPIENT_TYPES: {
     USER_RECIPIENT: "user",
     GROUP_RECIPIENT: "group"
@@ -84,5 +85,13 @@ export default {
   MANAGED_FEATURES_ARR: [
     "enable_credentials_management",
     "enable_enclaves_management",
-    "enable_deactivate_group_member_feature"]
+    "enable_deactivate_group_member_feature"
+  ],
+  MESSAGE_TYPES: {
+    USER_LOGIN: "userLogin",
+    USER_REMOVED: "userRemoved",
+    RECEIVED_APPROVAL: "receivedApproval",
+    DID_CREATED: "didCreated",
+    ADD_MEMBER_TO_GROUP: "AddMemberToGroup"
+  }
 };

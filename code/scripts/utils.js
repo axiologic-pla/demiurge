@@ -73,6 +73,19 @@ async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
   scAPI.refreshSecurityContext();
 }
 
+async function removeSharedEnclaveFromEnv() {
+  const openDSU = require("opendsu");
+  const scAPI = openDSU.loadAPI("sc");
+  const mainDSU = await $$.promisify(scAPI.getMainDSU)();
+  let env = await $$.promisify(mainDSU.readFile)("/environment.json");
+  env = JSON.parse(env.toString());
+  env[openDSU.constants.SHARED_ENCLAVE.TYPE] = undefined;
+  env[openDSU.constants.SHARED_ENCLAVE.DID] = undefined;
+  env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = undefined;
+  await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
+  scAPI.refreshSecurityContext();
+}
+
 async function getManagedFeatures() {
   const openDSU = require("opendsu");
   const config = openDSU.loadAPI("config");
@@ -153,5 +166,6 @@ export default {
   addLogMessage,
   uuidv4,
   isValidDID,
-  waitForEnclave
+  waitForEnclave,
+  removeSharedEnclaveFromEnv
 };

@@ -1,5 +1,4 @@
-import {getStoredDID, didWasApproved, getWalletStatus} from "./services/BootingIdentityService.js";
-import {getCommunicationService} from "./services/CommunicationService.js";
+import {getStoredDID, didWasApproved, getWalletStatus, setWalletStatus} from "./services/BootingIdentityService.js";
 import utils from "./utils.js";
 import constants from "./constants.js";
 
@@ -41,7 +40,6 @@ addHook("beforeAppLoads", async () => {
 
   const {getVaultDomainAsync} = await import("./hooks/getVaultDomain.js");
   const {getUserDetails} = await import("./hooks/getUserDetails.js");
-  const {getCommunicationService} = await import("./services/CommunicationService.js");
 
   wallet.vaultDomain = await getVaultDomainAsync();
   let userData = await getUserDetails();
@@ -52,6 +50,31 @@ addHook("beforeAppLoads", async () => {
   wallet.did = await getStoredDID();
   wallet.status = await getWalletStatus();
   wallet.managedFeatures = await utils.getManagedFeatures();
+  const openDSU = require("opendsu");
+  const didAPI = openDSU.loadAPI("w3cdid");
+  const typicalBusinessLogicHub = didAPI.getTypicalBusinessLogicHub();
+  function onUserLoginMessage(message) {
+    utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
+        .then(() => {
+        })
+        .catch(err => console.log(err));
+  }
+
+  typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_LOGIN, onUserLoginMessage);
+
+  function onUserRemovedMessage(message) {
+    utils.addLogMessage(message.userDID, constants.OPERATIONS.REMOVE, message.userGroup, message.userId || "-", message.messageId)
+        .then(() => {
+          utils.removeSharedEnclaveFromEnv()
+              .then(()=>{
+                setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL)
+                    .then(() => $$.history.go("home"));
+              })
+        })
+        .catch(err => console.log(err));
+  }
+
+  typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_REMOVED, onUserRemovedMessage);
 
 
   // load Custom Components
@@ -109,6 +132,18 @@ addHook("afterAppLoads", async () => {
       item.parentElement.insertBefore(iconDiv, item);
     }
   });
+
+  //go to home page and clear selected menu item
+  try {
+    document.querySelector(".logo-container").addEventListener("click", async () => {
+      document.querySelector("webc-app-menu-item[active]").removeAttribute("active");
+      await navigateToPageTag("home");
+    })
+  } catch (e) {
+    console.log("Menu not initialized yet.", e);
+  }
+
+
 });
 
 setConfig(getInitialConfig());

@@ -6,26 +6,13 @@ class DwController extends WebcController {
   constructor(...props) {
     super(...props);
     this._ui = new DwUI(...props);
-
+    if (!$$.history) {
+      $$.history = props[1];
+    }
     for (const item of ["did", "userDetails", "userName", "status", "managedFeatures", "messageProcessingService"]) {
       this[item] = WebCardinal.wallet[item];
     }
     this.domain = WebCardinal.wallet.vaultDomain;
-
-    if (!this.did) {
-      if (WebCardinal.state.page.tag !== "home") {
-        this.navigateToPageTag("home");
-        return;
-      }
-    }
-
-    this.getMainEnclaveDB((err, mainEnclaveDB) => {
-      this.storageService = mainEnclaveDB;
-    });
-
-    this.waitForSharedEnclave((err, sharedEnclaveDB) => {
-      this.sharedStorageService = sharedEnclaveDB;
-    });
   }
 
   get ui() {

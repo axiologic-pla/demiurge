@@ -163,7 +163,12 @@ class MembersController extends DwController {
     });
 
     this.onTagClick("member.delete", async (model, target, event) => {
-      await removeGroupMember(model.did, constants.OPERATIONS.REMOVE)
+      if (model.did !== this.did) {
+        await removeGroupMember(model.did, constants.OPERATIONS.REMOVE)
+      } else {
+        await ui.showToast("You tried to delete your account. This operation is not allowed.", {type: 'danger'});
+        return;
+      }
       // ui.page.closeMultipleSelection();
     });
 
@@ -236,7 +241,7 @@ class MembersController extends DwController {
       const didDocument = await promisify(w3cDID.resolveDID)(member.did);
       member["username"] = didDocument.getName();
       const addMemberToGroupMessage = {
-        messageType: "AddMemberToGroup",
+        messageType: constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP,
         groupDID: group.did,
         enclaveName: group.enclaveName,
         accessMode: group.accessMode,
@@ -265,7 +270,7 @@ class MembersController extends DwController {
    */
   async deleteMembers(group, memberDID, operation) {
     let deleteMmbersMsg = [{
-      messageType: operation === constants.OPERATIONS.REMOVE ? "RemoveMembersFromGroup" : "DeactivateMember",
+      messageType: operation === constants.OPERATIONS.REMOVE ? constants.MESSAGE_TYPES.USER_REMOVED : "DeactivateMember",
       groupDID: group.did,
       memberDID: memberDID,
       groupName: group.name,

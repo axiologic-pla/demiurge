@@ -1,22 +1,27 @@
-import {removeMemberFromGroup} from "./utils.js";
+import constants from "../constants.js";
 
 function checkIfRemoveMemberFromGroupMessage(message) {
-  return message.messageType === "RemoveMembersFromGroup";
+  return message.messageType === constants.MESSAGE_TYPES.USER_REMOVED;
 }
 
-async function removeMembersFromGroup(message) {
+async function removeMemberFromGroup(message) {
   const openDSU = require("opendsu");
-  const system = openDSU.loadAPI("system");
-  const config = openDSU.loadAPI("config");
-  const crypto = openDSU.loadAPI("crypto");
-  const http = openDSU.loadAPI("http");
-
-  await removeMemberFromGroup.call(this, message);
-  const appName = await $$.promisify(config.getEnv)("appName");
-  const did = crypto.encodeBase58(message.memberDID);
-  let url = `${system.getBaseURL()}/removeSSOSecret/${appName}/${did}`;
-  await http.fetch(url, {method: "DELETE"});
+  const w3cdid = openDSU.loadAPI("w3cdid");
+  const scAPI = openDSU.loadAPI("sc");
+  const vaultDomain = await $$.promisify(scAPI.getVaultDomain)();
+  const dsu = await this.createDSU(vaultDomain, "seed")
+  const groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(message.groupDID);
+  await $$.promisify(groupDIDDocument.removeMembers)([message.memberDID]);
+  const mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
+  let adminDID = await mainEnclave.readKeyAsync(constants.IDENTITY);
+  const adminDID_Document = await $$.promisify(w3cdid.resolveDID)(adminDID.did);
+  let memberDID_Document = await $$.promisify(w3cdid.resolveDID)(message.memberDID);
+  const msg = {
+    messageType: message.messageType
+  };
+  await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), memberDID_Document);
 }
 
-require("opendsu").loadAPI("m2dsu").defineMapping(checkIfRemoveMemberFromGroupMessage, removeMembersFromGroup);
-export {removeMembersFromGroup}
+
+require("opendsu").loadAPI("m2dsu").defineMapping(checkIfRemoveMemberFromGroupMessage, removeMemberFromGroup);
+export {removeMemberFromGroup}

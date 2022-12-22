@@ -13,7 +13,7 @@ customElements.define(
             <link rel="stylesheet" href="./components/dw-header/dw-header.css">
             <header>
                 <webc-app-menu mode="horizontal">
-                    <div slot="before">
+                    <div slot="before" class="logo-container">
                         <stencil-route-link class="logo">
                             Demiurge Wallet
                         </stencil-route-link>
