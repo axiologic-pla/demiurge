@@ -253,9 +253,14 @@ class MembersController extends DwController {
           userDID: member.did
         }
       };
-      MessagesService.processMessages([addMemberToGroupMessage], async () => {
-        console.log("Processed messages");
-      });
+      try{
+        await $$.promisify(MessagesService.processMessages)([addMemberToGroupMessage]);
+      }catch (undigestedMessages) {
+        if (undigestedMessages && undigestedMessages.length > 0) {
+          throw Error('Failed to add member');
+        }
+      }
+
       return member;
     } catch (err) {
       console.log(err);
@@ -281,14 +286,17 @@ class MembersController extends DwController {
       }
     }];
 
-    let undigestedMessages = await MessagesService.processMessages(deleteMmbersMsg, async () => {
-
-      console.log("Processed messages");
-    })
-    undigestedMessages = undigestedMessages || [];
-    return undigestedMessages.map(msg => {
-      return {did: msg.memberDID}
-    });
+    try{
+      await $$.promisify(MessagesService.processMessages)(deleteMmbersMsg);
+    }catch (undigestedMessages) {
+      if (undigestedMessages && undigestedMessages.length > 0) {
+        return undigestedMessages.map(msg => {
+          return {did: msg.memberDID}
+        });
+      }else{
+        return [];
+      }
+    }
   }
 
   async notifyMember(group, member) {

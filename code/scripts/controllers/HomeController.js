@@ -39,7 +39,7 @@ function HomeController(...props) {
       ui.disableMenu();
       self.model.showBootingIdentity = true;
       const isFirstAdmin = await self.isFirstAdmin();
-      // const didWasCreated = await self.didWasCreated();
+      // const didWasCreated = await seshowDialogFromComponentlf.didWasCreated();
       const did = await $$.promisify(typicalBusinessLogicHub.mainDIDCreated)();
       if (isFirstAdmin) {
         if (did) {

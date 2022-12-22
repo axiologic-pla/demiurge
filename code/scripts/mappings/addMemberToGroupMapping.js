@@ -24,7 +24,6 @@ async function addMemberToGroupMapping(message) {
     did: message.memberDID,
   };
   const groupDIDDocument = await promisify(w3cdid.resolveDID)(message.groupDID);
-  await promisify(groupDIDDocument.addMember)(member.did, member);
   let adminDID = await mainEnclave.readKeyAsync(constants.IDENTITY);
   adminDID = adminDID.did;
   const adminDID_Document = await $$.promisify(w3cdid.resolveDID)(adminDID);
@@ -71,6 +70,7 @@ async function addMemberToGroupMapping(message) {
   };
 
   await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), memberDID_Document);
+  await promisify(groupDIDDocument.addMember)(member.did, member);
 }
 
 require("opendsu").loadAPI("m2dsu").defineMapping(checkIfAddMemberToGroupMessage, addMemberToGroupMapping);
