@@ -24,17 +24,17 @@
 
   <!-- Member content -->
   <section id="dw-member-content">
-    <sl-tab-group class="dw-member-content">
+    <sl-tab-group class="dw-member-content" disabled_feature="@disable_credentials_management">
       <sl-tab slot="nav" panel="credentials">
         <sl-icon name="key-fill"></sl-icon>
         Credentials
       </sl-tab>
-      <sl-tab slot="nav" panel="databases">
+      <sl-tab slot="nav" panel="databases" disabled_feature="@disable_enclaves_management">
         <sl-icon name="hdd-stack-fill"></sl-icon>
         Databases
       </sl-tab>
 
-      <sl-tab-panel name="credentials">
+      <sl-tab-panel name="credentials" disabled_feature="@disable_credentials_management">
         <!-- Member credentials -->
         <webc-container controller="member/CredentialsController">
           <section class="dw-credentials--header">
@@ -121,7 +121,7 @@
 
         </webc-container>
       </sl-tab-panel>
-      <sl-tab-panel name="databases">
+      <sl-tab-panel name="databases" disabled_feature="@disable_enclaves_management">
         <!-- Member databases -->
         <webc-container controller="member/DatabasesController">
           <section class="dw-databases--header">

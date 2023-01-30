@@ -53,25 +53,23 @@ addHook("beforeAppLoads", async () => {
   const openDSU = require("opendsu");
   const didAPI = openDSU.loadAPI("w3cdid");
   const typicalBusinessLogicHub = didAPI.getTypicalBusinessLogicHub();
+
   function onUserLoginMessage(message) {
     utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
-        .then(() => {
-        })
-        .catch(err => console.log(err));
+      .then(() => {
+      })
+      .catch(err => console.log(err));
   }
 
   typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_LOGIN, onUserLoginMessage);
 
   function onUserRemovedMessage(message) {
-    utils.addLogMessage(message.userDID, constants.OPERATIONS.REMOVE, message.userGroup, message.userId || "-", message.messageId)
-        .then(() => {
-          utils.removeSharedEnclaveFromEnv()
-              .then(()=>{
-                setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL)
-                    .then(() => $$.history.go("home"));
-              })
-        })
-        .catch(err => console.log(err));
+//audit logs should already be registered during process message
+    utils.removeSharedEnclaveFromEnv()
+      .then(() => {
+        setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL)
+          .then(() => $$.history.go("home"))
+      }).catch(err => console.log(err));
   }
 
   typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_REMOVED, onUserRemovedMessage);
