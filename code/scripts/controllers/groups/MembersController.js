@@ -148,6 +148,7 @@ class MembersController extends DwController {
       }
 
       button.loading = false;
+      
       setTimeout(async () => {
         await ui.hideDialogFromComponent("dw-dialog-group-members-update")
       }, 0)
