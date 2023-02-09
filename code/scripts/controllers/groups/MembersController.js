@@ -142,19 +142,15 @@ class MembersController extends DwController {
         );
         const member = await this.addMember(selectedGroup, {did: newMemberDid});
         this.model.members.push(member);
-        button.loading = false;
-        await ui.hideDialogFromComponent("dw-dialog-group-members-update");
 
       } catch (e) {
-        try {
-          await ui.hideDialogFromComponent("dw-dialog-group-members-update");
-        } catch (e) {
-        }
-        await ui.showToast("Could not add user to the group because: " + e.message, {type: 'danger'});
+        ui.showToast("Could not add user to the group because: " + e.message, {type: 'danger'});
       }
 
-      const {did} = await ui.page.addMember(model, button);
       button.loading = false;
+      setTimeout(async () => {
+        await ui.hideDialogFromComponent("dw-dialog-group-members-update")
+      }, 0)
     });
 
     this.onTagClick("member.select", (selectedMember, ...props) => {
@@ -253,9 +249,9 @@ class MembersController extends DwController {
           userDID: member.did
         }
       };
-      try{
+      try {
         await $$.promisify(MessagesService.processMessages)([addMemberToGroupMessage]);
-      }catch (undigestedMessages) {
+      } catch (undigestedMessages) {
         if (undigestedMessages && undigestedMessages.length > 0) {
           throw Error('Failed to add member');
         }
@@ -286,14 +282,14 @@ class MembersController extends DwController {
       }
     }];
 
-    try{
+    try {
       await $$.promisify(MessagesService.processMessages)(deleteMmbersMsg);
-    }catch (undigestedMessages) {
+    } catch (undigestedMessages) {
       if (undigestedMessages && undigestedMessages.length > 0) {
         return undigestedMessages.map(msg => {
           return {did: msg.memberDID}
         });
-      }else{
+      } else {
         return [];
       }
     }

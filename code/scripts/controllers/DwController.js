@@ -289,7 +289,7 @@ class DwUI {
    * @param {string} component
    */
   async hideDialogFromComponent(component) {
-    await WebCardinal.state.page.dialogs[component].hide();
+      await WebCardinal.state.page.dialogs[component].hide();
   }
 
   get page() {
