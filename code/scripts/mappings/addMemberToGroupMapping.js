@@ -37,6 +37,9 @@ async function addMemberToGroupMapping(message) {
     enclaveKeySSI: enclave.enclaveKeySSI
   };
 
+/*
+*** allow access to enclave to let read only user to audit login
+
   if (message.accessMode === constants.READ_ONLY_ACCESS_MODE) {
     const keySSISpace = openDSU.loadAPI('keyssi');
     if (typeof enclaveRecord.enclaveKeySSI === 'string') {
@@ -45,6 +48,7 @@ async function addMemberToGroupMapping(message) {
       enclaveRecord.enclaveKeySSI = enclaveRecord.enclaveKeySSI.getIdentifier();
     }
   }
+*/
 
   const credentials = await sharedEnclave.filterAsync(constants.TABLES.GROUPS_CREDENTIALS, `groupDID == ${message.groupDID}`);
   let groupCredential = credentials.find(el => el.credentialType === constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION);
