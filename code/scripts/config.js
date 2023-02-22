@@ -134,8 +134,10 @@ addHook("afterAppLoads", async () => {
   //go to home page and clear selected menu item
   try {
     document.querySelector(".logo-container").addEventListener("click", async () => {
-      document.querySelector("webc-app-menu-item[active]").removeAttribute("active");
-      await navigateToPageTag("home");
+      if (document.querySelector("webc-app-menu-item[active]")) {
+        document.querySelector("webc-app-menu-item[active]").removeAttribute("active");
+      }
+      await navigateToPageTag("home", {skipLoginAudit: true});
     })
   } catch (e) {
     console.log("Menu not initialized yet.", e);

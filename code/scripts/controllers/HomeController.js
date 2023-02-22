@@ -29,12 +29,17 @@ const UI = {
 
 function HomeController(...props) {
   let self = new DwController(...props);
+  try {
+    this.skipLoginAudit = history.state.state.skipLoginAudit || false;
+  } catch (e) {
+    this.skipLoginAudit = false;
+  }
   self.model = {
     domain: self.domain, username: self.userDetails
   };
 
   const {ui} = self
-  getWalletStatus().then(async status=>{
+  getWalletStatus().then(async status => {
     if (status !== constants.ACCOUNT_STATUS.CREATED) {
       ui.disableMenu();
       self.model.showBootingIdentity = true;
@@ -74,7 +79,8 @@ function HomeController(...props) {
       let did;
       try {
         did = await getStoredDID();
-      } catch (err) {}
+      } catch (err) {
+      }
       if (did) {
         await $$.promisify(typicalBusinessLogicHub.setMainDID)(did);
       }
@@ -101,15 +107,15 @@ function HomeController(...props) {
     // submitElement.loading = false;
 
   }
-  self.onAccessGranted = (message)=>{
+  self.onAccessGranted = (message) => {
     utils.addSharedEnclaveToEnv(message.enclave.enclaveType, message.enclave.enclaveDID, message.enclave.enclaveKeySSI)
-        .then(()=> {
-          self.ui.hideDialogFromComponent("dw-dialog-waiting-approval")
-              .then(()=>{
-                setWalletStatus(constants.ACCOUNT_STATUS.CREATED)
-                    .then(() => self.showQuickActions());
-              })
-        }).catch(console.log)
+      .then(() => {
+        self.ui.hideDialogFromComponent("dw-dialog-waiting-approval")
+          .then(() => {
+            setWalletStatus(constants.ACCOUNT_STATUS.CREATED)
+              .then(() => self.showQuickActions());
+          })
+      }).catch(console.log)
   }
 
   self.showQuickActions = () => {
@@ -133,11 +139,12 @@ function HomeController(...props) {
       await UI.showConfigurationDialog(self.element);
     });
 
-
-    self.getSharedEnclave().then(async (sharedEnclave) => {
-      let adminGroup = await self.getAdminGroup(sharedEnclave);
-      await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, adminGroup.name, self.userName);
-    }).catch(e => console.log("Could not log user login action ", e));
+    if (!this.skipLoginAudit) {
+      self.getSharedEnclave().then(async (sharedEnclave) => {
+        let adminGroup = await self.getAdminGroup(sharedEnclave);
+        await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, adminGroup.name, self.userName);
+      }).catch(e => console.log("Could not log user login action ", e));
+    }
 
   }
 
@@ -294,7 +301,7 @@ function HomeController(...props) {
     await $$.promisify(w3cDID.createIdentity)(constants.SSI_NAME_DID_TYPE, didDomain, constants.INITIAL_IDENTITY_PUBLIC_NAME);
   }
 
-  self.createGroups=async () => {
+  self.createGroups = async () => {
     const sharedEnclave = await self.getSharedEnclave();
     const messages = await $$.promisify(self.DSUStorage.getObject.bind(self.DSUStorage))(constants.GROUP_MESSAGES_PATH);
     await self.processMessages(sharedEnclave, messages);
@@ -311,7 +318,7 @@ function HomeController(...props) {
     await self.storeSharedEnclaves();
   }
 
-  self.storeSharedEnclaves= async () => {
+  self.storeSharedEnclaves = async () => {
     const mainEnclave = await self.getMainEnclave();
     const enclaves = await $$.promisify(mainEnclave.getAllRecords)(constants.TABLES.GROUP_ENCLAVES);
     const sharedEnclave = await self.getSharedEnclave();
@@ -371,4 +378,5 @@ function HomeController(...props) {
 
   return self;
 }
+
 export default HomeController;
