@@ -42,6 +42,7 @@ class CredentialsController extends DwController {
 
     setTimeout(async () => {
       try {
+        this.storageService = await $$.promisify(this.waitForSharedEnclave)();
         this.model.credentials = await this.storageService.filterAsync(constants.TABLES.GROUPS_CREDENTIALS);
         this.updateState("credentials", this.model.credentials);
         this.model.areCredentialsLoaded = true;

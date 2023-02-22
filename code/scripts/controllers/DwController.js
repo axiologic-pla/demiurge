@@ -81,6 +81,7 @@ class DwController extends WebcController {
     scApi.getSharedEnclave((err, sharedEnclave) => {
       if (err) {
         return setTimeout(() => {
+          console.log("Waiting for shared enclave .....");
           this.waitForSharedEnclave(callback);
         }, 100);
       }

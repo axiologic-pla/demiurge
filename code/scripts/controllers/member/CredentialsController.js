@@ -96,6 +96,7 @@ class CredentialsController extends DwController {
     });
 
     setTimeout(async () => {
+      this.storageService = await $$.promisify(this.waitForSharedEnclave)();
       this.model.credentials = await this.fetchCredentials(this.model.selectedMember.did);
       this.model.governanceCredentials = await this.fetchGovernanceCredentials();
       this.model.hasCredentials = this.model.credentials.length > 0;
@@ -116,7 +117,7 @@ class CredentialsController extends DwController {
    * @returns {Promise<*>}
    */
   async fetchGovernanceCredentials() {
-    const governanceCredentials = await this.sharedStorageService.filterAsync(constants.TABLES.GOVERNANCE_CREDENTIALS);
+    const governanceCredentials = await this.storageService.filterAsync(constants.TABLES.GOVERNANCE_CREDENTIALS);
     return governanceCredentials.map(el => {
       const tags = (el.tags || []).join(', ');
       return { ...el, tags };
@@ -137,7 +138,7 @@ class CredentialsController extends DwController {
   }
 
   async deleteCredentialFromGovernanceTable(token) {
-    await this.sharedStorageService.deleteRecordAsync(constants.TABLES.GOVERNANCE_CREDENTIALS, utils.getPKFromContent(token));
+    await this.storageService.deleteRecordAsync(constants.TABLES.GOVERNANCE_CREDENTIALS, utils.getPKFromContent(token));
     this.model.governanceCredentials = this.model.governanceCredentials.filter(
       (credential) => credential.token !== token
     );

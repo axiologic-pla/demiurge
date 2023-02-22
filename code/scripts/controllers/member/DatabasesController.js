@@ -47,6 +47,7 @@ class DatabasesController extends DwController {
     });
 
     setTimeout(async () => {
+      this.storageService = await $$.promisify(this.waitForSharedEnclave)();
       this.model.databases = await this.fetchDatabases();
       this.model.areDatabasesLoaded = true;
     });

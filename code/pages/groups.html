@@ -55,14 +55,14 @@
                 <sl-icon name="people-fill"></sl-icon>
                 Members
             </sl-tab>
-            <sl-tab slot="nav" panel="credentials" disabled_feature="@disable_credentials_management">
+           <!-- <sl-tab slot="nav" panel="credentials" disabled_feature="@disable_credentials_management">
                 <sl-icon name="key-fill"></sl-icon>
                 Credentials
-            </sl-tab>
-            <sl-tab slot="nav" panel="databases" disabled_feature="@disable_enclaves_management">
+            </sl-tab>-->
+           <!-- <sl-tab slot="nav" panel="databases" disabled_feature="@disable_enclaves_management">
                 <sl-icon name="hdd-stack-fill"></sl-icon>
                 Enclaves
-            </sl-tab>
+            </sl-tab>-->
 
             <sl-tab-panel name="members">
                 <section id="dw-group-members">
@@ -70,18 +70,18 @@
                 </section>
             </sl-tab-panel>
 
-            <sl-tab-panel name="credentials">
+           <!-- <sl-tab-panel name="credentials">
                 <section id="dw-group-credentials" disabled_feature="@disable_credentials_management">
-                    <!-- Group credentials are injected here -->
+                    &lt;!&ndash; Group credentials are injected here &ndash;&gt;
                 </section>
-            </sl-tab-panel>
+            </sl-tab-panel>-->
 
 
-            <sl-tab-panel name="databases">
+           <!-- <sl-tab-panel name="databases">
                 <section id="dw-group-databases" disabled_feature="@disable_enclaves_management">
-                    <!-- Group databases are injected here -->
+                    &lt;!&ndash; Group databases are injected here &ndash;&gt;
                 </section>
-            </sl-tab-panel>
+            </sl-tab-panel>-->
 
         </sl-tab-group>
     </webc-container>
@@ -121,11 +121,11 @@
                 <sl-tooltip content="Delete group member">
                     <sl-icon-button data-tag="member.delete" name="trash"></sl-icon-button>
                 </sl-tooltip>
-                <section data-if="@enable_deactivate_group_member_feature">
+              <!--  <section data-if="@enable_deactivate_group_member_feature">
                     <sl-tooltip content="Deactivate group member" slot="true">
                         <sl-icon-button data-tag="member.deactivate" name="person-x"></sl-icon-button>
                     </sl-tooltip>
-                </section>
+                </section>-->
 
             </article>
             <div slot="no-data" data-if="@areMembersLoaded" class="no-data">

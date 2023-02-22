@@ -67,7 +67,9 @@ class GroupsUI extends DwController {
 
       for (const subPart of subParts[part]) {
         const parentElement = documentFragment.querySelector(`#dw-${subPart}`);
-        parentElement.append(cloneTemplate(subPart));
+        if (parentElement) {
+          parentElement.append(cloneTemplate(subPart));
+        }
       }
 
 

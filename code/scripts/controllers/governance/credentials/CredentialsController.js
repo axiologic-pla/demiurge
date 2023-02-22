@@ -1,8 +1,8 @@
 import constants from '../../../constants.js';
 import utils from '../../../utils.js';
-import { parseJWTSegments } from '../../../services/JWTCredentialService.js';
+import {parseJWTSegments} from '../../../services/JWTCredentialService.js';
 
-const { DwController } = WebCardinal.controllers;
+const {DwController} = WebCardinal.controllers;
 
 class CredentialsUI {
   async copyTokenToClipboard(model) {
@@ -36,7 +36,7 @@ class CredentialsController extends DwController {
   }
 
   init() {
-    const waitForSharedEnclave = () => {
+    /*const waitForSharedEnclave = () => {
       console.log('Waiting for shared enclave');
       setTimeout(async () => {
         const scAPI = require('opendsu').loadAPI('sc');
@@ -52,10 +52,19 @@ class CredentialsController extends DwController {
           waitForSharedEnclave();
         }
       }, 100);
-    };
-
+    };*/
+    setTimeout(async () => {
+      this.storageService = await $$.promisify(this.waitForSharedEnclave)();
+      const credentials = await this.fetchCredentials();
+      this.model.credentials = credentials.map(el => {
+        const tags = (el.tags || []).join(', ');
+        return {...el, tags};
+      })
+      this.model.hasCredentials = this.model.credentials.length > 0;
+      this.model.areCredentialsLoaded = true;
+    })
     this.attachViewEventListeners();
-    waitForSharedEnclave();
+
   }
 
   attachViewEventListeners() {
@@ -79,7 +88,7 @@ class CredentialsController extends DwController {
         if (result.state === 'granted' || result.state === 'prompt') {
           const clipboardValue = await navigator.clipboard.readText();
           target.parentElement.value = clipboardValue;
-          return { clipboardValue };
+          return {clipboardValue};
         }
         throw Error('Coping from clipboard is not possible!');
       } catch (err) {
@@ -149,4 +158,4 @@ class CredentialsController extends DwController {
 }
 
 export default CredentialsController;
-export { CredentialsUI };
+export {CredentialsUI};
