@@ -17,12 +17,11 @@ async function addMemberToGroupMapping(message) {
   await $$.promisify(mainDSU.refresh)();
   const mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
   const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
-  const vaultDomain = await promisify(scAPI.getVaultDomain)();
-  const dsu = await this.createDSU(vaultDomain, "seed");
   const member = {
     username: message.memberName,
     did: message.memberDID,
   };
+
   const groupDIDDocument = await promisify(w3cdid.resolveDID)(message.groupDID);
   let adminDID = await mainEnclave.readKeyAsync(constants.IDENTITY);
   adminDID = adminDID.did;
@@ -37,18 +36,18 @@ async function addMemberToGroupMapping(message) {
     enclaveKeySSI: enclave.enclaveKeySSI
   };
 
-/*
-*** allow access to enclave to let read only user to audit login
+  /*
+  *** allow access to enclave to let read only user to audit login
 
-  if (message.accessMode === constants.READ_ONLY_ACCESS_MODE) {
-    const keySSISpace = openDSU.loadAPI('keyssi');
-    if (typeof enclaveRecord.enclaveKeySSI === 'string') {
-      enclaveRecord.enclaveKeySSI = keySSISpace.parse(enclaveRecord.enclaveKeySSI);
-      enclaveRecord.enclaveKeySSI = await $$.promisify(enclaveRecord.enclaveKeySSI.derive)();
-      enclaveRecord.enclaveKeySSI = enclaveRecord.enclaveKeySSI.getIdentifier();
+    if (message.accessMode === constants.READ_ONLY_ACCESS_MODE) {
+      const keySSISpace = openDSU.loadAPI('keyssi');
+      if (typeof enclaveRecord.enclaveKeySSI === 'string') {
+        enclaveRecord.enclaveKeySSI = keySSISpace.parse(enclaveRecord.enclaveKeySSI);
+        enclaveRecord.enclaveKeySSI = await $$.promisify(enclaveRecord.enclaveKeySSI.derive)();
+        enclaveRecord.enclaveKeySSI = enclaveRecord.enclaveKeySSI.getIdentifier();
+      }
     }
-  }
-*/
+  */
 
   const credentials = await sharedEnclave.filterAsync(constants.TABLES.GROUPS_CREDENTIALS, `groupDID == ${message.groupDID}`);
   let groupCredential = credentials.find(el => el.credentialType === constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION);
@@ -78,4 +77,4 @@ async function addMemberToGroupMapping(message) {
 }
 
 require("opendsu").loadAPI("m2dsu").defineMapping(checkIfAddMemberToGroupMessage, addMemberToGroupMapping);
-export { addMemberToGroupMapping };
+export {addMemberToGroupMapping};

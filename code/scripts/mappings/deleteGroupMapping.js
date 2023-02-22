@@ -10,8 +10,6 @@ async function deleteGroup(message) {
     const openDSU = require("opendsu");
     const scAPI = openDSU.loadAPI("sc");
     const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
-    const vaultDomain = await promisify(scAPI.getVaultDomain)();
-    const dsu = await this.createDSU(vaultDomain, "seed")
     await promisify(enclaveDB.deleteRecord)(constants.TABLES.GROUPS, message.groupDID);
 }
 

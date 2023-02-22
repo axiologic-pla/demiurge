@@ -16,8 +16,7 @@ async function createGroup(message) {
   const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
   const vaultDomain = await promisify(scAPI.getVaultDomain)();
   const didDomain = await promisify(scAPI.getDIDDomain)();
-  const mainDSU = await promisify(scAPI.getMainDSU)();
-  const dsu = await this.createDSU(vaultDomain, "seed");
+
 
   const group = {};
   group.name = message.groupName;
