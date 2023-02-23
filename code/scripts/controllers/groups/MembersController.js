@@ -106,6 +106,7 @@ class MembersController extends DwController {
           throw new Error("DID is empty.");
         }
 
+        inputElement.value = "";
         let groups = await utils.fetchGroups();
         let selectedGroup = constants.EPI_GROUP_TAGS.find(group => group.name === this.model.selectedGroup.name);
         if (!selectedGroup) {
