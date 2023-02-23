@@ -50,4 +50,16 @@
       </webc-app-container>
     </webc-app-root>
   </body>
+  <script>
+    if($$){
+      const originalHTTPHandler = $$.httpUnknownResponseGlobalHandler;
+      $$.httpUnknownResponseGlobalHandler = function(res){
+        let err = res ? res.err : undefined;
+        if (res.status === 503 && err && err.code !== 20) {
+          originalHTTPHandler(res);
+          alert("Network issues detected!");
+        }
+      }
+    }
+  </script>
 </html>
