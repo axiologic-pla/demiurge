@@ -45,6 +45,7 @@ function HomeController(...props) {
       self.model.showBootingIdentity = true;
       const isFirstAdmin = await self.isFirstAdmin();
       // const didWasCreated = await seshowDialogFromComponentlf.didWasCreated();
+
       const did = await $$.promisify(typicalBusinessLogicHub.mainDIDCreated)();
       if (isFirstAdmin) {
         if (did) {
@@ -52,15 +53,26 @@ function HomeController(...props) {
         }
 
         self.createDID(async (err, model) => {
+          if (err) {
+            return alert(`Failed to create did. Probably an infrastructure issue. ${err.message}`);
+          }
           const {didDocument, submitElement} = model;
-          await $$.promisify(typicalBusinessLogicHub.setMainDID)(didDocument.getIdentifier());
+          await self.setMainDID(typicalBusinessLogicHub, didDocument);
           submitElement.loading = true;
-          await self.createInitialDID();
-          await self.showInitDialog();
-          await self.createEnclaves();
-          await self.createGroups();
-          typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onReceivedInitMessage)
-          await self.firstOrRecoveryAdminToAdministrationGroup(didDocument, self.userDetails);
+          try{
+            await self.createInitialDID();
+            await self.showInitDialog();
+            await self.createEnclaves();
+            ui.showToast("Created enclaves");
+            await self.createGroups();
+            ui.showToast("Created groups");
+            typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onReceivedInitMessage)
+            await self.firstOrRecoveryAdminToAdministrationGroup(didDocument, self.userDetails);
+            ui.showToast("Waiting for final initialization steps");
+          }catch (e) {
+            return alert(`Failed to initialise. Probably an infrastructure issue. ${e.message}`);
+          }
+
         });
       } else {
         if (did) {
@@ -68,11 +80,19 @@ function HomeController(...props) {
           return;
         }
         self.createDID(async (err, model) => {
+          if (err) {
+            return alert(`Failed create did. Probably an infrastructure issue. ${err.message}`);
+          }
           const {didDocument, submitElement} = model;
           submitElement.loading = true;
-          await $$.promisify(typicalBusinessLogicHub.setMainDID)(didDocument.getIdentifier());
-          await self.waitForApproval(didDocument);
-          submitElement.loading = false;
+          try{
+            await $$.promisify(typicalBusinessLogicHub.setMainDID)(didDocument.getIdentifier());
+            await self.setMainDID(typicalBusinessLogicHub, didDocument);
+            await self.waitForApproval(didDocument);
+            submitElement.loading = false;
+          }catch (e) {
+            return alert(`Failed to subscribe. Probably an infrastructure issue. ${err.message}`);
+          }
         });
       }
     } else {
@@ -82,7 +102,7 @@ function HomeController(...props) {
       } catch (err) {
       }
       if (did) {
-        await $$.promisify(typicalBusinessLogicHub.setMainDID)(did);
+        await self.setMainDID(typicalBusinessLogicHub, did);
       }
       self.showQuickActions();
     }
@@ -148,16 +168,32 @@ function HomeController(...props) {
 
   }
 
-  self.getAdminGroup = async (sharedEnclave) => {
-    let groups = [];
-    try {
-      groups = await utils.promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
-    } catch (e) {
-      console.log(e);
+  self.setMainDID = async (typicalBusinessLogicHub, didDocument)=>{
+    if(typeof didDocument === "object"){
+      didDocument = didDocument.getIdentifier();
     }
-    let adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE || gr.name === constants.EPI_ADMIN_GROUP_NAME) || {};
+    try{
+      await $$.promisify(typicalBusinessLogicHub.setMainDID)(didDocument);
+    }catch (e) {
+      ui.showToast(`Failed to set main did. Retrying ...`)
+      await self.setMainDID(typicalBusinessLogicHub, didDocument);
+    }
+  }
 
-    return adminGroup;
+  self.getAdminGroup = async (sharedEnclave) => {
+    const tryToGetAdminGroup = async () => {
+      let groups = [];
+      try {
+        groups = await utils.promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
+        let adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE || gr.name === constants.EPI_ADMIN_GROUP_NAME) || {};
+        return adminGroup;
+      } catch (e) {
+        console.log("Failed to get groups from table", e);
+        ui.showToast(`Failed to get admin group: ${e.message}`);
+        return await tryToGetAdminGroup();
+      }
+    }
+    return await tryToGetAdminGroup();
   }
 
   self.resolveNavigation = async () => {
@@ -188,6 +224,17 @@ function HomeController(...props) {
       did: did,
     }, {
       parentElement: self.element, disableClosing: true
+    });
+
+    self.onTagClick("paste-from-clipboard", async (model, target, event) => {
+      const result = await navigator.permissions.query({
+        name: "clipboard-read",
+      });
+      if (result.state === "granted" || result.state === "prompt") {
+        const did = await navigator.clipboard.readText();
+        target.parentElement.value = did;
+        return {did};
+      }
     });
 
     self.onTagClick("continue", async (model, target, event) => {
@@ -254,9 +301,13 @@ function HomeController(...props) {
     return true;
   }
 
-  self.createDID = async (callback) => {
+  self.createDID = (callback) => {
     self.onTagEvent("did-component", "did-generate", async (model) => {
-      await self.storeDID(model.didDocument);
+      try{
+        await self.storeDID(model.didDocument);
+      }catch (e) {
+        return callback(createOpenDSUErrorWrapper("Failed to store DID", e));
+      }
       callback(undefined, model);
     });
   }
@@ -279,7 +330,12 @@ function HomeController(...props) {
 
   self.getSharedEnclave = async () => {
     if (!self.sharedEnclave) {
-      self.sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+      try{
+        self.sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+      }catch (e) {
+        ui.showToast(`Failed to get shared enclave: ${e.message}. Retrying ...`);
+        return await self.getSharedEnclave();
+      }
     }
 
     return self.sharedEnclave;
@@ -298,13 +354,26 @@ function HomeController(...props) {
 
   self.createInitialDID = async () => {
     const didDomain = await self.getDIDDomain();
-    await $$.promisify(w3cDID.createIdentity)(constants.SSI_NAME_DID_TYPE, didDomain, constants.INITIAL_IDENTITY_PUBLIC_NAME);
+    try{
+      await $$.promisify(w3cDID.createIdentity)(constants.SSI_NAME_DID_TYPE, didDomain, constants.INITIAL_IDENTITY_PUBLIC_NAME);
+    }catch (e) {
+      ui.showToast(`Failed to create initial did. Retrying ...`);
+      await self.createInitialDID();
+    }
   }
 
   self.createGroups = async () => {
-    const sharedEnclave = await self.getSharedEnclave();
-    const messages = await $$.promisify(self.DSUStorage.getObject.bind(self.DSUStorage))(constants.GROUP_MESSAGES_PATH);
-    await self.processMessages(sharedEnclave, messages);
+    const tryToCreateGroups = async () => {
+      try{
+        const sharedEnclave = await self.getSharedEnclave();
+        const messages = await $$.promisify(self.DSUStorage.getObject.bind(self.DSUStorage))(constants.GROUP_MESSAGES_PATH);
+        await self.processMessages(sharedEnclave, messages);
+      }catch (e) {
+        ui.showToast(`Failed to create enclaves. Retrying`);
+        await tryToCreateGroups();
+      }
+    }
+    await tryToCreateGroups();
   }
 
   self.createEnclaves = async () => {
@@ -312,23 +381,37 @@ function HomeController(...props) {
     const messages = await $$.promisify(self.DSUStorage.getObject.bind(self.DSUStorage))(constants.ENCLAVE_MESSAGES_PATH);
     await self.processMessages(mainEnclave, messages);
     console.log("Processed create enclave messages");
-    const enclaveRecord = await mainEnclave.readKeyAsync(constants.SHARED_ENCLAVE);
-    await $$.promisify(typicalBusinessLogicHub.setSharedEnclave)(enclaveRecord.enclaveKeySSI);
-    await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
+    await self.setSharedEnclave(mainEnclave);
     await self.storeSharedEnclaves();
+  }
+
+  self.setSharedEnclave = async (mainEnclave)=>{
+    const tryToSetSharedEnclave = async () => {
+      try{
+        const enclaveRecord = await mainEnclave.readKeyAsync(constants.SHARED_ENCLAVE);
+        await $$.promisify(typicalBusinessLogicHub.setSharedEnclave)(enclaveRecord.enclaveKeySSI);
+        await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
+      }catch (e) {
+        ui.showToast(`Failed to add shared enclave to environment. Retrying ...`)
+        await tryToSetSharedEnclave();
+      }
+    }
+
+    await tryToSetSharedEnclave();
   }
 
   self.storeSharedEnclaves = async () => {
     const mainEnclave = await self.getMainEnclave();
     const enclaves = await $$.promisify(mainEnclave.getAllRecords)(constants.TABLES.GROUP_ENCLAVES);
     const sharedEnclave = await self.getSharedEnclave();
-
+    sharedEnclave.beginBatch();
     for (let i = 0; i < enclaves.length; i++) {
       await sharedEnclave.writeKeyAsync(enclaves[i].enclaveName, enclaves[i]);
       await sharedEnclave.insertRecordAsync(constants.TABLES.GROUP_ENCLAVES, enclaves[i].enclaveDID, enclaves[i]);
     }
-    self.keySSI = await self.getSharedEnclaveKeySSI(sharedEnclave);
 
+    await sharedEnclave.commitBatchAsync();
+    self.keySSI = await self.getSharedEnclaveKeySSI(sharedEnclave);
   }
 
   self.getSharedEnclaveKeySSI = async (sharedEnclave) => {
@@ -354,7 +437,6 @@ function HomeController(...props) {
     };
     self.did = did;
     await utils.addLogMessage(did, logAction, adminGroup.name, self.userName || "-");
-
     await self.processMessages(sharedEnclave, addMemberToGroupMessage);
   }
 
@@ -365,16 +447,16 @@ function HomeController(...props) {
     if (!Array.isArray(messages)) {
       messages = [messages];
     }
-    try {
-      await MessagesService.processMessages(storageService, messages, (undigestedMessages) => {
-        if (undigestedMessages && undigestedMessages.length > 0) {
-          console.log("Couldn't process all messages. Undigested messages: ", undigestedMessages);
-        }
-      })
-    } catch (err) {
-      console.log("Couldn't process messages: ", err, messages);
-    }
-  }
+
+    await MessagesService.processMessages(storageService, messages, (undigestedMessages) => {
+      if (undigestedMessages && undigestedMessages.length > 0) {
+        ui.showToast(`Couldn't process all messages. Undigested messages: ${undigestedMessages} Retrying`);
+        const remainingMessages = undigestedMessages.map(msgObj => msgObj.message);
+        console.log("Remaining messages:", remainingMessages);
+        self.processMessages(storageService, remainingMessages);
+      }
+    })
+ }
 
   return self;
 }

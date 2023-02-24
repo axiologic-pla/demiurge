@@ -123,7 +123,6 @@ async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, pr
     privileges: priveleges,
   }
   await $$.promisify(logService.log, logService)(logMsg);
-  return;
 }
 
 function uuidv4() {

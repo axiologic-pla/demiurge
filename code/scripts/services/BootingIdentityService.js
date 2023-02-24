@@ -9,15 +9,18 @@ const w3cDID = openDSU.loadAPI("w3cdid");
  * @param {string} did - identifier of DIDDocument
  */
 async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING_APPROVAL) {
-  const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-  if (typeof did !== "string") {
-    did = did.getIdentifier();
+  const tryToSetStoredDID = async () => {
+    try{
+      const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
+      if (typeof did !== "string") {
+        did = did.getIdentifier();
+      }
+      await walletStorage.writeKeyAsync(constants.IDENTITY, {did, walletStatus});
+    }catch (e) {
+      await tryToSetStoredDID();
+    }
   }
-  try {
-    await walletStorage.writeKeyAsync(constants.IDENTITY, {did, walletStatus});
-  } catch (err) {
-    console.log(err);
-  }
+  await tryToSetStoredDID();
 }
 
 async function getStoredDID() {
