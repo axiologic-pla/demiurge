@@ -191,7 +191,7 @@ class MembersController extends DwController {
       await ui.hideDialogFromComponent("dw-dialog-group-members-update");
 
       if (undeleted.length > 0) {
-        await ui.showToast("Member could not deleted", {type: 'danger'});
+        await ui.showToast("Member could not be deleted", {type: 'danger'});
         return;
       }
       this.model.members = this.model.members.filter((member) => member.did !== did);
