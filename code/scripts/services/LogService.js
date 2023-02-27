@@ -14,13 +14,13 @@ export default class LogService {
     if (logDetails === null || logDetails === undefined) {
       return;
     }
-
+    const crypto = require("opendsu").loadAPI("crypto");
     let log = {
       ...logDetails,
-      logPk: logDetails.logPk || require("opendsu").loadAPI("crypto").generateRandom(32).toString("hex")
+      logPk: logDetails.logPk || crypto.encodeBase58(crypto.generateRandom(32))
     };
 
-    this.getSharedStorage((err, storageService)=>{
+    this.getSharedStorage((err, storageService) => {
       if (err) {
         return callback(err);
       }
@@ -39,7 +39,7 @@ export default class LogService {
   }
 
   getLogs(callback) {
-    this.getSharedStorage((err, storageService)=> {
+    this.getSharedStorage((err, storageService) => {
       if (err) {
         return callback(err);
       }
@@ -47,13 +47,13 @@ export default class LogService {
     });
   }
 
-  getSharedStorage(callback){
+  getSharedStorage(callback) {
     if (typeof this.storageService !== "undefined") {
       return callback(undefined, this.storageService);
     }
     const openDSU = require("opendsu");
     const scAPI = openDSU.loadAPI("sc");
-    scAPI.getSharedEnclave((err, sharedEnclave)=>{
+    scAPI.getSharedEnclave((err, sharedEnclave) => {
       if (err) {
         return callback(err);
       }
