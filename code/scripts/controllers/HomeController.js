@@ -322,7 +322,12 @@ function HomeController(...props) {
 
   self.getMainEnclave = async () => {
     if (!self.mainEnclave) {
-      self.mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
+      try{
+        self.mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
+      }catch (e) {
+        ui.showToast(`Failed to get main enclave: ${e.message}. Retrying ...`);
+        return await self.getMainEnclave();
+      }
     }
 
     return self.mainEnclave;
@@ -363,22 +368,27 @@ function HomeController(...props) {
   }
 
   self.createGroups = async () => {
-    const tryToCreateGroups = async () => {
-      try{
-        const sharedEnclave = await self.getSharedEnclave();
-        const messages = await $$.promisify(self.DSUStorage.getObject.bind(self.DSUStorage))(constants.GROUP_MESSAGES_PATH);
-        await self.processMessages(sharedEnclave, messages);
-      }catch (e) {
-        ui.showToast(`Failed to create enclaves. Retrying`);
-        await tryToCreateGroups();
-      }
-    }
-    await tryToCreateGroups();
+    const sharedEnclave = await self.getSharedEnclave();
+    const messages = await self.readMappingEngineMessages(constants.GROUP_MESSAGES_PATH);
+    await self.processMessages(sharedEnclave, messages);
   }
 
+  self.readMappingEngineMessages = async (path)=>{
+    let messages;
+    try{
+      messages = await $$.promisify(self.DSUStorage.getObject.bind(self.DSUStorage))(path);
+    }catch (e) {
+
+    }
+    if (!messages) {
+      ui.showToast(`Failed to read mapping engine messages. Retrying ...`);
+      return await self.readMappingEngineMessages(path);
+    }
+    return messages;
+  }
   self.createEnclaves = async () => {
     const mainEnclave = await self.getMainEnclave();
-    const messages = await $$.promisify(self.DSUStorage.getObject.bind(self.DSUStorage))(constants.ENCLAVE_MESSAGES_PATH);
+    const messages = await self.readMappingEngineMessages(constants.ENCLAVE_MESSAGES_PATH);
     await self.processMessages(mainEnclave, messages);
     console.log("Processed create enclave messages");
     await self.setSharedEnclave(mainEnclave);
@@ -448,15 +458,19 @@ function HomeController(...props) {
       messages = [messages];
     }
 
-    await MessagesService.processMessages(storageService, messages, (undigestedMessages) => {
-      if (undigestedMessages && undigestedMessages.length > 0) {
-        ui.showToast(`Couldn't process all messages. Undigested messages: ${undigestedMessages} Retrying`);
-        const remainingMessages = undigestedMessages.map(msgObj => msgObj.message);
-        console.log("Remaining messages:", remainingMessages);
-        self.processMessages(storageService, remainingMessages);
-      }
-    })
- }
+    let undigestedMessages = [];
+    try{
+      undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, messages);
+    }catch(err) {
+      return self.processMessages(storageService, messages);
+    }
+    if (undigestedMessages && undigestedMessages.length > 0) {
+      ui.showToast(`Couldn't process all messages. Retrying`);
+      const remainingMessages = undigestedMessages.map(msgObj => msgObj.message);
+      console.log("Remaining messages:", remainingMessages);
+      self.processMessages(storageService, remainingMessages);
+    }
+  }
 
   return self;
 }
