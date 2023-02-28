@@ -194,47 +194,67 @@ class GroupsController extends DwController {
 
     const scAPI = require("opendsu").loadAPI("sc");
     if (group.name === constants.EPI_ADMIN_GROUP) {
-      scAPI.getMainEnclave((err, mainEnclave) => {
+      scAPI.getMainEnclave(async (err, mainEnclave) => {
         if (err) {
           return callback(err);
         }
-        return processMessages(mainEnclave, callback);
+        return await processMessages(mainEnclave);
       })
     } else {
-      scAPI.getSharedEnclave((err, sharedEnclave) => {
+      scAPI.getSharedEnclave(async (err, sharedEnclave) => {
         if (err) {
           return callback(err);
         }
-        processMessages(sharedEnclave, callback);
+        await processMessages(sharedEnclave);
       })
     }
-    const processMessages = (storageService, callback) => {
-      MessagesService.processMessages(storageService, [createGroupMessage], async () => {
-        const openDSU = require("opendsu");
-        const scAPI = openDSU.loadAPI("sc");
-        const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
-        const sharedEnclaveDB = await $$.promisify(scAPI.getSharedEnclave)();
-        const groups = await promisify(sharedEnclaveDB.getAllRecords)(constants.TABLES.GROUPS);
-        group.did = groups.find((gr) => gr.name === group.name).did;
-        const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
 
-        const addMemberToGroupMessage = {
-          messageType: constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP,
-          groupDID: group.did,
-          memberDID: adminDID.did,
-          memberName: adminDID.username,
-          auditData: {
-            action: constants.OPERATIONS.ADD,
-            userGroup: this.model.selectedGroup.name,
-            userDID: null,
-          }
-        };
-        await MessagesService.processMessages([addMemberToGroupMessage], async () => {
-          callback(undefined, group);
-        });
-      });
+    const processMessages = async (storageService) => {
+      let undigestedMessages;
+      try{
+        undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, createGroupMessage)
+      }catch (e) {
+        undigestedMessages = [createGroupMessage];
+      }
+
+      if (undigestedMessages && undigestedMessages.length > 0) {
+        this.ui.showToast(`Failed to create group ${group.name}`, {type: 'danger'});
+        console.log("Undigested messages:", undigestedMessages);
+        return;
+      }
+
+      const openDSU = require("opendsu");
+      const scAPI = openDSU.loadAPI("sc");
+      const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
+      const sharedEnclaveDB = await $$.promisify(scAPI.getSharedEnclave)();
+      const groups = await promisify(sharedEnclaveDB.getAllRecords)(constants.TABLES.GROUPS);
+      group.did = groups.find((gr) => gr.name === group.name).did;
+      const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
+
+      const addMemberToGroupMessage = {
+        messageType: constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP,
+        groupDID: group.did,
+        memberDID: adminDID.did,
+        memberName: adminDID.username,
+        auditData: {
+          action: constants.OPERATIONS.ADD,
+          userGroup: this.model.selectedGroup.name,
+          userDID: null,
+        }
+      };
+
+      try{
+        undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, addMemberToGroupMessage)
+      }catch (e) {
+        undigestedMessages = [addMemberToGroupMessage];
+      }
+      if (undigestedMessages && undigestedMessages.length > 0) {
+        this.ui.showToast(`Failed add member ${addMemberToGroupMessage.memberDID} to group ${group.name}`, {type: 'danger'});
+        console.log("Undigested messages:", undigestedMessages);
+      }
     }
   }
+
 
   /**
    * @param {object} group

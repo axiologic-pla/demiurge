@@ -234,36 +234,35 @@ class MembersController extends DwController {
    * @param {string} member.did
    */
   async addMember(group, member) {
-    try {
-      const w3cDID = require("opendsu").loadAPI("w3cdid");
-      const didDocument = await promisify(w3cDID.resolveDID)(member.did);
-      member["username"] = didDocument.getName();
-      const addMemberToGroupMessage = {
-        messageType: constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP,
-        groupDID: group.did,
-        enclaveName: group.enclaveName,
-        accessMode: group.accessMode,
-        memberDID: member.did,
-        memberName: member.username,
-        auditData: {
-          action: constants.OPERATIONS.ADD,
-          userGroup: group.name,
-          userDID: member.did
-        }
-      };
-      try {
-        await $$.promisify(MessagesService.processMessages)([addMemberToGroupMessage]);
-      } catch (undigestedMessages) {
-        if (undigestedMessages && undigestedMessages.length > 0) {
-          throw Error('Failed to add member');
-        }
+    const w3cDID = require("opendsu").loadAPI("w3cdid");
+    const didDocument = await promisify(w3cDID.resolveDID)(member.did);
+    member["username"] = didDocument.getName();
+    const addMemberToGroupMessage = {
+      messageType: constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP,
+      groupDID: group.did,
+      enclaveName: group.enclaveName,
+      accessMode: group.accessMode,
+      memberDID: member.did,
+      memberName: member.username,
+      auditData: {
+        action: constants.OPERATIONS.ADD,
+        userGroup: group.name,
+        userDID: member.did
       }
+    };
 
-      return member;
-    } catch (err) {
-      console.log(err);
-      throw err;
+    let undigestedMessages = [];
+    const messages = [addMemberToGroupMessage];
+    try{
+      undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(messages);
+    }catch (e) {
+      throw Error('Failed to add member');
     }
+
+    if (undigestedMessages && undigestedMessages.length > 0) {
+      throw Error('Failed to add member');
+    }
+    return member;
   }
 
   /**
@@ -272,7 +271,7 @@ class MembersController extends DwController {
    * @param {array<{did: string}>} members
    */
   async deleteMembers(group, memberDID, operation) {
-    let deleteMmbersMsg = [{
+    let deleteMembersMsg = {
       messageType: operation === constants.OPERATIONS.REMOVE ? constants.MESSAGE_TYPES.USER_REMOVED : "DeactivateMember",
       groupDID: group.did,
       memberDID: memberDID,
@@ -282,18 +281,22 @@ class MembersController extends DwController {
         userGroup: group.name,
         userDID: memberDID
       }
-    }];
+    };
 
+    let undigestedMessages = [];
+    const messages = [deleteMembersMsg];
     try {
-      await $$.promisify(MessagesService.processMessages)(deleteMmbersMsg);
-    } catch (undigestedMessages) {
-      if (undigestedMessages && undigestedMessages.length > 0) {
-        return undigestedMessages.map(msg => {
-          return {did: msg.memberDID}
-        });
-      } else {
-        return [];
-      }
+      undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(messages);
+    } catch (e) {
+      return messages
+    }
+
+    if (undigestedMessages && undigestedMessages.length > 0) {
+      return undigestedMessages.map(msg => {
+        return {did: msg.memberDID}
+      });
+    } else {
+      return [];
     }
   }
 
