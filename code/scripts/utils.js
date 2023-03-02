@@ -113,16 +113,22 @@ async function fetchGroups() {
 }
 
 async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, priveleges = "-") {
-  let logService = new LogService(constants.TABLES.LOGS_TABLE);
-  let logMsg = {
-    logPk: logPk,
-    actionUserId: actionUserId || WebCardinal.wallet.userName,
-    userDID: userDID || "-",
-    action: action,
-    group: userGroup,
-    privileges: priveleges,
+  try {
+    let logService = new LogService(constants.TABLES.LOGS_TABLE);
+    let logMsg = {
+      logPk: logPk,
+      actionUserId: actionUserId || WebCardinal.wallet.userName,
+      userDID: userDID || "-",
+      action: action,
+      group: userGroup,
+      privileges: priveleges,
+    }
+    await $$.promisify(logService.log, logService)(logMsg);
+  } catch (e) {
+    console.log("Failed to add log message", e);
+    return await addLogMessage(userDID, action, userGroup, actionUserId, logPk, priveleges);
   }
-  await $$.promisify(logService.log, logService)(logMsg);
+
 }
 
 function uuidv4() {
