@@ -40,8 +40,13 @@
         }
       }
     </script>
+    <script>
+      function reloadWarning() {
+        return "Are you sure? This may cause inconsistencies";
+      }
+    </script>
   </head>
-  <body>
+  <body onbeforeunload="return reloadWarning()">
     <webc-app-root preload="scripts/config.js">
       <webc-app-container>
         <dw-header slot="before"></dw-header>
