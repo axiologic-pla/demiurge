@@ -165,7 +165,7 @@ function HomeController(...props) {
         await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, adminGroup.name, self.userName);
       }).catch(e => {
         console.log("Could not log user login action ", e);
-        return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${err.message}`);
+        return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${e.message}`);
       });
     }
 
