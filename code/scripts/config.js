@@ -68,7 +68,11 @@ addHook("beforeAppLoads", async () => {
     utils.removeSharedEnclaveFromEnv()
       .then(() => {
         setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL)
-          .then(() => $$.history.go("home"))
+          .then(() => {
+            window.disableRefreshSafetyAlert = true;
+            window.location.reload();
+            $$.history.go("home");
+          })
       }).catch(err => console.log(err));
   }
 

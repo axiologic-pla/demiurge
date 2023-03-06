@@ -40,13 +40,8 @@
         }
       }
     </script>
-    <script>
-      function reloadWarning() {
-        return "Are you sure? This may cause inconsistencies";
-      }
-    </script>
   </head>
-  <body onbeforeunload="return reloadWarning()">
+  <body>
     <webc-app-root preload="scripts/config.js">
       <webc-app-container>
         <dw-header slot="before"></dw-header>
@@ -56,6 +51,13 @@
     </webc-app-root>
   </body>
   <script>
+    document.body.onbeforeunload = ()=>{
+      if(window.disableRefreshSafetyAlert){
+        return ;
+      }
+      return "Are you sure? This may cause inconsistencies";
+    }
+
     if($$){
       const originalHTTPHandler = $$.httpUnknownResponseGlobalHandler;
       $$.httpUnknownResponseGlobalHandler = function(res){
