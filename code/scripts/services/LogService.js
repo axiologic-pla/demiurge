@@ -17,7 +17,7 @@ export default class LogService {
     const crypto = require("opendsu").loadAPI("crypto");
     let log = {
       ...logDetails,
-      logPk: logDetails.logPk || crypto.encodeBase58(crypto.generateRandom(32))
+      logPk: crypto.encodeBase58(crypto.generateRandom(32))
     };
 
     this.getSharedStorage((err, storageService) => {

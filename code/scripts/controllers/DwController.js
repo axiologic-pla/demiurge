@@ -294,7 +294,11 @@ class DwUI {
    * @param {string} component
    */
   async hideDialogFromComponent(component) {
-    await WebCardinal.state.page.dialogs[component].hide();
+    try{
+      await WebCardinal.state.page.dialogs[component].hide();
+    }catch(err){
+      //dialog not render and could generate error when trying to hide
+    }
   }
 
   get page() {
