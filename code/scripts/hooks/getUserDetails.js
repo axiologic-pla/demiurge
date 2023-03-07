@@ -12,7 +12,10 @@ async function getUserDetails() {
     }
   } catch (err) {
     console.error(`Failed to get user's details`, err);
-    return {};
+    window.disableRefreshSafetyAlert = true;
+    alert("Wallet has issues. Will try to fix it.")
+    const basePath = window.location.href.split("loader")[0];
+    window.location.replace(basePath + "loader/newWallet.html");
   }
 }
 
