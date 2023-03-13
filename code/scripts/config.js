@@ -27,7 +27,7 @@ try{
       alert(`Failed to reset the application. RootCause: ${err.message}`);
     }
   } else {
-    alert(`Application is an desired state! Contact support!`);
+    alert(`Application is an undesired state! Contact support!`);
   }
 }
 
@@ -92,16 +92,22 @@ if(userData){
     typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_LOGIN, onUserLoginMessage);
 
     function onUserRemovedMessage(message) {
+      typicalBusinessLogicHub.stop();
 //audit logs should already be registered during process message
       utils.removeSharedEnclaveFromEnv()
           .then(() => {
             setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL)
                 .then(() => {
                   window.disableRefreshSafetyAlert = true;
-                  window.location.reload();
+                  window.top.location.reload();
                   $$.history.go("home");
                 })
-          }).catch(err => console.log(err));
+          }).catch(err => {
+            console.log(err);
+            window.disableRefreshSafetyAlert = true;
+            window.top.location.reload();
+            $$.history.go("home");
+      });
     }
 
     typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_REMOVED, onUserRemovedMessage);
