@@ -18,8 +18,30 @@ async function createEnclave(message) {
   const dsu = await $$.promisify(resolver.createSeedDSU)(vaultDomain);
   const keySSI = await $$.promisify(dsu.getKeySSIAsString)();
   const enclave = enclaveAPI.initialiseWalletDBEnclave(keySSI);
+
+  function waitForEnclaveInitialization() {
+    return new Promise((resolve) => {
+      enclave.on("initialised", resolve)
+    })
+  }
+
+  await waitForEnclaveInitialization();
+
   const enclaveDID = await $$.promisify(enclave.getDID)();
   const enclaveKeySSI = await $$.promisify(enclave.getKeySSI)();
+
+  let tables = Object.keys(message.enclaveIndexesMap);
+  for (let dbTableName of tables) {
+    for (let indexField of message.enclaveIndexesMap[dbTableName]) {
+      try {
+        await $$.promisify(enclave.addIndex)(null, dbTableName, indexField)
+      } catch (e) {
+        //to do change with devObserver
+        console.log(e);
+      }
+    }
+  }
+
   const enclaveRecord = {
     enclaveType: message.enclaveType,
     enclaveDID,
@@ -32,4 +54,4 @@ async function createEnclave(message) {
 }
 
 require("opendsu").loadAPI("m2dsu").defineMapping(checkIfCreateEnclaveMessage, createEnclave);
-export { createEnclave };
+export {createEnclave};
