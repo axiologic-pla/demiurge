@@ -1,15 +1,15 @@
-import { CredentialsUI } from '../groups/CredentialsController.js';
-import { parseJWTSegments } from '../../services/JWTCredentialService.js';
+import {CredentialsUI} from '../groups/CredentialsController.js';
+import {parseJWTSegments} from '../../services/JWTCredentialService.js';
 import constants from '../../constants.js';
 import utils from '../../utils.js';
 
-const { DwController } = WebCardinal.controllers;
+const {DwController} = WebCardinal.controllers;
 
 class CredentialsController extends DwController {
   constructor(...props) {
     super(...props);
-    const { ui } = this;
-    const { selectedGroup, selectedMember } = this.getState();
+    const {ui, errHandler} = this;
+    const {selectedGroup, selectedMember} = this.getState();
 
     ui.page = new CredentialsUI();
 
@@ -33,15 +33,14 @@ class CredentialsController extends DwController {
         const group = this.model.selectedGroup;
         const member = this.model.selectedMember;
         await this.storeCredential(model, member.did);
-        this.model.credentials.push({ ...model });
+        this.model.credentials.push({...model});
         await this.shareCredential(group, member, model.token);
         await this.deleteCredentialFromGovernanceTable(model.token);
         this.model.hasCredentials = true;
         this.model.isAssignCredentialOpened = false;
-        await this.ui.showToast('Credential assigned to member!', { type: 'success' });
+        await this.ui.showToast('Credential assigned to member!', {type: 'success'});
       } catch (err) {
-        console.log(err);
-        await this.ui.showToast('Encountered error: ' + err, { type: 'danger' });
+        this.notificationHandler.reportUserRelevantError("Encountered error: ", err);
       }
     });
 
@@ -69,10 +68,9 @@ class CredentialsController extends DwController {
         const tags = `Credential Tags:\n${model.tags}\n\n`;
         const decodedCredential = JSON.stringify(jsonCredential, null, 4);
         model.json = tags + decodedCredential;
-        await this.ui.showDialogFromComponent('dw-dialog-view-credential', model, { parentElement: this.element });
+        await this.ui.showDialogFromComponent('dw-dialog-view-credential', model, {parentElement: this.element});
       } catch (err) {
-        console.log(err);
-        await this.ui.showToast('Encountered error: ' + err, { type: 'danger' });
+        this.notificationHandler.reportUserRelevantError("Encountered error: ", err);
       }
     });
 
@@ -88,10 +86,9 @@ class CredentialsController extends DwController {
         );
         this.model.hasCredentials = this.model.credentials.length > 0;
         this.model.areCredentialsLoaded = true;
-        await this.ui.showToast('Credential deleted: ' + deletedCredential.token, { type: 'warning' });
+        await this.ui.showToast('Credential deleted: ' + deletedCredential.token, {type: 'warning'});
       } catch (err) {
-        console.log(err);
-        await this.ui.showToast('Encountered error: ' + err, { type: 'danger' });
+        this.notificationHandler.reportUserRelevantError("Encountered error: ", err);
       }
     });
 
@@ -109,7 +106,7 @@ class CredentialsController extends DwController {
     const memberCredentials = await this.storageService.filterAsync(constants.TABLES.USER_CREDENTIALS, `memberDID == ${memberDID}`);
     return memberCredentials.map(el => {
       const tags = (el.tags || []).join(', ');
-      return { ...el, tags };
+      return {...el, tags};
     });
   }
 
@@ -120,7 +117,7 @@ class CredentialsController extends DwController {
     const governanceCredentials = await this.storageService.filterAsync(constants.TABLES.GOVERNANCE_CREDENTIALS);
     return governanceCredentials.map(el => {
       const tags = (el.tags || []).join(', ');
-      return { ...el, tags };
+      return {...el, tags};
     });
   }
 
@@ -166,4 +163,4 @@ class CredentialsController extends DwController {
 }
 
 export default CredentialsController;
-export { CredentialsUI };
+export {CredentialsUI};

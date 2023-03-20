@@ -82,7 +82,7 @@ class PerformVoteController extends DwController {
         };
         await this.submitVote(myVoteModel, checkedAnswers);
       } catch (e) {
-        await this.ui.showToast(`Encountered error: ` + e.message, { type: 'danger' });
+        this.notificationHandler.reportUserRelevantError(`Encountered error: `, e);
       }
     });
   }

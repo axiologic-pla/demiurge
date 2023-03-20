@@ -146,7 +146,7 @@ class GroupsController extends DwController {
         this.model.groups.push(group);
         // await ui.showToast(group);
       } catch (err) {
-        console.log(err);
+        this.notificationHandler.reportDevRelevantInfo("Caught an error", err)
       }
     });
 
@@ -163,7 +163,7 @@ class GroupsController extends DwController {
         this.model.groups = this.model.groups.filter((group) => group.did !== deletedGroup.did);
         // await ui.showToast(deletedGroup);
       } catch (err) {
-        console.log(err);
+        this.notificationHandler.reportDevRelevantInfo("Caught an error", err)
       }
     });
 
@@ -211,9 +211,9 @@ class GroupsController extends DwController {
 
     const processMessages = async (storageService) => {
       let undigestedMessages;
-      try{
+      try {
         undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, createGroupMessage)
-      }catch (e) {
+      } catch (e) {
         undigestedMessages = [createGroupMessage];
       }
 
@@ -243,14 +243,14 @@ class GroupsController extends DwController {
         }
       };
 
-      try{
+      try {
         undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, addMemberToGroupMessage)
-      }catch (e) {
+      } catch (e) {
         undigestedMessages = [addMemberToGroupMessage];
       }
       if (undigestedMessages && undigestedMessages.length > 0) {
-        this.ui.showToast(`Failed add member ${addMemberToGroupMessage.memberDID} to group ${group.name}`, {type: 'danger'});
-        console.log("Undigested messages:", undigestedMessages);
+        this.notificationHandler.reportDevRelevantInfo("Undigested messages: ", JSON.stringify(undigestedMessages))
+        this.notificationHandler.reportUserRelevantError(`Failed add member ${addMemberToGroupMessage.memberDID} to group ${group.name}`)
       }
     }
   }

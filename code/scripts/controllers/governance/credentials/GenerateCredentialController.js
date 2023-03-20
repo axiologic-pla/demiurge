@@ -1,8 +1,8 @@
 import constants from '../../../constants.js';
 import utils from '../../../utils.js';
-import { getCredentialService } from '../../../services/JWTCredentialService.js';
+import {getCredentialService} from '../../../services/JWTCredentialService.js';
 
-const { DwController } = WebCardinal.controllers;
+const {DwController} = WebCardinal.controllers;
 
 class GenerateCredentialUI {
   getInitialViewModel() {
@@ -53,7 +53,7 @@ class GenerateCredentialController extends DwController {
       for (let index = 0; index < inputsCredentialClaims.length; index = index + 2) {
         let name = inputsCredentialClaims[index]?.value;
         let value = inputsCredentialClaims[index + 1]?.value;
-        this.model.credentialClaims[index / 2] = { name: name, value: value };
+        this.model.credentialClaims[index / 2] = {name: name, value: value};
       }
 
       this.model.credentialClaims.push({
@@ -80,7 +80,7 @@ class GenerateCredentialController extends DwController {
           throw new Error('Subject DID is not valid or does not exist! ' + subjectDID);
         }
 
-        const credentialOptions = { subjectClaims: {} };
+        const credentialOptions = {subjectClaims: {}};
         const inputsCredentialClaims = document.querySelectorAll('#public-claims sl-input');
         for (let index = 0; index < inputsCredentialClaims.length; index = index + 2) {
           let name = inputsCredentialClaims[index]?.value;
@@ -95,13 +95,13 @@ class GenerateCredentialController extends DwController {
         if (tags.trim().length > 0) {
           tags = tags.split(",").map(tag => tag.trim());
         }
-        const tokenModel = { issuer: this.did, token: encodedJWTToken, encodingType: this.selectedEncodingType, tags };
+        const tokenModel = {issuer: this.did, token: encodedJWTToken, encodingType: this.selectedEncodingType, tags};
         this.storeCredential(tokenModel);
         this.model.credentials.push(tokenModel);
         this.model.hasCredentials = this.model.credentials.length > 0;
         this.model.areCredentialsLoaded = true;
       } catch (err) {
-        await this.ui.showToast('Could not import credential because: ' + err.message, {type: 'danger'});
+        this.notificationHandler.reportUserRelevantError('Could not import credential because: ', err);
       }
     });
   }
@@ -112,4 +112,4 @@ class GenerateCredentialController extends DwController {
 }
 
 export default GenerateCredentialController;
-export { GenerateCredentialUI };
+export {GenerateCredentialUI};

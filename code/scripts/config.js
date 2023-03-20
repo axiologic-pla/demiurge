@@ -1,18 +1,20 @@
 import {getStoredDID, didWasApproved, getWalletStatus, setWalletStatus} from "./services/BootingIdentityService.js";
 import utils from "./utils.js";
 import constants from "./constants.js";
-const {getUserDetails} = await import("./hooks/getUserDetails.js");
 
+const {getUserDetails} = await import("./hooks/getUserDetails.js");
+const openDSU = require("opendsu");
+const didAPI = openDSU.loadAPI("w3cdid");
+const typicalBusinessLogicHub = didAPI.getTypicalBusinessLogicHub();
 let userData;
 
-try{
+try {
   userData = await getUserDetails();
-}catch(err) {
+} catch (err) {
   if (window.confirm("Looks that your application is not properly initialized or in an invalid state. Would you like to reset it?")) {
     try {
       const response = await fetch("/removeSSOSecret/Demiurge", {
-        method: "DELETE",
-        cache: "no-cache"
+        method: "DELETE", cache: "no-cache"
       })
       if (response.ok) {
         window.disableRefreshSafetyAlert = true;
@@ -31,10 +33,9 @@ try{
   }
 }
 
-if(userData){
+if (userData) {
   const {setConfig, getConfig, addControllers, addHook, navigateToPageTag} = WebCardinal.preload;
   const {define} = WebCardinal.components;
-  let userName = "-"
 
   function getInitialConfig() {
     const config = getConfig();
@@ -64,55 +65,56 @@ if(userData){
     }
   }
 
-  addHook("beforeAppLoads", async () => {
-    WebCardinal.wallet = {};
-    const wallet = WebCardinal.wallet;
+  function onUserLoginMessage(message) {
+    utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
+      .then(() => {
+      })
+      .catch(err => console.log(err));
+  }
 
-    const {getVaultDomainAsync} = await import("./hooks/getVaultDomain.js");
-
-    wallet.vaultDomain = await getVaultDomainAsync();
-
-    wallet.userDetails = userData.userAppDetails;
-    wallet.userName = userData.userName;
-    userName = userData.userName;
-    wallet.did = await getStoredDID();
-    wallet.status = await getWalletStatus();
-    wallet.managedFeatures = await utils.getManagedFeatures();
-    const openDSU = require("opendsu");
-    const didAPI = openDSU.loadAPI("w3cdid");
-    const typicalBusinessLogicHub = didAPI.getTypicalBusinessLogicHub();
-
-    function onUserLoginMessage(message) {
-      utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
-          .then(() => {
-          })
-          .catch(err => console.log(err));
-    }
-
-    typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_LOGIN, onUserLoginMessage);
-
-    function onUserRemovedMessage(message) {
-      typicalBusinessLogicHub.stop();
+  function onUserRemovedMessage(message) {
+    typicalBusinessLogicHub.stop();
 //audit logs should already be registered during process message
-      utils.removeSharedEnclaveFromEnv()
+    utils.removeSharedEnclaveFromEnv()
+      .then(() => {
+        setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL)
           .then(() => {
-            setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL)
-                .then(() => {
-                  window.disableRefreshSafetyAlert = true;
-                  window.top.location.reload();
-                  $$.history.go("home");
-                })
-          }).catch(err => {
-            console.log(err);
             window.disableRefreshSafetyAlert = true;
             window.top.location.reload();
             $$.history.go("home");
-      });
-    }
+          })
+      }).catch(err => {
+      console.log(err);
+      window.disableRefreshSafetyAlert = true;
+      window.top.location.reload();
+      $$.history.go("home");
+    });
+  }
 
-    typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_REMOVED, onUserRemovedMessage);
+  async function setupGlobalErrorHandlers() {
+    const {DwUI} = await import("./controllers/DwController.js");
+    const dwUIInstance = new DwUI();
+    let errHandler = openDSU.loadAPI("error");
 
+    errHandler.observeUserRelevantMessages('warn', (notification) => {
+      dwUIInstance.showToast(notification.message, {type: "warning"});
+    });
 
+    errHandler.observeUserRelevantMessages('info', (notification) => {
+      dwUIInstance.showToast(notification.message, {type: "info"})
+    });
+
+    errHandler.observeUserRelevantMessages('error', (notification) => {
+      let errMsg = "";
+      if (notification.err && notification.err.message) {
+        errMsg = notification.err.message;
+      }
+      let toastMsg = `${notification.message} ${errMsg}`
+      dwUIInstance.showToast(toastMsg, {type: "danger"})
+    });
+  }
+
+  addHook("beforeAppLoads", async () => {
     // load Custom Components
     await import("../components/dw-header/dw-header.js");
     await import("../components/dw-menu/dw-menu.js");
@@ -121,10 +123,15 @@ if(userData){
     await import("../components/dw-data-grid/dw-data-grid.js");
     await import("../components/dw-clipboard-input/dw-clipboard-input.js");
 
+    typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_LOGIN, onUserLoginMessage);
+    typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_REMOVED, onUserRemovedMessage);
 
     // load Demiurge base Controller
-    const {DwController} = await import("./controllers/DwController.js");
+    const {DwController, setupDefaultModel} = await import("./controllers/DwController.js");
+    await setupDefaultModel(userData);
     addControllers({DwController});
+
+    await setupGlobalErrorHandlers()
   });
 
   addHook("afterAppLoads", async () => {

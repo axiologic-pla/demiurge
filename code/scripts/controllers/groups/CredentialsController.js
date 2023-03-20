@@ -20,7 +20,7 @@ class CredentialsUI {
 class CredentialsController extends DwController {
   constructor(...props) {
     super(...props);
-    const { ui } = this;
+    const { ui , errHandler} = this;
     const { selectedGroup } = this.getState();
 
     ui.page = new CredentialsUI();
@@ -50,8 +50,7 @@ class CredentialsController extends DwController {
         this.model.isAssignCredentialOpened = false;
         await this.ui.showToast('Credential assigned to group!', {type: 'success'});
       } catch (err) {
-        console.log(err);
-        await this.ui.showToast('Encountered error: ' + err, {type: 'danger'});
+        this.notificationHandler.reportUserRelevantError("Caught an error", err)
       }
     });
 
@@ -81,8 +80,7 @@ class CredentialsController extends DwController {
         model.json = tags + decodedCredential;
         await this.ui.showDialogFromComponent('dw-dialog-view-credential', model);
       } catch (err) {
-        console.log(err);
-        await this.ui.showToast('Encountered error: ' + err, {type: 'danger'});
+        this.notificationHandler.reportUserRelevantError("Caught an error", err)
       }
     });
 
@@ -100,8 +98,8 @@ class CredentialsController extends DwController {
         this.model.areCredentialsLoaded = true;
         await this.ui.showToast('Credential deleted: ' + deletedCredential.token, {type: 'warning'});
       } catch (err) {
-        console.log(err);
-        await this.ui.showToast('Encountered error: ' + err, {type: 'danger'});
+        this.notificationHandler.reportUserRelevantError("Caught an error", err)
+
       }
     });
 

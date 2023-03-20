@@ -53,6 +53,7 @@ class MonitoringController extends DwController {
       } catch (err) {
         target.remove();
         console.log(err);
+        this.notificationHandler.reportDevRelevantInfo("Caught an error", err);
         return '';
       }
     });

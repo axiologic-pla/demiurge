@@ -36,8 +36,9 @@ async function createEnclave(message) {
       try {
         await $$.promisify(enclave.addIndex)(null, dbTableName, indexField)
       } catch (e) {
-        //to do change with devObserver
-        console.log(e);
+        const openDSU = require("opendsu");
+        let notificationHandler = openDSU.loadAPI("error");
+        notificationHandler.reportUserRelevantWarning('Failed to setup index on enclave: ', e)
       }
     }
   }

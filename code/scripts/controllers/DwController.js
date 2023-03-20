@@ -1,4 +1,6 @@
 import {escapeHTML, isHTMLElement} from "../../components/utils.js";
+import {getStoredDID, getWalletStatus} from "../services/BootingIdentityService.js";
+import utils from "../utils.js";
 
 const {WebcController} = WebCardinal.controllers;
 
@@ -13,6 +15,8 @@ class DwController extends WebcController {
       this[item] = WebCardinal.wallet[item];
     }
     this.domain = WebCardinal.wallet.vaultDomain;
+    const openDSU = require("opendsu");
+    this.notificationHandler = openDSU.loadAPI("error");
   }
 
   get ui() {
@@ -91,6 +95,22 @@ class DwController extends WebcController {
   }
 }
 
+async function setupDefaultModel(userData){
+  WebCardinal.wallet = {};
+  const wallet = WebCardinal.wallet;
+
+  const {getVaultDomainAsync} = await import("../hooks/getVaultDomain.js");
+
+  wallet.vaultDomain = await getVaultDomainAsync();
+
+  wallet.userDetails = userData.userAppDetails;
+  wallet.userName = userData.userName;
+  let userName = userData.userName || "-";
+
+  wallet.did = await getStoredDID();
+  wallet.status = await getWalletStatus();
+  wallet.managedFeatures = await utils.getManagedFeatures();
+}
 class DwUI {
   constructor(element) {
     this._element = element;
@@ -310,4 +330,4 @@ class DwUI {
   }
 }
 
-export {DwController, DwUI};
+export {DwController, DwUI, setupDefaultModel};

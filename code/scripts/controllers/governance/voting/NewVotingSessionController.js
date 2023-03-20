@@ -122,7 +122,7 @@ class NewVotingSessionController extends DwController {
         throw Error('Coping from clipboard is not possible!');
       } catch (err) {
         target.remove();
-        console.log(err);
+        this.notificationHandler.reportDevRelevantInfo("Caught an error", e);
         return '';
       }
     });

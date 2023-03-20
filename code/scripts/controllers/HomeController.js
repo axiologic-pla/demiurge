@@ -63,12 +63,12 @@ function HomeController(...props) {
             await self.createInitialDID();
             await self.showInitDialog();
             await self.createEnclaves();
-            ui.showToast("Created enclaves");
+            self.notificationHandler.reportUserRelevantInfo("Created enclaves");
             await self.createGroups();
-            ui.showToast("Created groups");
+            self.notificationHandler.reportUserRelevantInfo("Created groups");
             typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onReceivedInitMessage)
             await self.firstOrRecoveryAdminToAdministrationGroup(didDocument, self.userDetails);
-            ui.showToast("Waiting for final initialization steps");
+            self.notificationHandler.reportUserRelevantInfo("Waiting for final initialization steps");
           } catch (e) {
             return alert(`Failed to initialise. Probably an infrastructure issue. ${e.message}`);
           }
@@ -107,7 +107,7 @@ function HomeController(...props) {
       self.showQuickActions();
     }
   }).catch(async e => {
-    await ui.showToast("Error on getting wallet status: " + e.message);
+    self.notificationHandler.reportUserRelevantError("Failed to initialise wallet ", e);
   });
 
   self.onReceivedInitMessage = (message) => {
@@ -120,10 +120,14 @@ function HomeController(...props) {
             self.showQuickActions();
           }
         }).then(() => {
-          console.log("Finished processing message", message);
+          self.notificationHandler.reportDevRelevantInfo("Finished processing message " + JSON.stringify(message));
         })
+      }).catch(e => {
+        self.notificationHandler.reportUserRelevantInfo("Failed to initialise wallet: ", e);
       })
-    }).catch(console.log);
+    }).catch(e => {
+      self.notificationHandler.reportDevRelevantInfo("hideDialogFromComponent", e);
+    });
     // submitElement.loading = false;
 
   }
@@ -133,9 +137,15 @@ function HomeController(...props) {
         self.ui.hideDialogFromComponent("dw-dialog-waiting-approval")
           .then(() => {
             setWalletStatus(constants.ACCOUNT_STATUS.CREATED)
-              .then(() => self.showQuickActions());
-          })
-      }).catch(console.log)
+              .then(() => self.showQuickActions()).catch(e => {
+              self.notificationHandler.reportUserRelevantInfo("Failed to initialise wallet: ", e);
+            });
+          }).catch(e => {
+          self.notificationHandler.reportDevRelevantInfo("hideDialogFromComponent", e);
+        })
+      }).catch(e => {
+      self.notificationHandler.reportUserRelevantInfo("Failed to properly execute authorization flow: ", e);
+    });
   }
 
   self.showQuickActions = () => {
@@ -164,7 +174,7 @@ function HomeController(...props) {
         let adminGroup = await self.getAdminGroup(sharedEnclave);
         await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, adminGroup.name, self.userName);
       }).catch(e => {
-        console.log("Could not log user login action ", e);
+        self.notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
         return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${e.message}`);
       });
     }
@@ -178,7 +188,7 @@ function HomeController(...props) {
     try {
       await $$.promisify(typicalBusinessLogicHub.setMainDID)(didDocument);
     } catch (e) {
-      ui.showToast(`Failed to set main did. Retrying ...`)
+      self.notificationHandler.reportUserRelevantInfo(`Failed to initialise communication layer. Retrying ...`);
       await self.setMainDID(typicalBusinessLogicHub, didDocument);
     }
   }
@@ -194,8 +204,7 @@ function HomeController(...props) {
         }
         return adminGroup;
       } catch (e) {
-        console.log("Failed to get groups from table", e);
-        ui.showToast(`Failed to get admin group: ${e.message}`);
+        self.notificationHandler.reportUserRelevantInfo(`Failed to get info about admin group. Retrying ...`, e);
         return await tryToGetAdminGroup();
       }
     }
@@ -247,7 +256,7 @@ function HomeController(...props) {
       try {
         const recoveryCode = document.getElementById("add-member-input").value;
         if (recoveryCode === "") {
-          self.ui.showToast(`Please insert a recovery code.`);
+          self.notificationHandler.reportUserRelevantError(`Please insert a recovery code.`);
           return;
         }
 
@@ -259,8 +268,7 @@ function HomeController(...props) {
         await self.firstOrRecoveryAdminToAdministrationGroup(self.did, self.userDetails, constants.OPERATIONS.BREAK_GLASS_RECOVERY);
         target.loading = false;
       } catch (e) {
-        console.log("Error on getting wallet with recovery code", e)
-        self.ui.showToast("Couldn't recover wallet for inserted recovery code.");
+        self.notificationHandler.reportUserRelevantError("Failed to gain access to the wallet. Check your recovery code and try again", e)
         target.loading = false;
       }
     })
@@ -331,7 +339,7 @@ function HomeController(...props) {
       try {
         self.mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
       } catch (e) {
-        ui.showToast(`Failed to get main enclave: ${e.message}. Retrying ...`);
+        self.notificationHandler.reportUserRelevantWarning(`Failed to get main enclave: ${e.message}. Retrying ...`);
         return await self.getMainEnclave();
       }
     }
@@ -344,7 +352,7 @@ function HomeController(...props) {
       try {
         self.sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
       } catch (e) {
-        ui.showToast(`Failed to get shared enclave: ${e.message}. Retrying ...`);
+        self.notificationHandler.reportUserRelevantWarning(`Failed to get shared enclave: ${e.message}. Retrying ...`);
         return await self.getSharedEnclave();
       }
     }
@@ -368,7 +376,7 @@ function HomeController(...props) {
     try {
       await $$.promisify(w3cDID.createIdentity)(constants.SSI_NAME_DID_TYPE, didDomain, constants.INITIAL_IDENTITY_PUBLIC_NAME);
     } catch (e) {
-      ui.showToast(`Failed to create initial did. Retrying ...`);
+      self.notificationHandler.reportUserRelevantWarning(`Failed to create DID. Retrying ...`);
       await self.createInitialDID();
     }
   }
@@ -387,7 +395,7 @@ function HomeController(...props) {
 
     }
     if (!messages) {
-      ui.showToast(`Failed to read mapping engine messages. Retrying ...`);
+      self.notificationHandler.reportUserRelevantWarning(`Failed to retrieve configuration data. Retrying ...`);
       return await self.readMappingEngineMessages(path);
     }
     return messages;
@@ -396,7 +404,7 @@ function HomeController(...props) {
     const mainEnclave = await self.getMainEnclave();
     const messages = await self.readMappingEngineMessages(constants.ENCLAVE_MESSAGES_PATH);
     await self.processMessages(mainEnclave, messages);
-    console.log("Processed create enclave messages");
+    self.notificationHandler.reportUserRelevantInfo(`Processed create enclave messages`);
     await self.setSharedEnclave(mainEnclave);
     await self.storeSharedEnclaves();
   }
@@ -408,7 +416,7 @@ function HomeController(...props) {
         await $$.promisify(typicalBusinessLogicHub.setSharedEnclave)(enclaveRecord.enclaveKeySSI);
         await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
       } catch (e) {
-        ui.showToast(`Failed to add shared enclave to environment. Retrying ...`)
+        self.notificationHandler.reportUserRelevantWarning(`Failed to add shared enclave to environment. Retrying ...`);
         await tryToSetSharedEnclave();
       }
     }
@@ -471,9 +479,9 @@ function HomeController(...props) {
       return await self.processMessages(storageService, messages);
     }
     if (undigestedMessages && undigestedMessages.length > 0) {
-      ui.showToast(`Couldn't process all messages. Retrying`);
       const remainingMessages = undigestedMessages.map(msgObj => msgObj.message);
-      console.log("Remaining messages:", remainingMessages);
+      self.notificationHandler.reportDevRelevantInfo("Undigested messages:", JSON.stringify(remainingMessages));
+      self.notificationHandler.reportUserRelevantWarning(`Couldn't process all messages. Retrying ...`);
       return await self.processMessages(storageService, remainingMessages);
     }
   }
