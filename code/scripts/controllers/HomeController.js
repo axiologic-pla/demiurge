@@ -420,7 +420,7 @@ function HomeController(...props) {
     const mainEnclave = await self.getMainEnclave();
     const enclaves = await $$.promisify(mainEnclave.getAllRecords)(constants.TABLES.GROUP_ENCLAVES);
     const sharedEnclave = await self.getSharedEnclave();
-    sharedEnclave.beginBatch();
+    await sharedEnclave.safeBeginBatchAsync();
     for (let i = 0; i < enclaves.length; i++) {
       await sharedEnclave.writeKeyAsync(enclaves[i].enclaveName, enclaves[i]);
       await sharedEnclave.insertRecordAsync(constants.TABLES.GROUP_ENCLAVES, enclaves[i].enclaveDID, enclaves[i]);
