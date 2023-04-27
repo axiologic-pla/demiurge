@@ -53,8 +53,8 @@ class LogsDataSource extends DataSource {
   }
 
   async searchHandler(inputValue, foundIcon, notFoundIcon) {
-    notFoundIcon.style.display = "none";
-    foundIcon.style.display = "none";
+ /*   notFoundIcon.style.display = "none";
+    foundIcon.style.display = "none";*/
     try {
       await this.getSharedEnclave();
       if (inputValue) {
@@ -157,7 +157,9 @@ class AuditController extends DwController {
     let notFoundIcon = this.querySelector(".fa-ban");
     if (searchInput) {
       searchInput.addEventListener("search", async (event) => {
-        await this.model.logsDataSource.searchHandler(event.target.value, foundIcon, notFoundIcon)
+        window.WebCardinal.loader.hidden = false;
+        await this.model.logsDataSource.searchHandler(event.target.value, foundIcon, notFoundIcon);
+        window.WebCardinal.loader.hidden = true;
       })
     }
 

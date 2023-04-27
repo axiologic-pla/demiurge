@@ -3,6 +3,7 @@
 @import "./parts/labels.css";
 @import "./parts/tables.css";
 @import "./parts/forms.css";
+@import url("./fonts/fontawesome/font-awesome.min.css");
 
 /* dm-sans-regular - latin-ext_latin */
 @font-face {
