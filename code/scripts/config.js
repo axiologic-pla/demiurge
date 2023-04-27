@@ -73,6 +73,9 @@ if (userData) {
   }
 
   function onUserRemovedMessage(message) {
+    let notificationHandler = openDSU.loadAPI("error");
+    notificationHandler.reportUserRelevantWarning("Your account was deleted. Please contact an admin to see the reason");
+
     typicalBusinessLogicHub.stop();
 //audit logs should already be registered during process message
     utils.removeSharedEnclaveFromEnv()

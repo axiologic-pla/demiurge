@@ -53,8 +53,8 @@ class LogsDataSource extends DataSource {
   }
 
   async searchHandler(inputValue, foundIcon, notFoundIcon) {
- /*   notFoundIcon.style.display = "none";
-    foundIcon.style.display = "none";*/
+    notFoundIcon.style.display = "none";
+    foundIcon.style.display = "none";
     try {
       await this.getSharedEnclave();
       if (inputValue) {
