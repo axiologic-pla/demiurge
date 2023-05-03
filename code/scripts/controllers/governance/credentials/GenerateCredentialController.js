@@ -95,7 +95,7 @@ class GenerateCredentialController extends DwController {
         if (tags.trim().length > 0) {
           tags = tags.split(",").map(tag => tag.trim());
         }
-        const tokenModel = {issuer: this.did, token: encodedJWTToken, encodingType: this.selectedEncodingType, tags};
+        const tokenModel = { issuer: this.did, token: encodedJWTToken, encodingType: this.selectedEncodingType, tags };
         this.storeCredential(tokenModel);
         this.model.credentials.push(tokenModel);
         this.model.hasCredentials = this.model.credentials.length > 0;
@@ -112,4 +112,4 @@ class GenerateCredentialController extends DwController {
 }
 
 export default GenerateCredentialController;
-export {GenerateCredentialUI};
+export { GenerateCredentialUI };

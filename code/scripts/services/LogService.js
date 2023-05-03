@@ -24,16 +24,12 @@ export default class LogService {
       if (err) {
         return callback(err);
       }
-      storageService.addIndex(this.logsTable, "__timestamp", (error) => {
-        if (error) {
-          return callback(error);
+
+      storageService.insertRecord(this.logsTable, log.logPk, log, (err) => {
+        if (err) {
+          return callback(err);
         }
-        storageService.insertRecord(this.logsTable, log.logPk, log, (err) => {
-          if (err) {
-            return callback(err);
-          }
-          callback(undefined, log);
-        });
+        callback(undefined, log);
       });
     })
   }

@@ -14,7 +14,8 @@ try {
   if (window.confirm("Looks that your application is not properly initialized or in an invalid state. Would you like to reset it?")) {
     try {
       const response = await fetch("/removeSSOSecret/Demiurge", {
-        method: "DELETE", cache: "no-cache"
+        method: "DELETE",
+        cache: "no-cache"
       })
       if (response.ok) {
         window.disableRefreshSafetyAlert = true;
@@ -33,9 +34,10 @@ try {
   }
 }
 
-if (userData) {
+if(userData){
   const {setConfig, getConfig, addControllers, addHook, navigateToPageTag} = WebCardinal.preload;
   const {define} = WebCardinal.components;
+  let userName = "-"
 
   function getInitialConfig() {
     const config = getConfig();

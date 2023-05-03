@@ -1,5 +1,5 @@
-import {CredentialsUI} from '../groups/CredentialsController.js';
-import {parseJWTSegments} from '../../services/JWTCredentialService.js';
+import { CredentialsUI } from '../groups/CredentialsController.js';
+import { parseJWTSegments } from '../../services/JWTCredentialService.js';
 import constants from '../../constants.js';
 import utils from '../../utils.js';
 
@@ -8,8 +8,8 @@ const {DwController} = WebCardinal.controllers;
 class CredentialsController extends DwController {
   constructor(...props) {
     super(...props);
-    const {ui, errHandler} = this;
-    const {selectedGroup, selectedMember} = this.getState();
+    const { ui } = this;
+    const { selectedGroup, selectedMember } = this.getState();
 
     ui.page = new CredentialsUI();
 
@@ -163,4 +163,4 @@ class CredentialsController extends DwController {
 }
 
 export default CredentialsController;
-export {CredentialsUI};
+export { CredentialsUI };

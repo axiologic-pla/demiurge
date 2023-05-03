@@ -55,6 +55,7 @@ async function addMemberToGroupMapping(message) {
   if (!groupCredential) {
     const credentialService = getCredentialService();
     const groupCredential = await credentialService.createVerifiableCredential(adminDID, message.groupDID);
+
     await sharedEnclave.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromContent(groupCredential), {
       issuer: adminDID,
       groupDID: message.groupDID,
@@ -64,6 +65,9 @@ async function addMemberToGroupMapping(message) {
       tags: [groupDIDDocument.getGroupName(), constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION]
     });
   }
+
+  let allPossibleGroups =  await sharedEnclave.filterAsync(constants.TABLES.GROUPS, "enclaveName == epiEnclave");
+  groupCredential.allPossibleGroups = allPossibleGroups;
 
   const msg = {
     messageType: constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP,

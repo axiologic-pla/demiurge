@@ -1,4 +1,4 @@
-const {DwController} = WebCardinal.controllers;
+const { DwController } = WebCardinal.controllers;
 import constants from "../constants.js";
 import utils from "../utils.js";
 
@@ -14,7 +14,7 @@ class CredentialsUI {
     }
 
     const slInputElement = target.querySelector("sl-input");
-    const {value} = slInputElement;
+    const { value } = slInputElement;
     await slInputElement.select();
     await slInputElement.setSelectionRange(0, value.length);
     document.execCommand("copy");
@@ -29,8 +29,8 @@ class CredentialsUI {
 class CredentialsController extends DwController {
   constructor(...props) {
     super(...props);
-    const {ui} = this;
-    const {selectedGroup} = this.getState();
+    const { ui } = this;
+    const { selectedGroup } = this.getState();
 
     ui.page = new CredentialsUI();
 
@@ -64,7 +64,7 @@ class CredentialsController extends DwController {
     });
 
     this.onTagClick("credential.delete", async (deletedCredential, ...props) => {
-      console.log({props});
+      console.log({ props });
 
       this.model.credentials = this.model.credentials.filter(
         (credential) => credential.credential !== deletedCredential.credential
@@ -81,4 +81,4 @@ class CredentialsController extends DwController {
 }
 
 export default CredentialsController;
-export {CredentialsUI};
+export { CredentialsUI };

@@ -20,7 +20,7 @@ class CredentialsUI {
 class CredentialsController extends DwController {
   constructor(...props) {
     super(...props);
-    const { ui , errHandler} = this;
+    const { ui } = this;
     const { selectedGroup } = this.getState();
 
     ui.page = new CredentialsUI();

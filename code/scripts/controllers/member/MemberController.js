@@ -1,10 +1,9 @@
-const {DwController} = WebCardinal.controllers;
+const { DwController } = WebCardinal.controllers;
 
 class MemberController extends DwController {
   constructor(...props) {
     super(...props);
-
-    const {selectedGroup, selectedMember} = this.getStateSelection();
+    const { selectedGroup, selectedMember } = this.getStateSelection();
 
     if (!selectedGroup || !selectedMember) {
       this.history.goBack();
