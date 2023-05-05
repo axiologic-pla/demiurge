@@ -22,11 +22,12 @@ export default {
     DATABASE: "db",
     GROUP_MEMBER: "group_member"
   },
+  IDENTITY_KEY: "did",
   DB_KEY_SSI_PATH: "/dbKeySSI",
   SECURITY_CONTEXT_KEY_SSI_PATH: "security-context",
   IDENTITY_PK: "identity_pk",
   IDENTITY: "identity",
-  WALLET_STATUS:"walletStatus",
+  WALLET_STATUS: "walletStatus",
   RECIPIENT_TYPES: {
     USER_RECIPIENT: "user",
     GROUP_RECIPIENT: "group"
@@ -93,5 +94,16 @@ export default {
     RECEIVED_APPROVAL: "receivedApproval",
     DID_CREATED: "didCreated",
     ADD_MEMBER_TO_GROUP: "AddMemberToGroup"
+  },
+  HOOKS: {
+    BEFORE_PAGE_LOADS: "beforePageLoads",
+    WHEN_PAGE_CLOSE: "whenPageClose",
+    BEFORE_APP_LOADS: "beforeAppLoads",
+    AFTER_APP_LOADS: "afterAppLoads"
+  },
+  NOTIFICATION_TYPES: {
+    WARN: "warn",
+    INFO: "info",
+    ERROR: "error"
   }
 };

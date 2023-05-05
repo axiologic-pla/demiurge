@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" mode="ios">
-  <head>
+<head>
     <title>Demiurge</title>
 
     PLACEHOLDER_THAT_WILL_BE_REPLACED_BY_SW_OR_SERVER_WITH_BASE_TAG
 
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
 
     <script src="scripts/bundles/iframeBoot.js"></script>
     <script src="scripts/bundles/webshims.js"></script>
@@ -16,14 +16,14 @@
 
     <!-- WebCardinal dist -->
     <script type="module" src="webcardinal/webcardinal.js"></script>
-    <link rel="stylesheet" href="webcardinal/webcardinal.css" />
+    <link rel="stylesheet" href="webcardinal/webcardinal.css"/>
 
     <!-- Shoelace dist -->
-    <link rel="stylesheet" href="shoelace/dist/themes/light.css" />
+    <link rel="stylesheet" href="shoelace/dist/themes/light.css"/>
     <script type="module" src="shoelace/dist/shoelace.js"></script>
 
     <!-- local assets -->
-    <link rel="icon" type="image/png" href="assets/favicon/favicon.png" />
+    <link rel="icon" type="image/png" href="assets/favicon/favicon.png"/>
 
     <script>
       if (window.frameElement) {
@@ -40,33 +40,15 @@
         }
       }
     </script>
-  </head>
-  <body>
-    <webc-app-root preload="scripts/config.js">
-      <webc-app-container>
+</head>
+<body>
+<webc-app-root preload="scripts/config.js">
+    <webc-app-container>
         <dw-header slot="before"></dw-header>
         <webc-app-router></webc-app-router>
         <dw-menu></dw-menu>
-      </webc-app-container>
-    </webc-app-root>
-  </body>
-  <script>
-    document.body.onbeforeunload = ()=>{
-      if(window.disableRefreshSafetyAlert){
-        return ;
-      }
-      return "Are you sure? This may cause inconsistencies";
-    }
-
-    if($$){
-      const originalHTTPHandler = $$.httpUnknownResponseGlobalHandler;
-      $$.httpUnknownResponseGlobalHandler = function(res){
-        let err = res ? res.err : undefined;
-        if (err && err.rootCause == "network") {
-          originalHTTPHandler(res);
-          alert("Network issues detected!");
-        }
-      }
-    }
-  </script>
+    </webc-app-container>
+</webc-app-root>
+</body>
+<script src="scripts/globalHandlers.js"></script>
 </html>

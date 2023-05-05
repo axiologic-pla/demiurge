@@ -53,6 +53,7 @@ async function setWalletStatus(walletStatus) {
 
 async function getWalletStatus() {
   let walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
+/*
 
   let sharedEnclave;
   try {
@@ -63,6 +64,7 @@ async function getWalletStatus() {
   if (sharedEnclave) {
     return constants.ACCOUNT_STATUS.CREATED;
   }
+*/
 
   let record;
 
