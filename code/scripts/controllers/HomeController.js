@@ -62,6 +62,10 @@ function HomeController(...props) {
           try {
             await self.createInitialDID();
             await self.showInitDialog();
+            console.log("=================================================================");
+            const batchInProgress = await self.batchInProgress();
+            console.log("batchInProgress", batchInProgress);
+            console.log("=================================================================");
             await self.createEnclaves();
             ui.showToast("Created enclaves");
             await self.createGroups();
@@ -392,6 +396,12 @@ function HomeController(...props) {
     }
     return messages;
   }
+
+  self.batchInProgress = async () => {
+    const mainEnclave = await self.getMainEnclave();
+    return mainEnclave.batchInProgress();
+  }
+
   self.createEnclaves = async () => {
     const mainEnclave = await self.getMainEnclave();
     const messages = await self.readMappingEngineMessages(constants.ENCLAVE_MESSAGES_PATH);
@@ -465,16 +475,25 @@ function HomeController(...props) {
     }
 
     let undigestedMessages = [];
-    try {
-      undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, messages);
-    } catch (err) {
-      return await self.processMessages(storageService, messages);
-    }
-    if (undigestedMessages && undigestedMessages.length > 0) {
-      ui.showToast(`Couldn't process all messages. Retrying`);
-      const remainingMessages = undigestedMessages.map(msgObj => msgObj.message);
-      console.log("Remaining messages:", remainingMessages);
-      return await self.processMessages(storageService, remainingMessages);
+
+    for (let i = 0; i < messages.length; i++) {
+      try {
+        console.log("#############################################");
+        console.log(storageService.batchInProgress());
+        console.log("#############################################");
+        undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, [messages[i]]);
+      } catch (err) {
+        return await self.processMessages(storageService, messages);
+      }
+      console.log("---------------------------------------------");
+      console.log(storageService.batchInProgress());
+      console.log("---------------------------------------------");
+      if (undigestedMessages && undigestedMessages.length > 0) {
+        ui.showToast(`Couldn't process all messages. Retrying`);
+        const remainingMessages = undigestedMessages.map(msgObj => msgObj.message);
+        console.log("Remaining messages:", remainingMessages);
+        return await self.processMessages(storageService, remainingMessages);
+      }
     }
   }
 

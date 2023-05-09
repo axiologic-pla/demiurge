@@ -38,6 +38,7 @@ async function createGroup(message) {
     group.did = groupDIDDocument.getIdentifier();
 
     const sharedEnclaveDB = await $$.promisify(scAPI.getSharedEnclave)();
+    await sharedEnclaveDB.safeBeginBatchAsync();
     await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS, group.did, group);
 
     const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
@@ -51,6 +52,7 @@ async function createGroup(message) {
       encodingType: constants.JWT_ENCODING,
       tags: [group.name, constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION]
     });
+    await sharedEnclaveDB.commitBatchAsync();
   }
 }
 

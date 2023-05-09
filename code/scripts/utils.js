@@ -69,7 +69,9 @@ async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
   env[openDSU.constants.SHARED_ENCLAVE.DID] = enclaveDID;
   env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = enclaveKeySSI;
   // await $$.promisify(mainDSU.refresh)();
+  await mainDSU.safeBeginBatchAsync();
   await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
+  await mainDSU.commitBatchAsync();
   scAPI.refreshSecurityContext();
 }
 
@@ -82,7 +84,9 @@ async function removeSharedEnclaveFromEnv() {
   env[openDSU.constants.SHARED_ENCLAVE.TYPE] = undefined;
   env[openDSU.constants.SHARED_ENCLAVE.DID] = undefined;
   env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = undefined;
+  await mainDSU.safeBeginBatchAsync();
   await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
+  await mainDSU.commitBatchAsync();
   scAPI.refreshSecurityContext();
 }
 

@@ -34,7 +34,9 @@ async function createEnclave(message) {
   for (let dbTableName of tables) {
     for (let indexField of message.enclaveIndexesMap[dbTableName]) {
       try {
+        await enclave.safeBeginBatchAsync();
         await $$.promisify(enclave.addIndex)(null, dbTableName, indexField)
+        await enclave.commitBatchAsync();
       } catch (e) {
         //to do change with devObserver
         console.log(e);
@@ -49,8 +51,10 @@ async function createEnclave(message) {
     enclaveName: message.enclaveName,
   };
 
+  await enclaveDB.safeBeginBatchAsync();
   await enclaveDB.writeKeyAsync(message.enclaveName, enclaveRecord);
   await enclaveDB.insertRecordAsync(constants.TABLES.GROUP_ENCLAVES, enclaveRecord.enclaveDID, enclaveRecord);
+  await enclaveDB.commitBatchAsync();
 }
 
 require("opendsu").loadAPI("m2dsu").defineMapping(checkIfCreateEnclaveMessage, createEnclave);

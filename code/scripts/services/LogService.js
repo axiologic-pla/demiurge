@@ -20,15 +20,18 @@ export default class LogService {
       logPk: crypto.encodeBase58(crypto.generateRandom(32))
     };
 
-    this.getSharedStorage((err, storageService) => {
+    this.getSharedStorage(async (err, storageService) => {
       if (err) {
         return callback(err);
       }
 
-      storageService.insertRecord(this.logsTable, log.logPk, log, (err) => {
+      await storageService.safeBeginBatchAsync();
+      storageService.insertRecord(this.logsTable, log.logPk, log, async (err) => {
         if (err) {
           return callback(err);
         }
+
+        await storageService.commitBatchAsync();
         callback(undefined, log);
       });
     })
