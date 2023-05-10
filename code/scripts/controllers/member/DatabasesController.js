@@ -31,7 +31,7 @@ class DatabasesController extends DwController {
         await this.shareDatabase(group, member, database);
         await ui.showToast(database, {type: 'success'});
       } catch (err) {
-        await ui.showToast("Encountered error: " + err.message, {type: 'danger'});
+        this.notificationHandler.reportUserRelevantError("Encountered error: ", err);
       }
     });
 
@@ -42,7 +42,7 @@ class DatabasesController extends DwController {
         await this.deleteDatabase(deletedDatabase);
         await ui.showToast(deletedDatabase, {type: 'warning'});
       } catch (err) {
-        await ui.showToast("Encountered error: " + err.message, {type: 'danger'});
+        this.notificationHandler.reportUserRelevantError("Encountered error: ", err);
       }
     });
 

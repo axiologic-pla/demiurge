@@ -47,7 +47,7 @@ class CredentialsController extends DwController {
         this.updateState("credentials", this.model.credentials);
         this.model.areCredentialsLoaded = true;
       } catch (err) {
-        console.error(err);
+        this.notificationHandler.reportDevRelevantInfo("Caught an error: ", err);
       }
     });
 

@@ -93,7 +93,7 @@ class CredentialsController extends DwController {
         throw Error('Coping from clipboard is not possible!');
       } catch (err) {
         target.remove();
-        console.log(err);
+        this.notificationHandler.reportDevRelevantInfo("Caught an error", err);
         return '';
       }
     });
@@ -124,8 +124,10 @@ class CredentialsController extends DwController {
         model.json = tags + decodedCredential;
         await this.ui.showDialogFromComponent('dw-dialog-view-credential', model);
       } catch (err) {
-        console.log(err);
-        await this.ui.showToast('Encountered error: ' + err.message, {type: 'success'});
+        /* console.log(err);
+         await this.ui.showToast('Encountered error: ' + err.message, {type: 'success'});*/
+        this.notificationHandler.reportUserRelevantError('Encountered error: ', err);
+
       }
     });
 
@@ -139,8 +141,10 @@ class CredentialsController extends DwController {
         this.model.areCredentialsLoaded = true;
         await this.ui.showToast('Credential deleted: ' + deletedCredential.token, {type: 'warning'});
       } catch (err) {
-        console.log(err);
-        await this.ui.showToast('Encountered error: ' + err.message, {type: 'success'});
+        /* console.log(err);
+         await this.ui.showToast('Encountered error: ' + err.message, {type: 'success'});*/
+        this.notificationHandler.reportUserRelevantError('Encountered error: ', err);
+
       }
     });
   }

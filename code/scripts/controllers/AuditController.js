@@ -12,6 +12,7 @@ class LogsDataSource extends DataSource {
     this.dsuStorage = customOptions.dsuStorage;
     this.tableName = customOptions.tableName;
     this.searchField = customOptions.searchField;
+    this.notificationHandler = customOptions.notificationHandler
     this.setPageSize(this.itemsOnPage);
     this.dataSourceRezults = [];
     this.hasMoreLogs = false;
@@ -72,7 +73,7 @@ class LogsDataSource extends DataSource {
         this.forceUpdate(true);
       }
     } catch (e) {
-      console.log("Error on filter async page data  ", e);
+      this.notificationHandler.reportUserRelevantWarning("Error on filter async page data  ", e);
     }
 
   }
@@ -118,11 +119,11 @@ class LogsDataSource extends DataSource {
       }
 
     } catch (e) {
-      console.log("Error on get async page data  ", e);
+      this.notificationHandler.reportUserRelevantError("Failed to get table page data ", e);
     }
 
     if (resultData.length === 0) {
-      if(document.querySelector(".search-container")){
+      if (document.querySelector(".search-container")) {
         document.querySelector(".search-container").hidden = true;
       }
     }
@@ -142,7 +143,10 @@ class AuditController extends DwController {
     };
 
     this.model.logsDataSource = new LogsDataSource({
-      dsuStorage: this.DSUStorage, tableName: constants.TABLES.LOGS_TABLE, searchField: "userDID"
+      dsuStorage: this.DSUStorage,
+      tableName: constants.TABLES.LOGS_TABLE,
+      searchField: "userDID",
+      notificationHandler: this.notificationHandler
     });
     this.attachHandlers();
   }
@@ -153,7 +157,9 @@ class AuditController extends DwController {
     let notFoundIcon = this.querySelector(".fa-ban");
     if (searchInput) {
       searchInput.addEventListener("search", async (event) => {
-        await this.model.logsDataSource.searchHandler(event.target.value, foundIcon, notFoundIcon)
+        window.WebCardinal.loader.hidden = false;
+        await this.model.logsDataSource.searchHandler(event.target.value, foundIcon, notFoundIcon);
+        window.WebCardinal.loader.hidden = true;
       })
     }
 

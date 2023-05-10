@@ -38,7 +38,7 @@ class DatabasesController extends DwController {
         await this.shareDatabaseWithMembers(group, database);
         // await ui.showToast(database);
       } catch (err) {
-        console.log(err);
+        this.notificationHandler.reportDevRelevantInfo("Caught an error", err)
       }
     });
 
@@ -49,7 +49,7 @@ class DatabasesController extends DwController {
         await this.deleteDatabase(deletedDatabase);
         // await ui.showToast(deletedDatabase);
       } catch (err) {
-        console.log(err);
+        this.notificationHandler.reportDevRelevantInfo("Caught an error", err)
       }
     });
 

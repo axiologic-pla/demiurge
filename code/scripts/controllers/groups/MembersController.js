@@ -41,7 +41,7 @@ class MembersUI extends DwController {
         throw Error("Coping from clipboard is not possible!");
       } catch (err) {
         target.remove();
-        console.log(err);
+        this.notificationHandler.reportUserRelevantInfo("Failed to read data from clipboard", err);
         return "";
       }
     });
@@ -145,7 +145,7 @@ class MembersController extends DwController {
         this.model.members.push(member);
 
       } catch (e) {
-        ui.showToast("Could not add user to the group because: " + e.message, {type: 'danger'});
+        this.notificationHandler.reportUserRelevantError("Could not add user to the group because: ", e)
       }
 
       button.loading = false;

@@ -1,118 +1,134 @@
-import {getStoredDID, didWasApproved, getWalletStatus, setWalletStatus} from "./services/BootingIdentityService.js";
+import {getWalletStatus, setWalletStatus} from "./services/BootingIdentityService.js";
 import utils from "./utils.js";
 import constants from "./constants.js";
-const {getUserDetails} = await import("./hooks/getUserDetails.js");
 
+const {getUserDetails, getUserInfo} = await import("./hooks/getUserDetails.js");
+const openDSU = require("opendsu");
+const didAPI = openDSU.loadAPI("w3cdid");
+const typicalBusinessLogicHub = didAPI.getTypicalBusinessLogicHub();
+const {setConfig, getConfig, addControllers, addHook, navigateToPageTag} = WebCardinal.preload;
+const {define} = WebCardinal.components;
 let userData;
 
-try{
-  userData = await getUserDetails();
-}catch(err) {
-  if (window.confirm("Looks that your application is not properly initialized or in an invalid state. Would you like to reset it?")) {
-    try {
-      const response = await fetch("/removeSSOSecret/Demiurge", {
-        method: "DELETE",
-        cache: "no-cache"
-      })
-      if (response.ok) {
-        window.disableRefreshSafetyAlert = true;
-        const basePath = window.location.href.split("loader")[0];
-        window.location.replace(basePath + "loader/newWallet.html");
-      } else {
-        let er = new Error(`Reset request failed (${response.status})`);
-        er.rootCause = `statusCode: ${response.status}`;
-        throw er;
-      }
-    } catch (err) {
-      alert(`Failed to reset the application. RootCause: ${err.message}`);
-    }
-  } else {
-    alert(`Application is an undesired state! Contact support!`);
+function setInitialTheme() {
+  function applyDarkTheme() {
+    const schemeElement = document.head.querySelector("[name=color-scheme]");
+    schemeElement.setAttribute("content", `${schemeElement.getAttribute("content")} dark`);
+    document.body.classList.add("sl-theme-dark");
+  }
+
+  const storedTheme = window.localStorage.getItem("dw-theme");
+  if (storedTheme === "dark") {
+    applyDarkTheme();
+    return;
+  }
+  if (storedTheme === "light") {
+    return;
+  }
+
+  if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    applyDarkTheme();
   }
 }
 
-if(userData){
-  const {setConfig, getConfig, addControllers, addHook, navigateToPageTag} = WebCardinal.preload;
-  const {define} = WebCardinal.components;
-  let userName = "-"
+async function setupGlobalErrorHandlers() {
+  const {DwUI} = await import("./controllers/DwController.js");
+  const dwUIInstance = new DwUI();
+  let errHandler = openDSU.loadAPI("error");
 
-  function getInitialConfig() {
-    const config = getConfig();
-    config.translations = false;
-    config.logLevel = "none";
-    return config;
-  }
+  errHandler.observeUserRelevantMessages(constants.NOTIFICATION_TYPES.WARN, (notification) => {
+    dwUIInstance.showToast(notification.message, {type: "warning"});
+  });
 
-  function setInitialTheme() {
-    function applyDarkTheme() {
-      const schemeElement = document.head.querySelector("[name=color-scheme]");
-      schemeElement.setAttribute("content", `${schemeElement.getAttribute("content")} dark`);
-      document.body.classList.add("sl-theme-dark");
+  errHandler.observeUserRelevantMessages(constants.NOTIFICATION_TYPES.INFO, (notification) => {
+    dwUIInstance.showToast(notification.message, {type: "info"})
+  });
+
+  errHandler.observeUserRelevantMessages(constants.NOTIFICATION_TYPES.ERROR, (notification) => {
+    let errMsg = "";
+    if (notification.err && notification.err.message) {
+      errMsg = notification.err.message;
     }
+    let toastMsg = `${notification.message} ${errMsg}`
+    dwUIInstance.showToast(toastMsg, {type: "danger"})
+  });
+}
 
-    const storedTheme = window.localStorage.getItem("dw-theme");
-    if (storedTheme === "dark") {
-      applyDarkTheme();
-      return;
-    }
-    if (storedTheme === "light") {
-      return;
-    }
+function onUserLoginMessage(message) {
+  utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
+    .then(() => {
+    })
+    .catch(err => console.log(err));
+}
 
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      applyDarkTheme();
-    }
-  }
+function onUserRemovedMessage(message) {
+  let notificationHandler = openDSU.loadAPI("error");
+  notificationHandler.reportUserRelevantWarning("Your account was deleted. Please contact an admin to see the reason");
 
-  addHook("beforeAppLoads", async () => {
-    WebCardinal.wallet = {};
-    const wallet = WebCardinal.wallet;
-
-    const {getVaultDomainAsync} = await import("./hooks/getVaultDomain.js");
-
-    wallet.vaultDomain = await getVaultDomainAsync();
-
-    wallet.userDetails = userData.userAppDetails;
-    wallet.userName = userData.userName;
-    userName = userData.userName;
-    wallet.did = await getStoredDID();
-    wallet.status = await getWalletStatus();
-    wallet.managedFeatures = await utils.getManagedFeatures();
-    const openDSU = require("opendsu");
-    const didAPI = openDSU.loadAPI("w3cdid");
-    const typicalBusinessLogicHub = didAPI.getTypicalBusinessLogicHub();
-
-    function onUserLoginMessage(message) {
-      utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
-          .then(() => {
-          })
-          .catch(err => console.log(err));
-    }
-
-    typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_LOGIN, onUserLoginMessage);
-
-    function onUserRemovedMessage(message) {
-      typicalBusinessLogicHub.stop();
+  typicalBusinessLogicHub.stop();
 //audit logs should already be registered during process message
-      utils.removeSharedEnclaveFromEnv()
-          .then(() => {
-            setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL)
-                .then(() => {
-                  window.disableRefreshSafetyAlert = true;
-                  window.top.location.reload();
-                  $$.history.go("home");
-                })
-          }).catch(err => {
-            console.log(err);
-            window.disableRefreshSafetyAlert = true;
-            window.top.location.reload();
-            $$.history.go("home");
-      });
+  utils.removeSharedEnclaveFromEnv()
+    .then(() => {
+      setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL)
+        .then(() => {
+          $$.navigateToPage("home");
+        })
+    }).catch(err => {
+    $$.navigateToPage("home");
+  });
+}
+
+async function watchAndHandleExecution(fnc) {
+  try {
+    await fnc();
+  } catch (err) {
+    if (err.rootCause === "security") {
+      await setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL);
+      return;
     }
+    if (window.confirm("Looks that your application is not properly initialized or in an invalid state. Would you like to reset it?")) {
+      try {
+        const response = await fetch("/removeSSOSecret/DSU_Fabric", {
+          method: "DELETE",
+          cache: "no-cache"
+        })
+        if (response.ok) {
+          const basePath = window.location.href.split("loader")[0];
+          $$.forceRedirect(basePath + "loader/newWallet.html");
+        } else {
+          let er = new Error(`Reset request failed (${response.status})`);
+          er.rootCause = `statusCode: ${response.status}`;
+          throw er;
+        }
+      } catch (err) {
+        $$.showErrorAlert(`Failed to reset the application. RootCause: ${err.message}`);
+        $$.forceTabRefresh();
+      }
+    } else {
+      $$.showErrorAlert(`Application is an undesired state! It is a good idea to close all browser windows and try again!`);
+      $$.forceTabRefresh();
+    }
+  }
+  return true;
+}
 
-    typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_REMOVED, onUserRemovedMessage);
+async function initializeWebCardinalConfig() {
+  let userName = "-"
+  const config = getConfig();
+  config.translations = false;
+  config.logLevel = "none";
 
+  await watchAndHandleExecution(async () => {
+    userData = await getUserDetails();
+  });
+  return config;
+}
 
+let config = await initializeWebCardinalConfig();
+
+function finishInit() {
+  setConfig(config);
+  addHook(constants.HOOKS.BEFORE_APP_LOADS, async () => {
     // load Custom Components
     await import("../components/dw-header/dw-header.js");
     await import("../components/dw-menu/dw-menu.js");
@@ -121,13 +137,23 @@ if(userData){
     await import("../components/dw-data-grid/dw-data-grid.js");
     await import("../components/dw-clipboard-input/dw-clipboard-input.js");
 
+    typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_LOGIN, onUserLoginMessage);
+    typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_REMOVED, onUserRemovedMessage);
 
     // load Demiurge base Controller
-    const {DwController} = await import("./controllers/DwController.js");
+    const {DwController, setupDefaultModel} = await import("./controllers/DwController.js");
+    await setupDefaultModel(userData);
     addControllers({DwController});
+
+    await setupGlobalErrorHandlers();
+    let status = await getWalletStatus();
+    if (status === constants.ACCOUNT_STATUS.CREATED)
+      await watchAndHandleExecution(async () => {
+        await getUserInfo();
+      })
   });
 
-  addHook("afterAppLoads", async () => {
+  addHook(constants.HOOKS.AFTER_APP_LOADS, async () => {
     await import("../components/did-generator/did-generator.js");
     const {getEnvironmentDataAsync} = await import("./hooks/getEnvironmentData.js");
     const envData = await getEnvironmentDataAsync() || {};
@@ -184,9 +210,6 @@ if(userData){
 
   });
 
-  setConfig(getInitialConfig());
-
-
   define("dw-action");
   define("dw-subdomains");
   define("dw-dialog-configuration");
@@ -197,4 +220,9 @@ if(userData){
   define("dw-dialog-initialising");
   define("dw-dialog-break-glass-recovery");
   define("dw-dialog-group-members-update");
+}
+
+if (userData) {
+  //we finish the init only if proper user details retrieval was executed
+  finishInit();
 }

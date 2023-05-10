@@ -109,7 +109,7 @@ class AddEditOrganizationController extends DwController {
 
         this.goBackToOrganizationsDashboard();
       } catch (e) {
-        await this.ui.showToast(`Encountered error: ` + e.message, { type: 'danger' });
+        this.notificationHandler.reportUserRelevantError(`Encountered error: `, e);
       }
     });
 
@@ -123,7 +123,7 @@ class AddEditOrganizationController extends DwController {
         this.ui.showToast(`Organization ${submitModel.name} has been removed!`, { type: 'warning' });
         this.goBackToOrganizationsDashboard();
       } catch (e) {
-        this.ui.showToast(`Encountered error: ` + e.message, { type: 'danger' });
+        this.notificationHandler.reportUserRelevantError(`Encountered error: `, e);
       }
     });
   }

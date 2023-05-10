@@ -10,18 +10,17 @@ class MemberController extends DwController {
       return;
     }
 
-    this.model = { selectedGroup, selectedMember };
+    this.model = {selectedGroup, selectedMember};
     this.setStateSelection();
   }
 
   getStateSelection() {
     // TODO: getState() uses location history of @stencil/router (v1) in WebCardinal implementation
     // which seems to work inappropriate in an iframe when native History API (pushState) is used
-
     try {
       return JSON.parse(window.history.state);
     } catch (err) {
-      console.log(err);
+      this.notificationHandler.reportDevRelevantInfo("Failed to parse history satate", err);
       return {};
     }
   }
