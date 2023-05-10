@@ -62,10 +62,6 @@ function HomeController(...props) {
           try {
             await self.createInitialDID();
             await self.showInitDialog();
-            console.log("=================================================================");
-            const batchInProgress = await self.batchInProgress();
-            console.log("batchInProgress", batchInProgress);
-            console.log("=================================================================");
             await self.createEnclaves();
             ui.showToast("Created enclaves");
             await self.createGroups();
@@ -478,16 +474,10 @@ function HomeController(...props) {
 
     for (let i = 0; i < messages.length; i++) {
       try {
-        console.log("#############################################");
-        console.log(storageService.batchInProgress());
-        console.log("#############################################");
         undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, [messages[i]]);
       } catch (err) {
         return await self.processMessages(storageService, messages);
       }
-      console.log("---------------------------------------------");
-      console.log(storageService.batchInProgress());
-      console.log("---------------------------------------------");
       if (undigestedMessages && undigestedMessages.length > 0) {
         ui.showToast(`Couldn't process all messages. Retrying`);
         const remainingMessages = undigestedMessages.map(msgObj => msgObj.message);
