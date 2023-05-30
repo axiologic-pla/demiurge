@@ -68,11 +68,26 @@ async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
   env[openDSU.constants.SHARED_ENCLAVE.TYPE] = enclaveType;
   env[openDSU.constants.SHARED_ENCLAVE.DID] = enclaveDID;
   env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = enclaveKeySSI;
-  // await $$.promisify(mainDSU.refresh)();
-  await mainDSU.safeBeginBatchAsync();
-  await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
-  await mainDSU.commitBatchAsync();
-  scAPI.refreshSecurityContext();
+  try{
+    await mainDSU.safeBeginBatchAsync();
+  } catch(e){
+    throw e;
+  }
+
+  try {
+    await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
+    await mainDSU.commitBatchAsync();
+    scAPI.refreshSecurityContext();
+  } catch (e) {
+    const writeFileError = createOpenDSUErrorWrapper(`Failed to write environment.json`, e);
+    try{
+      await mainDSU.cancelBatchAsync();
+    } catch(e){
+      throw createOpenDSUErrorWrapper(`Failed to cancel batch`, e, writeFileError);
+    }
+
+    throw writeFileError;
+  }
 }
 
 async function removeSharedEnclaveFromEnv() {
@@ -84,10 +99,26 @@ async function removeSharedEnclaveFromEnv() {
   env[openDSU.constants.SHARED_ENCLAVE.TYPE] = undefined;
   env[openDSU.constants.SHARED_ENCLAVE.DID] = undefined;
   env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = undefined;
-  await mainDSU.safeBeginBatchAsync();
-  await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
-  await mainDSU.commitBatchAsync();
-  scAPI.refreshSecurityContext();
+  try{
+    await mainDSU.safeBeginBatchAsync();
+  } catch(e){
+    throw e;
+  }
+
+  try {
+    await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
+    await mainDSU.commitBatchAsync();
+    scAPI.refreshSecurityContext();
+  } catch (e) {
+    const writeFileError = createOpenDSUErrorWrapper(`Failed to write environment.json`, e);
+    try{
+      await mainDSU.cancelBatchAsync();
+    } catch(e){
+      throw createOpenDSUErrorWrapper(`Failed to cancel batch`, e, writeFileError);
+    }
+
+    throw writeFileError;
+  }
 }
 
 async function getManagedFeatures() {
@@ -116,7 +147,7 @@ async function fetchGroups() {
   return groups;
 }
 
-async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, priveleges = "-") {
+async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, privileges = "-") {
   try {
     let logService = new LogService(constants.TABLES.LOGS_TABLE);
     let logMsg = {
@@ -125,12 +156,12 @@ async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, pr
       userDID: userDID || "-",
       action: action,
       group: userGroup,
-      privileges: priveleges,
+      privileges: privileges,
     }
     await $$.promisify(logService.log, logService)(logMsg);
   } catch (e) {
     console.log("Failed to add log message", e);
-    return await addLogMessage(userDID, action, userGroup, actionUserId, logPk, priveleges);
+    return await addLogMessage(userDID, action, userGroup, actionUserId, logPk, privileges);
   }
 
 }

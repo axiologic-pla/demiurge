@@ -31,18 +31,32 @@ async function createEnclave(message) {
   const enclaveKeySSI = await $$.promisify(enclave.getKeySSI)();
 
   let tables = Object.keys(message.enclaveIndexesMap);
+  let notificationHandler = openDSU.loadAPI("error");
+  try{
+    await enclave.safeBeginBatchAsync();
+  }catch (e) {
+    return notificationHandler.reportUserRelevantWarning('Failed to begin batch on enclave: ', e)
+  }
   for (let dbTableName of tables) {
     for (let indexField of message.enclaveIndexesMap[dbTableName]) {
       try {
-        await enclave.safeBeginBatchAsync();
         await $$.promisify(enclave.addIndex)(null, dbTableName, indexField)
-        await enclave.commitBatchAsync();
       } catch (e) {
-        const openDSU = require("opendsu");
-        let notificationHandler = openDSU.loadAPI("error");
-        notificationHandler.reportUserRelevantWarning('Failed to setup index on enclave: ', e)
+        const addIndexError = createOpenDSUErrorWrapper(`Failed to add index ${indexField} on table ${dbTableName}`, e);
+        try{
+          await enclave.cancelBatchAsync();
+        } catch (error) {
+          return notificationHandler.reportUserRelevantWarning('Failed to cancel batch on enclave: ', error, addIndexError)
+        }
+        return notificationHandler.reportUserRelevantWarning('Failed to add index on enclave: ', addIndexError);
       }
     }
+  }
+
+  try{
+      await enclave.commitBatchAsync();
+  }catch (e) {
+      return notificationHandler.reportUserRelevantWarning('Failed to commit batch on enclave: ', e)
   }
 
   const enclaveRecord = {

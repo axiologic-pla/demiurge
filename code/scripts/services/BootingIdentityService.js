@@ -10,12 +10,16 @@ const w3cDID = openDSU.loadAPI("w3cdid");
  */
 async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING_APPROVAL) {
   const tryToSetStoredDID = async () => {
+    const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
+    if (typeof did !== "string") {
+      did = did.getIdentifier();
+    }
     try{
-      const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-      if (typeof did !== "string") {
-        did = did.getIdentifier();
-      }
       await walletStorage.safeBeginBatchAsync();
+    } catch (e) {
+      return;
+    }
+    try{
       await walletStorage.writeKeyAsync(constants.IDENTITY, {did, walletStatus});
       await walletStorage.commitBatchAsync();
     }catch (e) {
@@ -46,11 +50,21 @@ async function getStoredDID() {
 
 async function setWalletStatus(walletStatus) {
   const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-  try {
+  try{
     await walletStorage.safeBeginBatchAsync();
+  }catch (e) {
+    return console.log(e);
+  }
+
+  try {
     await walletStorage.writeKeyAsync(constants.WALLET_STATUS,  walletStatus);
     await walletStorage.commitBatchAsync();
   } catch (err) {
+    try{
+      await walletStorage.cancelBatchAsync();
+    }catch (e) {
+      return console.log(e, err);
+    }
     console.log(err);
   }
 }

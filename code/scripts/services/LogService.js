@@ -25,15 +25,24 @@ export default class LogService {
         return callback(err);
       }
 
-      await storageService.safeBeginBatchAsync();
-      storageService.insertRecord(this.logsTable, log.logPk, log, async (err) => {
-        if (err) {
-          return callback(err);
-        }
+      try{
+        await storageService.safeBeginBatchAsync();
+      }catch (e) {
+        return callback(e);
+      }
 
+      try{
+        await $$.promisify(storageService.insertRecord, storageService)(this.logsTable, log.logPk, log);
         await storageService.commitBatchAsync();
         callback(undefined, log);
-      });
+      }catch (e) {
+        const insertError = createOpenDSUErrorWrapper(`Failed to insert log in table ${this.logsTable}`, e);
+        try {
+          await storageService.cancelBatchAsync();
+        } catch (error) {
+          return callback(createOpenDSUErrorWrapper(`Failed to cancel batch`, error, insertError));
+        }
+      }
     })
   }
 
