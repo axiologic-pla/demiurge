@@ -108,7 +108,7 @@ function HomeController(...props) {
       if (did) {
         await self.setMainDID(typicalBusinessLogicHub, did);
       }
-      self.showQuickActions();
+      await self.showQuickActions();
     }
   }).catch(async e => {
     self.notificationHandler.reportUserRelevantError("Failed to initialise wallet ", e);
@@ -152,7 +152,7 @@ function HomeController(...props) {
     });
   }
 
-  self.showQuickActions = () => {
+  self.showQuickActions = async () => {
     self.model.showBootingIdentity = false;
     self.ui.enableMenu();
     self.resolveNavigation().then((enableGovernance) => {
@@ -169,20 +169,21 @@ function HomeController(...props) {
         });
       });
     });
+
     self.onTagClick("configuration.show", async () => {
       await UI.showConfigurationDialog(self.element);
     });
 
     if (!this.skipLoginAudit) {
-      self.getSharedEnclave().then(async (sharedEnclave) => {
+      try {
+        const sharedEnclave = await self.getSharedEnclave();
         let adminGroup = await self.getAdminGroup(sharedEnclave);
         await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, adminGroup.name, self.userName);
-      }).catch(e => {
+      } catch(e){
         self.notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
         return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${e.message}`);
-      });
+      }
     }
-
   }
 
   self.setMainDID = async (typicalBusinessLogicHub, didDocument) => {
