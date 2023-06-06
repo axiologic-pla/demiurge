@@ -294,13 +294,21 @@ class DwUI {
     slElement.addEventListener("sl-hide", async (event) => {
       event.preventDefault();
       event.stopImmediatePropagation();
-      await onClose();
+      try{
+        await onClose();
+      } catch (e) {
+        console.log(e);
+      }
     });
 
     if (slElement.querySelector("sl-icon-button[close]")) {
       slElement.querySelector("sl-icon-button[close]").addEventListener("click", async () => {
-        dialogElement.remove();
-        await onClose();
+        try{
+          dialogElement.remove();
+          await onClose();
+        } catch (e) {
+          console.log(e);
+        }
       })
     }
 

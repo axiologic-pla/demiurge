@@ -56,28 +56,13 @@ async function sendUserMessage(sender, group, member, content, contentType, reci
   await promisify(didDocument.sendMessage)(message, receiverDIDDocument);
 }
 
-async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
+async function writeEnvironmentFile(mainDSU, env) {
   const openDSU = require("opendsu");
   const scAPI = openDSU.loadAPI("sc");
-  const resolver = openDSU.loadAPI("resolver");
-  const mainDSU = await $$.promisify(scAPI.getMainDSU)();
-  const keySSI = await $$.promisify(mainDSU.getKeySSIAsString)();
-  // await $$.promisify(mainDSU.refresh)();
-  let env = await $$.promisify(mainDSU.readFile)("/environment.json");
-  env = JSON.parse(env.toString());
-  env[openDSU.constants.SHARED_ENCLAVE.TYPE] = enclaveType;
-  env[openDSU.constants.SHARED_ENCLAVE.DID] = enclaveDID;
-  env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = enclaveKeySSI;
-  try{
-    await mainDSU.safeBeginBatchAsync();
-  } catch(e){
-    throw e;
-  }
-
+  await mainDSU.safeBeginBatchAsync();
   try {
     await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
     await mainDSU.commitBatchAsync();
-    scAPI.refreshSecurityContext();
   } catch (e) {
     const writeFileError = createOpenDSUErrorWrapper(`Failed to write environment.json`, e);
     try{
@@ -88,6 +73,19 @@ async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
 
     throw writeFileError;
   }
+  scAPI.refreshSecurityContext();
+}
+
+async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
+  const openDSU = require("opendsu");
+  const scAPI = openDSU.loadAPI("sc");
+  const mainDSU = await $$.promisify(scAPI.getMainDSU)();
+  let env = await $$.promisify(mainDSU.readFile)("/environment.json");
+  env = JSON.parse(env.toString());
+  env[openDSU.constants.SHARED_ENCLAVE.TYPE] = enclaveType;
+  env[openDSU.constants.SHARED_ENCLAVE.DID] = enclaveDID;
+  env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = enclaveKeySSI;
+  await writeEnvironmentFile(mainDSU, env);
 }
 
 async function removeSharedEnclaveFromEnv() {
@@ -99,26 +97,7 @@ async function removeSharedEnclaveFromEnv() {
   env[openDSU.constants.SHARED_ENCLAVE.TYPE] = undefined;
   env[openDSU.constants.SHARED_ENCLAVE.DID] = undefined;
   env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = undefined;
-  try{
-    await mainDSU.safeBeginBatchAsync();
-  } catch(e){
-    throw e;
-  }
-
-  try {
-    await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
-    await mainDSU.commitBatchAsync();
-    scAPI.refreshSecurityContext();
-  } catch (e) {
-    const writeFileError = createOpenDSUErrorWrapper(`Failed to write environment.json`, e);
-    try{
-      await mainDSU.cancelBatchAsync();
-    } catch(e){
-      throw createOpenDSUErrorWrapper(`Failed to cancel batch`, e, writeFileError);
-    }
-
-    throw writeFileError;
-  }
+  await writeEnvironmentFile(mainDSU, env);
 }
 
 async function getManagedFeatures() {

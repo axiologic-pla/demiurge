@@ -54,28 +54,23 @@ async function setupGlobalErrorHandlers() {
   });
 }
 
-function onUserLoginMessage(message) {
-  utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
-    .then(() => {
-    })
-    .catch(err => console.log(err));
+async function onUserLoginMessage(message) {
+  await utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
 }
 
-function onUserRemovedMessage(message) {
+async function onUserRemovedMessage(message) {
   let notificationHandler = openDSU.loadAPI("error");
   notificationHandler.reportUserRelevantWarning("Your account was deleted. Please contact an admin to see the reason");
 
   typicalBusinessLogicHub.stop();
 //audit logs should already be registered during process message
-  utils.removeSharedEnclaveFromEnv()
-    .then(() => {
-      setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL)
-        .then(() => {
-          $$.navigateToPage("home");
-        })
-    }).catch(err => {
+  try{
+    await utils.removeSharedEnclaveFromEnv();
+    await setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL);
     $$.navigateToPage("home");
-  });
+  }catch(err){
+    $$.navigateToPage("home");
+  }
 }
 
 async function watchAndHandleExecution(fnc) {

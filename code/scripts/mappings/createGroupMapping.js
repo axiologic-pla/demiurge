@@ -39,20 +39,38 @@ async function createGroup(message) {
 
     const sharedEnclaveDB = await $$.promisify(scAPI.getSharedEnclave)();
     await sharedEnclaveDB.safeBeginBatchAsync();
-    await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS, group.did, group);
+    try {
+      await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS, group.did, group);
 
-    const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
-    const credentialService = getCredentialService();
-    const groupCredential = await credentialService.createVerifiableCredential(adminDID.did, group.did);
-    await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromContent(groupCredential), {
-      issuer: adminDID.did,
-      groupDID: group.did,
-      token: groupCredential,
-      credentialType: constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION,
-      encodingType: constants.JWT_ENCODING,
-      tags: [group.name, constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION]
-    });
-    await sharedEnclaveDB.commitBatchAsync();
+      const adminDID = await enclaveDB.readKeyAsync(constants.IDENTITY);
+      const credentialService = getCredentialService();
+      const groupCredential = await credentialService.createVerifiableCredential(adminDID.did, group.did);
+      await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS_CREDENTIALS, utils.getPKFromContent(groupCredential), {
+        issuer: adminDID.did,
+        groupDID: group.did,
+        token: groupCredential,
+        credentialType: constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION,
+        encodingType: constants.JWT_ENCODING,
+        tags: [group.name, constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION]
+      });
+    } catch (e) {
+      try{
+        await sharedEnclaveDB.cancelBatchAsync();
+      }catch (err) {
+        console.log(err);
+      }
+
+      throw e;
+    }
+    try{
+      await sharedEnclaveDB.commitBatchAsync();
+    }catch (e) {
+      try{
+        await sharedEnclaveDB.cancelBatchAsync();
+      } catch (err) {
+        console.log(err);
+      }
+    }
   }
 }
 

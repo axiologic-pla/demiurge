@@ -14,15 +14,16 @@ async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING
     if (typeof did !== "string") {
       did = did.getIdentifier();
     }
-    try{
-      await walletStorage.safeBeginBatchAsync();
-    } catch (e) {
-      return;
-    }
+    await walletStorage.safeBeginBatchAsync();
     try{
       await walletStorage.writeKeyAsync(constants.IDENTITY, {did, walletStatus});
       await walletStorage.commitBatchAsync();
     }catch (e) {
+        try{
+            await walletStorage.cancelBatchAsync();
+        }catch (err) {
+            console.log(err);
+        }
       await tryToSetStoredDID();
     }
   }
@@ -50,11 +51,7 @@ async function getStoredDID() {
 
 async function setWalletStatus(walletStatus) {
   const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-  try{
-    await walletStorage.safeBeginBatchAsync();
-  }catch (e) {
-    return console.log(e);
-  }
+  await walletStorage.safeBeginBatchAsync();
 
   try {
     await walletStorage.writeKeyAsync(constants.WALLET_STATUS,  walletStatus);
