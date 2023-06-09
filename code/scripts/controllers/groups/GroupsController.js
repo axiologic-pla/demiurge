@@ -150,9 +150,11 @@ class GroupsController extends DwController {
       }
     });
 
-    const groupSelect = document.querySelector('sl-select');
-    groupSelect.addEventListener('sl-change', event => {
-      this.model.selectedGroup = event.target.value;
+    const groupSelect = document.querySelector('select.group-select');
+    groupSelect.addEventListener('change', event => {
+      this.model.selectedGroup = this.model.groups.find(group => group.pk === event.target.value);
+      //after select is done focus out select input
+      groupSelect.blur();
     });
 
 
@@ -173,6 +175,7 @@ class GroupsController extends DwController {
         if (scAPI.sharedEnclaveExists()) {
           this.model.groups = await utils.fetchGroups();
           this.model.defaultGroup = this.model.groups[0];
+          this.model.selectedGroup = this.model.groups[0];
           this.model.areGroupsLoaded = true;
         } else {
           __waitForSharedEnclave();

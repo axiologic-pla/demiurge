@@ -84,3 +84,18 @@
     color: #ffffff;
     border: none;
 }
+
+select:disabled {
+    background-color: rgb(var(--sl-input-background-color-disabled));
+    border-color: rgb(var(--sl-input-border-color-disabled));
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-radius: var(--sl-input-border-radius-medium);
+    font-size: var(--sl-input-font-size-medium);
+    height: var(--sl-input-height-medium);
+    font-family: var(--sl-input-font-family);
+    font-weight: var(--sl-input-font-weight);
+    letter-spacing: var(--sl-input-letter-spacing);
+    color: rgb(var(--sl-input-color-disabled));
+    padding: 0px 10px;
+}

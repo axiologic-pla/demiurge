@@ -1,6 +1,9 @@
-<link rel="stylesheet" href="components/dw-subdomains/dw-subdomains.css" />
-<sl-tooltip content="@content" placement="top-end" disabled>
-  <sl-menu>
-    <slot></slot>
-  </sl-menu>
-</sl-tooltip>
+<link rel="stylesheet" href="components/dw-subdomains/dw-subdomains.css"/>
+<div class="tooltip" disabled>
+    <sl-menu>
+        <slot></slot>
+    </sl-menu>
+    <span class="tooltiptext">{{@content}}</span>
+</div>
+
+

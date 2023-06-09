@@ -29,12 +29,14 @@
 
             <dw-title shadow>Quick actions</dw-title>
             <main class="dw-actions">
-                <dw-action action="My Identities" icon="person-fill" tag="my-identities"
-                           tooltip="My Identities"></dw-action>
-                <dw-action action="Groups" icon="people-fill" tag="groups" tooltip="Groups"></dw-action>
-                <dw-action action="Governance" hidden icon="clouds-fill" tag="governance"
+                <dw-action action="My Identities" icon="person-fill" data-tag="go-to-page" tag="my-identities"
+                           tooltip="Click to see identities"></dw-action>
+                <dw-action action="Groups" icon="people-fill" tag="groups" data-tag="go-to-page"
+                           tooltip="Click to manage groups"></dw-action>
+                <dw-action action="Governance" hidden icon="clouds-fill" tag="governance" data-tag="go-to-page"
                            tooltip="Governance"></dw-action>
-                <dw-action action="Audit" icon="person-lines-fill" tag="audit" tooltip="Audit"></dw-action>
+                <dw-action action="Audit" icon="person-lines-fill" tag="audit" data-tag="go-to-page"
+                           tooltip="Click to see audit info"></dw-action>
 
                 <!--hide because not implemented yet -->
                 <!--*******************-->

@@ -212,18 +212,19 @@ function createDidGeneratorSelect(types) {
     }
 
     connectedCallback() {
-      this._menuElement = createElement("sl-select", {
+      this._menuElement = createElement("select", {
         placeholder: this.placeholder,
         value: this.type ? this.type : "",
         disabled: this.disabled
       });
       const menuElements = {};
       for (const type of this.types) {
-        menuElements[type] = createElement("sl-menu-item", {
+        menuElements[type] = createElement("option", {
           size: "large",
           innerText: this._allTypes[type].LABEL,
           value: type,
-          disabled: true
+          disabled: true,
+          selected: type === this.type
         });
         menuElements[type].dataset.tag = type.toLowerCase();
         menuElements[type].addEventListener("click", () => {

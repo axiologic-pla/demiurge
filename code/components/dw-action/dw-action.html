@@ -1,6 +1,7 @@
-<sl-tooltip content="@tooltip">
-  <sl-button class="dw-action">
-    <sl-icon slot="prefix" name="@icon"></sl-icon>
-    <span>{{ @action }}</span>
-  </sl-button>
-</sl-tooltip>
+<div class="tooltip">
+    <sl-button class="dw-action">
+        <sl-icon slot="prefix" name="@icon"></sl-icon>
+        <span>{{ @action }}</span>
+    </sl-button>
+    <span class="tooltiptext">{{@tooltip}}</span>
+</div>

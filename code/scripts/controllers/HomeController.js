@@ -22,7 +22,7 @@ const UI = {
     }, 25);
 
     slElement.addEventListener("sl-hide", () => {
-      try{
+      try {
         dialogElement.remove();
       } catch (e) {
         console.log(e);
@@ -41,6 +41,9 @@ function HomeController(...props) {
   self.model = {
     domain: self.domain, username: self.userDetails
   };
+  self.onTagClick("go-to-page", (model, target, event) => {
+    self.navigateToPageTag(target.getAttribute("tag"));
+  })
 
   const {ui} = self
   getWalletStatus().then(async status => {
@@ -162,12 +165,7 @@ function HomeController(...props) {
           governanceElement.removeAttribute("hidden");
         }
       }
-      const actionElements = self.querySelectorAll("dw-action[tag]:not([hidden])");
-      Array.from(actionElements).forEach((actionElement) => {
-        actionElement.addEventListener("click", () => {
-          self.navigateToPageTag(actionElement.getAttribute("tag"));
-        });
-      });
+
     });
 
     self.onTagClick("configuration.show", async () => {
@@ -179,7 +177,7 @@ function HomeController(...props) {
         const sharedEnclave = await self.getSharedEnclave();
         let adminGroup = await self.getAdminGroup(sharedEnclave);
         await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, adminGroup.name, self.userName);
-      } catch(e){
+      } catch (e) {
         self.notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
         return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${e.message}`);
       }
@@ -434,13 +432,13 @@ function HomeController(...props) {
     const enclaves = await $$.promisify(mainEnclave.getAllRecords)(constants.TABLES.GROUP_ENCLAVES);
     const sharedEnclave = await self.getSharedEnclave();
     await sharedEnclave.safeBeginBatchAsync();
-    try{
+    try {
       for (let i = 0; i < enclaves.length; i++) {
         await sharedEnclave.writeKeyAsync(enclaves[i].enclaveName, enclaves[i]);
         await sharedEnclave.insertRecordAsync(constants.TABLES.GROUP_ENCLAVES, enclaves[i].enclaveDID, enclaves[i]);
       }
     } catch (e) {
-      try{
+      try {
         await sharedEnclave.cancelBatchAsync();
       } catch (err) {
         console.log(err);
