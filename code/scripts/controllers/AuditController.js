@@ -59,7 +59,7 @@ class LogsDataSource extends DataSource {
       await this.getSharedEnclave();
       if (inputValue) {
         await $$.promisify(this.sharedEnclaveDB.refresh.bind(this.sharedEnclaveDB))();
-        let result = await $$.promisify(this.sharedEnclaveDB.filter, this.sharedEnclaveDB)(this.tableName, `${this.searchField} == ${inputValue}`, "dsc");
+        let result = await $$.promisify(this.sharedEnclaveDB.filter, this.sharedEnclaveDB)(this.tableName, ["__timestamp > 0", `${this.searchField} == ${inputValue}`], "dsc");
 
         if (result && result.length > 0) {
           foundIcon.style.display = "inline";
