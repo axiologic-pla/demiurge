@@ -26,7 +26,7 @@ export default class LogService {
       }
 
       try{
-        await storageService.safeBeginBatchAsync();
+        await storageService.safeBeginBatchAsync(true);
       }catch (e) {
         return callback(e);
       }
