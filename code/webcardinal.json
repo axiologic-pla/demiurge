@@ -1,36 +1,16 @@
 {
   "pages": [
     {
-      "name": "My Identities",
-      "tag": "my-identities"
-    },
-    {
       "name": "Groups",
       "tag": "groups"
-    },
-    {
-      "name": "Governance",
-      "tag": "governance"
     },
     {
       "name": "Audit",
       "tag": "audit"
     },
     {
-      "name": "BDNS",
-      "tag": "bdns",
-      "src": "./blockchain-domains.html",
-      "indexed": false
-    },
-    {
-      "name": "My Keys",
-      "tag": "my-keys",
-      "indexed": false
-    },
-    {
-      "name": "Workspaces",
-      "tag": "workspaces",
-      "indexed": false
+      "name": "My Identities",
+      "tag": "my-identities"
     },
     {
       "name": "Member",
@@ -43,31 +23,6 @@
       "name": "Home",
       "tag": "home",
       "src": "home.html",
-      "indexed": false
-    },
-    {
-      "name": "Contracts",
-      "tag": "contracts",
-      "indexed": false
-    },
-    {
-      "name": "Domains",
-      "tag": "domains",
-      "indexed": false
-    },
-    {
-      "name": "Subdomains",
-      "tag": "subdomains",
-      "indexed": false
-    },
-    {
-      "name": "Keys",
-      "tag": "keys",
-      "indexed": false
-    },
-    {
-      "name": "Tokens",
-      "tag": "tokens",
       "indexed": false
     }
   ]

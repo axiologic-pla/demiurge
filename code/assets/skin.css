@@ -41,6 +41,9 @@
     --sl-z-index-dialog: 1000 !important;
     --sl-z-index-toast: 1001 !important;
 
+    --dw-app-color: #328569;
+    --dw-active-item-color: #FFFFFF;
+    --dw-inactive-item-color: #92D3BD;
     --dw-custom-default-color-100: rgba(1, 1, 1, 1);
     --dw-custom-default-color-015: rgba(1, 1, 1, 0.15);
     --dw-custom-primary-color-100: rgba(47, 128, 237, 1);
@@ -73,11 +76,17 @@ sl-tab-group sl-tab:active::part(base) {
 }
 
 webc-app-root {
-    --mode: horizontal;
+    --mode: vertical;
 }
 
 webc-app-menu {
     --disable-identity: true;
+}
+
+webc-app-menu[mode='vertical'] {
+    --background: var(--dw-app-color);
+    --padding: 45px 0px;
+    --min-width: 155px;
 }
 
 webc-app-container {
@@ -263,6 +272,37 @@ select:-moz-focusring {
     text-shadow: 0 0 0 #000;
 }
 
+webc-app-menu[mode=vertical] .app-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 65px;
+    align-items: center;
+}
+
+.menu-item-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--dw-inactive-item-color)
+}
+
+.link-active .menu-item-container {
+    color: var(--dw-active-item-color)
+}
+
+.menu-item-container svg {
+    fill: var(--dw-inactive-item-color)
+}
+
+.link-active .menu-item-container svg {
+    fill: var(--dw-active-item-color)
+}
+
+webc-app-menu[mode=vertical] .app-menu webc-app-menu-item[level="0"],
+webc-app-menu[mode=vertical] .app-menu webc-app-menu-item,
+webc-app-menu[mode=vertical] .app-menu webc-app-menu-item[level="0"]:last-child {
+    border: none;
+}
 
 /*:root .sl-theme-dark {*/
 /*    --webc-primary-color: rgb(var(--sl-color-gray-50));*/
