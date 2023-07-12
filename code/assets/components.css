@@ -23,7 +23,7 @@ dw-clipboard-input > sl-input > sl-icon::part(base) {
 
 .dw-container {
     display: grid;
-    margin: 45px 0 0 124px;
+    margin: 45px 0 0 28px;
 }
 
 .not-implemented {
