@@ -47,7 +47,7 @@ class GroupsUI extends DwController {
     const part = "group-content";
     const rootElement = this.querySelector(`#dw-${part}`);
     const subParts = {
-      [part]: ["group-members", "group-credentials", "group-databases"],
+      [part]: ["group-members"],
     };
 
     this.model.onChange("selectedGroup", ({targetChain}) => {
@@ -63,6 +63,13 @@ class GroupsUI extends DwController {
         return;
       }
 
+      this.element.querySelectorAll(".tab-header").forEach((tabHeader, index) => {
+        tabHeader.classList.remove("selected");
+        if (index === this.model.selectedTabIndex) {
+          tabHeader.classList.add("selected");
+        }
+      })
+
       const documentFragment = cloneTemplate(part);
 
       for (const subPart of subParts[part]) {
@@ -73,30 +80,32 @@ class GroupsUI extends DwController {
       }
 
 
-      rootElement.hidden = true;
       rootElement.append(documentFragment);
 
-      const tabGroupElement = rootElement.querySelector("sl-tab-group");
+      const tabGroupElement = rootElement.querySelector(".dw-group-members-container");
+
       const storedActiveTab = localStorage.getItem(key);
 
-      tabGroupElement.addEventListener("sl-tab-show", (event) => {
-        const tab = event.detail.name;
+      /*  tabGroupElement.addEventListener("sl-tab-show", (event) => {
+          const tab = event.detail.name;
 
-        if (tab === "members") {
-          localStorage.removeItem(key);
+          if (tab === "members") {
+            localStorage.removeItem(key);
+          }
+
+          localStorage.setItem(key, tab);
+        });
+
+        if (tabGroupElement && storedActiveTab) {
+          setTimeout(async () => {
+            await tabGroupElement.show(storedActiveTab);
+            rootElement.hidden = false;
+          });
+        } else {
+          rootElement.hidden = false;
         }
 
-        localStorage.setItem(key, tab);
-      });
-
-      if (tabGroupElement && storedActiveTab) {
-        setTimeout(async () => {
-          await tabGroupElement.show(storedActiveTab);
-          rootElement.hidden = false;
-        });
-      } else {
-        rootElement.hidden = false;
-      }
+       */
     });
   }
 
@@ -131,6 +140,7 @@ class GroupsController extends DwController {
       groups: [],
       selectedGroup: undefined,
       areGroupsLoaded: false,
+      selectedTabIndex: 0
     };
 
     ui.page = new GroupsUI(...props);
@@ -150,13 +160,17 @@ class GroupsController extends DwController {
       }
     });
 
-    const groupSelect = document.querySelector('select.group-select');
-    groupSelect.addEventListener('change', event => {
-      this.model.selectedGroup = this.model.groups.find(group => group.pk === event.target.value);
-      //after select is done focus out select input
-      groupSelect.blur();
-    });
+    /*    const groupSelect = document.querySelector('select.group-select');
+        groupSelect.addEventListener('change', event => {
+          this.model.selectedGroup = this.model.groups.find(group => group.pk === event.target.value);
+          //after select is done focus out select input
+          groupSelect.blur();
+        });*/
 
+    this.onTagClick("select-tab", (model, target, event) => {
+      this.model.selectedTabIndex = this.model.groups.findIndex(group => group.pk === target.getAttribute("tab-name"));
+      this.model.selectedGroup = this.model.groups[this.model.selectedTabIndex];
+    })
 
     this.onTagClick("group.delete", async (deletedGroup) => {
       try {

@@ -1,6 +1,7 @@
 {
   "pages": [
     {
+      "path": "/",
       "name": "Groups",
       "tag": "groups"
     },
@@ -16,13 +17,6 @@
       "name": "Member",
       "path": "/groups/member",
       "tag": "member",
-      "indexed": false
-    },
-    {
-      "path": "/",
-      "name": "Home",
-      "tag": "home",
-      "src": "home.html",
       "indexed": false
     }
   ]

@@ -3,41 +3,36 @@
 
 <webc-container controller="groups/GroupsController" id="groups-page" class="dw-container">
 
+    <dw-title header="Groups"></dw-title>
+
     <main id="dw-groups">
         <section class="dw-groups--header">
-            <dw-title header="Groups"></dw-title>
-            <span> > </span>
-            <div class="custom-select">
-                <select class="group-select dw-select" data-for="@groups" data-for-option="rerender">
-                    <option value="@pk">{{@name}}</option>
-                </select>
+            <!--           <div class="custom-select">
+                           <select class="group-select dw-select" data-for="@groups" data-for-option="rerender">
+                               <option value="@pk">{{@name}}</option>
+                           </select>
+                       </div>-->
+
+            <div class="tab-nav-container" data-for="@groups">
+                <div class="tab-header" tab-name="@pk" data-tag="select-tab">
+                    <span class="tab-header-label">{{@name}}</span>
+                </div>
             </div>
         </section>
-
+        <section id="dw-group-content">
+            <!-- Group content is injected here -->
+        </section>
     </main>
-    <section id="dw-group-content">
-        <!-- Group content is injected here -->
-    </section>
+
 </webc-container>
 
 <!-- Group content -->
 <template id="dw-group-content--template">
-    <webc-container controller="groups/GroupFeaturesController">
-        <sl-tab-group class="dw-group-content">
-            <sl-tab slot="nav" panel="members">
-                <sl-icon name="people-fill"></sl-icon>
-                Members
-            </sl-tab>
-
-            <sl-tab-panel name="members">
-                <section id="dw-group-members">
-                    <!-- Group members are injected here -->
-                </section>
-            </sl-tab-panel>
-
-
-        </sl-tab-group>
-    </webc-container>
+    <div class="dw-group-members-container">
+        <section id="dw-group-members">
+            <!-- Group members are injected here -->
+        </section>
+    </div>
 </template>
 
 <!-- Group members -->
@@ -45,38 +40,40 @@
     <webc-container controller="groups/MembersController">
         <section class="dw-members--header">
             <dw-title>
-                <p slot="subheader">Manage members of group "{{ @selectedGroup.name }}"</p>
+                <p slot="subheader">Manage members of "{{ @selectedGroup.name }}" group </p>
             </dw-title>
             <div data-loaded="@areMembersLoaded">
-                <sl-form>
-                    <sl-input label="Member DID" name="did" placeholder="did:ssi:name:domain:<username>"
-                              id="add-member-input" required clearable>
-                        <sl-button slot="suffix" type="text" data-tag="member.paste" class="dw-paste">
-                            Paste
-                        </sl-button>
-                    </sl-input>
-                    <sl-button type="primary" data-tag="member.add" class="dw-action-button"> Add member
-                        <sl-icon slot="prefix" name="plus-lg"></sl-icon>
-                    </sl-button>
-                </sl-form>
 
+                <label>Member DID</label>
+                <div class="add-member-container">
+                    <dw-copy-paste-input button-label="Paste" button-type="paste"
+                                         placeholder="did:ssi:name:domain:<username>"
+                                         id="add-member-input" required></dw-copy-paste-input>
+
+                    <button type="primary" data-tag="member.add"
+                            class="dw-icon-button dw-action-button add-member-button">
+                        <div class="button-icon" icon-name="plus-lg"></div>
+                        <span class="button-label">Add member</span>
+                    </button>
+
+                </div>
             </div>
         </section>
 
         <section class="dw-members dw-data-grid" data-for="@members">
             <article class="dw-data-grid-item">
-                <sl-menu-item value="@did" data-tag="member.select">
+                <div data-tag="member.select" member-data="@did" class="member-item">
                     <div>
                         <div><strong>{{ @username }}</strong> &nbsp; {{ @email }}</div>
                         <div><code>{{ @did }}</code></div>
                     </div>
-                </sl-menu-item>
-
-                <div class="tooltip">
-                    <sl-icon-button data-tag="member.delete" name="trash"></sl-icon-button>
-                    <span class="tooltiptext">Delete group member</span>
                 </div>
 
+
+                <button type="primary" tooltip-text="Delete group member" data-tag="member.delete"
+                        class="dw-icon-button delete-member-button tooltip">
+                    <div class="button-icon" icon-name="trash"></div>
+                </button>
             </article>
             <div slot="no-data" data-if="@areMembersLoaded" class="no-data">
                 <dw-spinner slot="false" content="Members are loading"></dw-spinner>

@@ -67,9 +67,9 @@ async function onUserRemovedMessage(message) {
   try {
     await utils.removeSharedEnclaveFromEnv();
     await setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL);
-    $$.navigateToPage("home");
+    $$.navigateToPage("groups");
   } catch (err) {
-    $$.navigateToPage("home");
+    $$.navigateToPage("groups");
   }
 }
 
@@ -131,7 +131,8 @@ function finishInit() {
     await import("../components/dw-title/dw-title.js");
     await import("../components/dw-data-grid/dw-data-grid.js");
     await import("../components/dw-clipboard-input/dw-clipboard-input.js");
-
+    await import("../components/dw-copy-paste-input/dw-copy-paste-input.js");
+    await import("../components/dw-tab-navigator/dw-tab-panel.js");
     typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_LOGIN, onUserLoginMessage);
     typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_REMOVED, onUserRemovedMessage);
 
@@ -190,9 +191,8 @@ function finishInit() {
     });
 
 
-
     //go to home page and clear selected menu item
-    try {
+   /* try {
       document.querySelector(".logo-container").addEventListener("click", async () => {
         if (document.querySelector("webc-app-menu-item[active]")) {
           document.querySelector("webc-app-menu-item[active]").removeAttribute("active");
@@ -201,7 +201,7 @@ function finishInit() {
       })
     } catch (e) {
       console.log("Menu not initialized yet.", e);
-    }
+    }*/
 
 
   });
