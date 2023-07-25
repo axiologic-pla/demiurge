@@ -1,0 +1,20 @@
+#home-page {
+    margin-right: 56px;
+}
+
+.info-container {
+    border-radius: 7px;
+    border: 0.5px solid lightgray;
+    padding: 20px 15px;
+    align-items: baseline;
+    display: flex;
+    font-size: 14px;
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+
+.info-container img {
+    height: 20px;
+    margin-right: 20px;
+    align-self: center;
+}

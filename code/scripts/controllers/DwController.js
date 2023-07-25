@@ -1,6 +1,8 @@
 import {escapeHTML, isHTMLElement} from "../../components/utils.js";
 import {getStoredDID, getWalletStatus} from "../services/BootingIdentityService.js";
 import utils from "../utils.js";
+import constants from "../constants.js";
+
 
 const {WebcController} = WebCardinal.controllers;
 
@@ -95,7 +97,7 @@ class DwController extends WebcController {
   }
 }
 
-async function setupDefaultModel(userData){
+async function setupDefaultModel(userData) {
   WebCardinal.wallet = {};
   const wallet = WebCardinal.wallet;
 
@@ -111,13 +113,14 @@ async function setupDefaultModel(userData){
   wallet.status = await getWalletStatus();
   wallet.managedFeatures = await utils.getManagedFeatures();
 }
+
 class DwUI {
   constructor(element) {
     this._element = element;
     this._page = undefined;
   }
 
-  async submitGenericForm(model, target) {
+/*  async submitGenericForm(model, target) {
     let element = target;
     let slFormElement;
 
@@ -168,7 +171,7 @@ class DwUI {
       await slFormElement.submit();
       slFormElement.removeEventListener("sl-submit", listener);
     });
-  }
+  }*/
 
   /**
    * @param {string, object} message
@@ -187,7 +190,7 @@ class DwUI {
     }
 
     if (typeof type !== "string") {
-      type = "primary";
+      type = constants.NOTIFICATION_TYPES.INFO;
     }
 
     if (typeof icon !== "string") {
@@ -198,11 +201,9 @@ class DwUI {
       duration = 30000;
     }
 
-    if (typeof closable !== "boolean") {
-      closable = true;
-    }
+    utils.renderToast(message, type, duration);
 
-    const alert = Object.assign(document.createElement("sl-alert"), {
+    /*const alert = Object.assign(document.createElement("sl-alert"), {
       type: type,
       closable: closable,
       duration: duration,
@@ -214,7 +215,7 @@ class DwUI {
 
     document.body.append(alert);
 
-    return alert.toast();
+    return alert.toast();*/
   }
 
   disableMenu() {
@@ -225,14 +226,15 @@ class DwUI {
     document.body.removeAttribute("disable-menu");
   }
 
-  /**
+/*
+  /!**
    * @param {string} component
    * @param {object | Proxy} [attributes]
    * @param {object} [options]
    * @param {function} [options.onClose]
    * @param {HTMLElement} [options.parentElement]
    * @param {boolean} [options.disableClosing]
-   */
+   *!/
   async showDialogFromComponent(component, attributes = {}, options = {}) {
     let {parentElement, onClose, disableClosing} = options;
     if (typeof onClose !== "function") {
@@ -294,7 +296,7 @@ class DwUI {
     slElement.addEventListener("sl-hide", async (event) => {
       event.preventDefault();
       event.stopImmediatePropagation();
-      try{
+      try {
         await onClose();
       } catch (e) {
         console.log(e);
@@ -303,7 +305,7 @@ class DwUI {
 
     if (slElement.querySelector("sl-icon-button[close]")) {
       slElement.querySelector("sl-icon-button[close]").addEventListener("click", async () => {
-        try{
+        try {
           dialogElement.remove();
           await onClose();
         } catch (e) {
@@ -317,17 +319,18 @@ class DwUI {
       await slElement.show();
     });
   }
+*/
 
-  /**
+/*  /!**
    * @param {string} component
-   */
+   *!/
   async hideDialogFromComponent(component) {
-    try{
+    try {
       await WebCardinal.state.page.dialogs[component].hide();
-    }catch(err){
+    } catch (err) {
       //dialog not render and could generate error when trying to hide
     }
-  }
+  }*/
 
   get page() {
     return this._page;

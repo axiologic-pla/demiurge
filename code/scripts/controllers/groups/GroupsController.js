@@ -111,9 +111,11 @@ class GroupsUI extends DwController {
 
   // methods
 
+/*
   async addGroup(model, target) {
     return await this.ui.submitGenericForm(model, target);
   }
+*/
 
   async selectGroup(model, target) {
     if (target.checked) {

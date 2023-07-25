@@ -70,7 +70,7 @@ class DwCopyPasteInput extends HTMLElement {
     this.inputElement = this.shadowRoot.querySelector("input");
     this.buttonElement = this.shadowRoot.querySelector("button");
     this.buttonElement.addEventListener("click", this.btnClickHandler.bind(this))
-
+    this.inputElement.addEventListener("change", this.inputChange.bind(this))
   }
 
   async connectedCallback() {
@@ -96,6 +96,10 @@ class DwCopyPasteInput extends HTMLElement {
       }
       this.inputElement.setAttribute(name, value);
     }
+  }
+
+  inputChange(event) {
+    this.value = event.target.value;
   }
 
   async btnClickHandler(event) {

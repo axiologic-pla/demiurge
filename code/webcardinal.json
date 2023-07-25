@@ -2,21 +2,31 @@
   "pages": [
     {
       "path": "/",
-      "name": "Groups",
-      "tag": "groups"
+      "name": "Landing Page",
+      "tag": "landing-page",
+      "indexed": false
     },
     {
-      "name": "Audit",
-      "tag": "audit"
+      "name": "Groups",
+      "tag": "groups"
     },
     {
       "name": "My Identities",
       "tag": "my-identities"
     },
     {
+      "name": "Audit",
+      "tag": "audit"
+    },
+    {
       "name": "Member",
       "path": "/groups/member",
       "tag": "member",
+      "indexed": false
+    },
+    {
+      "name": "Booting Identity",
+      "tag": "booting-identity",
       "indexed": false
     }
   ]

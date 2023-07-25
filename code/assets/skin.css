@@ -42,6 +42,7 @@
     --sl-z-index-toast: 1001 !important;
 
     --dw-app-color: #328569;
+    --dw-app-disabled-color: #AAAFAE;
     --dw-active-item-color: #FFFFFF;
     --dw-inactive-item-color: #92D3BD;
     --dw-custom-default-color-100: rgba(1, 1, 1, 1);
@@ -286,7 +287,7 @@ dw-subdomains {
     display: block;
 }
 
-.dw-default-input{
+.dw-default-input {
     border-radius: 8px;
     border: 1px solid #00CA86;
     background: #FFF;
@@ -395,37 +396,90 @@ webc-app-menu[mode=vertical] .app-menu webc-app-menu-item[level="0"]:last-child 
     border: none;
 }
 
-/*:root .sl-theme-dark {*/
-/*    --webc-primary-color: rgb(var(--sl-color-gray-50));*/
-/*    --sl-input-label-color: rgb(var(--sl-color-gray-50));*/
-/*}*/
+.toast-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    width: 40%;
+    right: 0;
+    align-items: end;
+    padding: 10px;
+    background: none;
+    pointer-events: none;
+}
 
-/*.sl-theme-dark webc-app-menu[mode=horizontal] {*/
-/*    --color: rgb(var(--sl-color-gray-300));*/
-/*}*/
+.toast-text {
+    color: #000;
+    padding: 1.25rem;
+}
 
-/*.sl-theme-dark dw-spinner {*/
-/*    --color: rgb(var(--sl-color-gray-100));*/
-/*}*/
+.toast {
+    display: flex;
+    opacity: 100%;
+    background-color: #FFFFFF;
+    justify-content: space-between;
+    width: 100%;
+    border-top: 3px solid;
+    border-bottom: 1px solid;
+    border-left: 1px solid;
+    border-right: 1px solid;
+    border-radius: 8px;
+    margin-top: 10px;
+}
 
-/*.sl-theme-dark dw-title {*/
-/*    --color: rgb(var(--sl-color-gray-300));*/
-/*}*/
+.toast.info {
+    border-top-color: #33D29C;
+}
 
-/*.sl-theme-dark dw-header {*/
-/*    --border-color: rgb(var(--sl-color-gray-800));*/
-/*    --color: rgb(var(--sl-color-gray-300));*/
-/*}*/
+.toast.warn {
+    border-top-color: #FEC02D;
+}
 
-/*.sl-theme-dark .dw-data-grid {*/
-/*    --background: rgb(var(--sl-input-background-color));*/
-/*    --border-color: rgb(var(--sl-input-border-color));*/
-/*}*/
+.toast.error {
+    border-top-color: #EF4C61;
 
-/*::selection {*/
-/*    background: rgb(var(--sl-color-primary-600));*/
-/*}*/
+}
 
-/*::-moz-selection {*/
-/*    background: rgb(var(--sl-color-primary-600));*/
-/*}*/
+.toast-close-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-right: 1.25rem;
+    pointer-events: all;
+}
+
+
+webc-modal {
+    --header-button-background: none !important;
+    --confirm-button-background: var(--dw-app-color);
+}
+
+webc-modal::part(position) {
+    overflow: auto;
+}
+
+webc-modal::part(dialog) {
+    max-height: 95vh;
+    height: 95%;
+}
+
+
+webc-modal::part(content) {
+    min-width: 785px;
+    max-width: 95%;
+    max-height: 95vh;
+    margin: auto;
+    height: fit-content;
+}
+
+webc-modal::part(main) {
+    word-break: break-word;
+    overflow: auto;
+    height: 100%;
+}
+

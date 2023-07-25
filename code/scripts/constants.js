@@ -105,5 +105,13 @@ export default {
     WARN: "warn",
     INFO: "info",
     ERROR: "error"
+  },
+  HTML_EVENTS: {
+    CLOSED: "closed",
+    CONFIRMED: "confirmed",
+    SEARCH: "search",
+    CLICK: "click",
+    FOCUSOUT: "focusout",
+    CHANGE: "change"
   }
 };

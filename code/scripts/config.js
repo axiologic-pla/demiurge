@@ -1,50 +1,47 @@
-import {getWalletStatus, setWalletStatus} from "./services/BootingIdentityService.js";
+import {getWalletStatus, setWalletStatus, getStoredDID, setMainDID} from "./services/BootingIdentityService.js";
 import utils from "./utils.js";
 import constants from "./constants.js";
 
 const {getUserDetails, getUserInfo} = await import("./hooks/getUserDetails.js");
 const openDSU = require("opendsu");
 const didAPI = openDSU.loadAPI("w3cdid");
+const notificationHandler = openDSU.loadAPI("error");
+const scAPI = openDSU.loadApi("sc");
 const typicalBusinessLogicHub = didAPI.getTypicalBusinessLogicHub();
 const {setConfig, getConfig, addControllers, addHook, navigateToPageTag} = WebCardinal.preload;
 const {define} = WebCardinal.components;
+
 let userData;
 
-function setInitialTheme() {
-  function applyDarkTheme() {
-    const schemeElement = document.head.querySelector("[name=color-scheme]");
-    schemeElement.setAttribute("content", `${schemeElement.getAttribute("content")} dark`);
-    document.body.classList.add("sl-theme-dark");
-  }
+const {DwController, DwUI, setupDefaultModel} = await import("./controllers/DwController.js");
+const dwUIInstance = new DwUI();
 
-  const storedTheme = window.localStorage.getItem("dw-theme");
-  if (storedTheme === "dark") {
-    applyDarkTheme();
-    return;
-  }
-  if (storedTheme === "light") {
-    return;
-  }
+function waitForSharedEnclave(callback) {
 
-  if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-    applyDarkTheme();
-  }
+  scAPI.getSharedEnclave((err, sharedEnclave) => {
+    if (err) {
+      return setTimeout(() => {
+        console.log("Waiting for shared enclave .....");
+        waitForSharedEnclave(callback);
+      }, 100);
+    }
+
+    callback(undefined, sharedEnclave);
+  });
 }
 
 async function setupGlobalErrorHandlers() {
-  const {DwUI} = await import("./controllers/DwController.js");
-  const dwUIInstance = new DwUI();
-  let errHandler = openDSU.loadAPI("error");
 
-  errHandler.observeUserRelevantMessages(constants.NOTIFICATION_TYPES.WARN, (notification) => {
+
+  notificationHandler.observeUserRelevantMessages(constants.NOTIFICATION_TYPES.WARN, (notification) => {
     dwUIInstance.showToast(notification.message, {type: "warning"});
   });
 
-  errHandler.observeUserRelevantMessages(constants.NOTIFICATION_TYPES.INFO, (notification) => {
+  notificationHandler.observeUserRelevantMessages(constants.NOTIFICATION_TYPES.INFO, (notification) => {
     dwUIInstance.showToast(notification.message, {type: "info"})
   });
 
-  errHandler.observeUserRelevantMessages(constants.NOTIFICATION_TYPES.ERROR, (notification) => {
+  notificationHandler.observeUserRelevantMessages(constants.NOTIFICATION_TYPES.ERROR, (notification) => {
     let errMsg = "";
     if (notification.err && notification.err.message) {
       errMsg = notification.err.message;
@@ -59,7 +56,6 @@ async function onUserLoginMessage(message) {
 }
 
 async function onUserRemovedMessage(message) {
-  let notificationHandler = openDSU.loadAPI("error");
   notificationHandler.reportUserRelevantWarning("Your account was deleted. Please contact an admin to see the reason");
 
   typicalBusinessLogicHub.stop();
@@ -121,32 +117,33 @@ async function initializeWebCardinalConfig() {
 
 let config = await initializeWebCardinalConfig();
 
+async function isFirstAdmin() {
+  const didDomain = await $$.promisify(scAPI.getDIDDomain)();
+  try {
+    await $$.promisify(didAPI.resolveDID)(`did:${constants.SSI_NAME_DID_TYPE}:${didDomain}:${constants.INITIAL_IDENTITY_PUBLIC_NAME}`);
+  } catch (e) {
+    return true;
+  }
+
+  return false;
+}
+
 function finishInit() {
   setConfig(config);
   addHook(constants.HOOKS.BEFORE_APP_LOADS, async () => {
     // load Custom Components
-    await import("../components/dw-header/dw-header.js");
-    await import("../components/dw-menu/dw-menu.js");
     await import("../components/dw-spinner/dw-spinner.js");
     await import("../components/dw-title/dw-title.js");
     await import("../components/dw-data-grid/dw-data-grid.js");
-    await import("../components/dw-clipboard-input/dw-clipboard-input.js");
     await import("../components/dw-copy-paste-input/dw-copy-paste-input.js");
-    await import("../components/dw-tab-navigator/dw-tab-panel.js");
+
     typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_LOGIN, onUserLoginMessage);
     typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_REMOVED, onUserRemovedMessage);
 
     // load Demiurge base Controller
-    const {DwController, setupDefaultModel} = await import("./controllers/DwController.js");
     await setupDefaultModel(userData);
     addControllers({DwController});
-
     await setupGlobalErrorHandlers();
-    let status = await getWalletStatus();
-    if (status === constants.ACCOUNT_STATUS.CREATED)
-      await watchAndHandleExecution(async () => {
-        await getUserInfo();
-      })
   });
 
   addHook(constants.HOOKS.AFTER_APP_LOADS, async () => {
@@ -155,6 +152,37 @@ function finishInit() {
     const envData = await getEnvironmentDataAsync() || {};
     const enableGovernance = envData.enableGovernance || false;
 
+    let status = await getWalletStatus();
+
+    if (status === constants.ACCOUNT_STATUS.CREATED) {
+      await watchAndHandleExecution(async () => {
+        await getUserInfo();
+      })
+      let did;
+      try {
+        did = await getStoredDID();
+      } catch (err) {
+      }
+      if (did) {
+        await setMainDID(typicalBusinessLogicHub, did, notificationHandler);
+      }
+      window.WebCardinal.loader.hidden = true;
+      try {
+        const sharedEnclave = await $$.promisify(waitForSharedEnclave)();
+        let adminGroup = await utils.getAdminGroup(sharedEnclave);
+        await utils.addLogMessage(did, constants.OPERATIONS.LOGIN, adminGroup.name, userData.userName);
+      } catch (e) {
+        notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
+        return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${e.message}`);
+      }
+      dwUIInstance.enableMenu();
+      navigateToPageTag("groups");
+    } else {
+      dwUIInstance.disableMenu();
+      const firstAdmin = await isFirstAdmin();
+      navigateToPageTag("booting-identity", {isFirstAdmin: firstAdmin});
+    }
+
     document.querySelectorAll("webc-app-menu-item").forEach(item => {
       if (!item.querySelector("a")) {
         return;
@@ -162,6 +190,18 @@ function finishInit() {
 
       const menuItemName = item.querySelector("a").innerHTML;
       item.setAttribute("icon-name", menuItemName);
+      if (menuItemName === "Requests") {
+        item.querySelector("a").innerHTML = `<div class="menu-item-container">
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+          <g> 
+             <path d="M48.9,43.4c0.7,0.6,1.5,0.6,2.2,0l23-21.3c0.4-0.8,0.3-2.1-1.3-2.1l-45.6,0.1c-1.2,0-2.2,1.1-1.3,2.1L48.9,43.4z"/>
+             <path d="M74.3,31.2c0-1.1-1.3-1.6-2-0.9L54.4,46.9c-1.2,1.1-2.8,1.7-4.4,1.7c-1.6,0-3.2-0.6-4.4-1.7l-18-16.6c-0.8-0.7-2-0.2-2,0.9v21.2c0,2.7,2.2,4.9,4.9,4.9h23.9v-6.1c0.2-3.3,2.8-6,6.2-6.2h0.7c3.3,0.2,6,2.8,6.2,6.2v6.1h2.2c2.7,0,4.9-2.2,4.9-4.9C74.3,52.4,74.3,37.7,74.3,31.2z"/>
+          </g>
+          <path d="M71.1,63.7l-6.7-2.3c-0.5-0.2-0.9-0.7-0.9-1.2v-8.9c0-1.4-1.1-2.4-2.5-2.4h-0.2c-1.4,0-2.5,1.1-2.5,2.4v17.5c0,1.5-1.9,2.1-2.7,0.8L53.9,66c-0.9-1.5-2.9-2-4.4-0.9L48.4,66L54,79.3c0.2,0.6,0.8,0.9,1.5,0.9h14.7c0.7,0,1.3-0.5,1.5-1.1l2.6-9.3C74.9,67.1,73.5,64.6,71.1,63.7z"/>
+        </svg>
+       <span>Requests</span></div>`
+      }
+
       if (menuItemName === "My Identities") {
         item.querySelector("a").innerHTML = `<div class="menu-item-container">
         <svg xmlns="http://www.w3.org/2000/svg" width="55" height="56" viewBox="0 0 55 56" fill="none">
@@ -192,30 +232,20 @@ function finishInit() {
 
 
     //go to home page and clear selected menu item
-   /* try {
-      document.querySelector(".logo-container").addEventListener("click", async () => {
-        if (document.querySelector("webc-app-menu-item[active]")) {
-          document.querySelector("webc-app-menu-item[active]").removeAttribute("active");
-        }
-        await navigateToPageTag("home", {skipLoginAudit: true});
-      })
-    } catch (e) {
-      console.log("Menu not initialized yet.", e);
-    }*/
+    /* try {
+       document.querySelector(".logo-container").addEventListener("click", async () => {
+         if (document.querySelector("webc-app-menu-item[active]")) {
+           document.querySelector("webc-app-menu-item[active]").removeAttribute("active");
+         }
+         await navigateToPageTag("home", {skipLoginAudit: true});
+       })
+     } catch (e) {
+       console.log("Menu not initialized yet.", e);
+     }*/
 
 
   });
 
-  define("dw-action");
-  define("dw-subdomains");
-  define("dw-dialog-configuration");
-  define("dw-dialog-view-credential");
-  define("dw-dialog-booting-identity");
-  define("dw-dialog-add-domain");
-  define("dw-dialog-waiting-approval");
-  define("dw-dialog-initialising");
-  define("dw-dialog-break-glass-recovery");
-  define("dw-dialog-group-members-update");
 }
 
 if (userData) {
