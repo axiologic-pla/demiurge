@@ -19,6 +19,10 @@
       "tag": "audit"
     },
     {
+      "name": "Logout",
+      "tag": "logout"
+    },
+    {
       "name": "Member",
       "path": "/groups/member",
       "tag": "member",
