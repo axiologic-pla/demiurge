@@ -168,7 +168,8 @@ function BootingIdentityController(...props) {
         await self.firstOrRecoveryAdminToAdministrationGroup(self.did, self.userDetails, constants.OPERATIONS.BREAK_GLASS_RECOVERY);
         target.loading = false;
       } catch (e) {
-        self.notificationHandler.reportUserRelevantError("Failed to gain access to the wallet. Check your recovery code and try again", e)
+        self.notificationHandler.reportUserRelevantError("Failed to gain access to the wallet. Check your recovery code and try again");
+        self.notificationHandler.reportDevRelevantInfo("Failed to gain access to the wallet with recovery code: ", e);
         target.loading = false;
       }
     })
