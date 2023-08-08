@@ -42,6 +42,7 @@
     --sl-z-index-toast: 1001 !important;
 
     --dw-app-color: #328569;
+    --webc-primary-background: var(--dw-app-color);
     --dw-app-disabled-color: #AAAFAE;
     --dw-active-item-color: #FFFFFF;
     --dw-inactive-item-color: #92D3BD;
@@ -90,6 +91,11 @@ webc-app-menu[mode='vertical'] {
     --background: var(--dw-app-color);
     --padding: 45px 0px;
     --min-width: 155px;
+
+    --scrollbar-thumb-background: unset;
+    --scrollbar-thumb-hover-background: unset;
+    --scrollbar-thumb-border: unset;
+    --scrollbar-track-background: unset;
 }
 
 webc-app-container {
