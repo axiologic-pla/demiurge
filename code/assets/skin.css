@@ -381,7 +381,8 @@ webc-app-menu[mode=vertical] .app-menu {
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: var(--dw-inactive-item-color)
+    color: var(--dw-inactive-item-color);
+    font-weight: 600;
 }
 
 .link-active .menu-item-container {
@@ -389,7 +390,8 @@ webc-app-menu[mode=vertical] .app-menu {
 }
 
 .menu-item-container svg {
-    fill: var(--dw-inactive-item-color)
+    fill: var(--dw-inactive-item-color);
+    margin-bottom: 10px;
 }
 
 .link-active .menu-item-container svg {
