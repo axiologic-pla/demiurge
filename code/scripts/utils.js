@@ -76,6 +76,76 @@ async function writeEnvironmentFile(mainDSU, env) {
   scAPI.refreshSecurityContext();
 }
 
+async function initSharedEnclave(keySSI, enclaveConfig) {
+  const openDSU = require("opendsu");
+  const scAPI = openDSU.loadAPI("sc");
+  const enclaveAPI = openDSU.loadAPI("enclave");
+  const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
+  let notificationHandler = openDSU.loadAPI("error");
+
+  let enclave;
+  try {
+    enclave = enclaveAPI.initialiseWalletDBEnclave(keySSI);
+
+    function waitForEnclaveInitialization() {
+      return new Promise((resolve, reject) => {
+        enclave.on("initialised", resolve)
+      })
+    }
+
+    await waitForEnclaveInitialization();
+  } catch (e) {
+    throw e
+  }
+
+
+  const enclaveDID = await $$.promisify(enclave.getDID)();
+  const enclaveKeySSI = await $$.promisify(enclave.getKeySSI)();
+
+  let tables = Object.keys(enclaveConfig.enclaveIndexesMap);
+
+  try {
+    await enclave.safeBeginBatchAsync();
+  } catch (e) {
+    return notificationHandler.reportUserRelevantWarning('Failed to begin batch on enclave: ', e)
+  }
+  for (let dbTableName of tables) {
+    for (let indexField of enclaveConfig.enclaveIndexesMap[dbTableName]) {
+      try {
+        await $$.promisify(enclave.addIndex)(null, dbTableName, indexField)
+      } catch (e) {
+        const addIndexError = createOpenDSUErrorWrapper(`Failed to add index ${indexField} on table ${dbTableName}`, e);
+        try {
+          await enclave.cancelBatchAsync();
+        } catch (error) {
+          return notificationHandler.reportUserRelevantWarning('Failed to cancel batch on enclave: ', error, addIndexError)
+        }
+        return notificationHandler.reportUserRelevantWarning('Failed to add index on enclave: ', addIndexError);
+      }
+    }
+  }
+
+  try {
+    await enclave.commitBatchAsync();
+  } catch (e) {
+    return notificationHandler.reportUserRelevantWarning('Failed to commit batch on enclave: ', e)
+  }
+
+  const enclaveRecord = {
+    enclaveType: enclaveConfig.enclaveType,
+    enclaveDID,
+    enclaveKeySSI,
+    enclaveName: enclaveConfig.enclaveName,
+  };
+
+  await enclaveDB.safeBeginBatchAsync();
+  await enclaveDB.writeKeyAsync(enclaveConfig.enclaveName, enclaveRecord);
+  await enclaveDB.insertRecordAsync(constants.TABLES.GROUP_ENCLAVES, enclaveRecord.enclaveDID, enclaveRecord);
+  await enclaveDB.commitBatchAsync();
+  return enclaveRecord;
+}
+
+
 async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
   const openDSU = require("opendsu");
   const scAPI = openDSU.loadAPI("sc");
@@ -185,7 +255,9 @@ async function getAdminGroup(sharedEnclave) {
       }
       return adminGroup;
     } catch (e) {
-      self.notificationHandler.reportUserRelevantInfo(`Failed to get info about admin group. Retrying ...`, e);
+      let notificationHandler = require("opendsu").loadAPI("error");
+      notificationHandler.reportUserRelevantWarning(`Failed to retrieve configuration data. Retrying ...`);
+      notificationHandler.reportUserRelevantInfo(`Failed to get info about admin group. Retrying ...`, e);
       return await tryToGetAdminGroup();
     }
   }
@@ -217,6 +289,21 @@ function renderToast(message, type, timeoutValue = 15000) {
   toastContainer.appendChild(toastElement);
 }
 
+async function readMappingEngineMessages(path, DSUStorage) {
+  let messages;
+  try {
+    messages = await $$.promisify(DSUStorage.getObject, DSUStorage)(path);
+  } catch (e) {
+
+  }
+  if (!messages) {
+    let notificationHandler = require("opendsu").loadAPI("error");
+    notificationHandler.reportUserRelevantWarning(`Failed to retrieve configuration data. Retrying ...`);
+    return await this.readMappingEngineMessages(path, DSUStorage);
+  }
+  return messages;
+}
+
 export default {
   promisify,
   getPKFromContent,
@@ -231,5 +318,7 @@ export default {
   waitForEnclave,
   removeSharedEnclaveFromEnv,
   getAdminGroup,
-  renderToast
+  renderToast,
+  readMappingEngineMessages,
+  initSharedEnclave
 };

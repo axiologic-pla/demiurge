@@ -7,11 +7,6 @@
 
     <main id="dw-groups">
         <section class="dw-groups--header">
-            <!--           <div class="custom-select">
-                           <select class="group-select dw-select" data-for="@groups" data-for-option="rerender">
-                               <option value="@pk">{{@name}}</option>
-                           </select>
-                       </div>-->
 
             <div class="tab-nav-container" data-for="@groups">
                 <div class="tab-header" tab-name="@pk" data-tag="select-tab">
@@ -42,6 +37,12 @@
             <dw-title>
                 <p slot="subheader">Manage members of "{{ @selectedGroup.name }}" group </p>
             </dw-title>
+            <section class="recovery-data-section" data-if="@hasRecoveryOption">
+                <button slot="true" type="primary" data-tag="recover-data-key"
+                        class="dw-icon-button dw-action-button recovery-data-button">
+                    <span class="button-label">Recovery Data Key</span>
+                </button>
+            </section>
             <div data-loaded="@areMembersLoaded">
 
                 <label>Member DID</label>

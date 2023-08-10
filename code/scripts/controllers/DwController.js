@@ -1,4 +1,3 @@
-import {escapeHTML, isHTMLElement} from "../../components/utils.js";
 import {getStoredDID, getWalletStatus} from "../services/BootingIdentityService.js";
 import utils from "../utils.js";
 import constants from "../constants.js";

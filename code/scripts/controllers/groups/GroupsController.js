@@ -111,11 +111,11 @@ class GroupsUI extends DwController {
 
   // methods
 
-/*
-  async addGroup(model, target) {
-    return await this.ui.submitGenericForm(model, target);
-  }
-*/
+  /*
+    async addGroup(model, target) {
+      return await this.ui.submitGenericForm(model, target);
+    }
+  */
 
   async selectGroup(model, target) {
     if (target.checked) {
@@ -150,6 +150,49 @@ class GroupsController extends DwController {
     ui.page.addGroupContentListener.call(this);
 
 
+    this.onTagClick("recover-data-key", async () => {
+      const scAPI = require("opendsu").loadAPI("sc");
+      const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
+      const enclaveRecord = await enclaveDB.readKeyAsync(constants.EPI_SHARED_ENCLAVE);
+
+      this.recoveryDataKeyModal = this.showModalFromTemplate("dw-dialog-data-recovery/template", () => {
+      }, () => {
+      }, {
+        model: {
+          dataRecoveryKey: enclaveRecord.enclaveKeySSI,
+        },
+        disableClosing: false,
+        showCancelButton: false,
+        disableExpanding: true,
+        disableFooter: true,
+      })
+    })
+
+    this.onTagClick("data-recovery-key-submit", async () => {
+      const w3cDID = require("opendsu").loadAPI("w3cdid");
+      const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();
+      const recoveryCode = document.getElementById("data-recovery-key-input").value;
+      if (recoveryCode === "") {
+        this.notificationHandler.reportUserRelevantError(`Please insert Recovery Data Key.`);
+        return;
+      }
+      try {
+        let messages = await utils.readMappingEngineMessages(constants.ENCLAVE_MESSAGES_PATH, this.DSUStorage);
+        let epiEnclaveMsg = messages.find((msg) => msg.enclaveName === this.model.selectedGroup.enclaveName)
+        if (!epiEnclaveMsg) {
+          this.notificationHandler.reportUserRelevantError(`Wrong or missing enclave name`);
+          return;
+        }
+        let enclaveRecord = await utils.initSharedEnclave(recoveryCode, epiEnclaveMsg);
+       // await $$.promisify(typicalBusinessLogicHub.setSharedEnclave)(recoveryCode);
+      //  await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, recoveryCode);
+
+      } catch (e) {
+        this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
+      }
+
+      this.recoveryDataKeyModal.destroy()
+    })
     this.onTagClick("group.add", async (...props) => {
       try {
         const {name} = await ui.page.addGroup(...props);

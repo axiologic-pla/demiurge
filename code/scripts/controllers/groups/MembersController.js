@@ -86,6 +86,7 @@ class MembersController extends DwController {
 
     this.model = {
       selectedGroup,
+      hasRecoveryOption: selectedGroup.accessMode === "write",
       selectedMember: undefined,
       members: [],
       areMembersLoaded: false,

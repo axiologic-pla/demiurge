@@ -273,27 +273,13 @@ function BootingIdentityController(...props) {
 
   self.createGroups = async () => {
     const sharedEnclave = await self.getSharedEnclave();
-    const messages = await self.readMappingEngineMessages(constants.GROUP_MESSAGES_PATH);
+    const messages = await utils.readMappingEngineMessages(constants.GROUP_MESSAGES_PATH, self.DSUStorage);
     await self.processMessages(sharedEnclave, messages);
-  }
-
-  self.readMappingEngineMessages = async (path) => {
-    let messages;
-    try {
-      messages = await $$.promisify(self.DSUStorage.getObject.bind(self.DSUStorage))(path);
-    } catch (e) {
-
-    }
-    if (!messages) {
-      self.notificationHandler.reportUserRelevantWarning(`Failed to retrieve configuration data. Retrying ...`);
-      return await self.readMappingEngineMessages(path);
-    }
-    return messages;
   }
 
   self.createEnclaves = async () => {
     const mainEnclave = await self.getMainEnclave();
-    const messages = await self.readMappingEngineMessages(constants.ENCLAVE_MESSAGES_PATH);
+    const messages = await utils.readMappingEngineMessages(constants.ENCLAVE_MESSAGES_PATH, self.DSUStorage);
     await self.processMessages(mainEnclave, messages);
     self.notificationHandler.reportUserRelevantInfo(`Processed create enclave messages`);
     await self.setSharedEnclave(mainEnclave);
