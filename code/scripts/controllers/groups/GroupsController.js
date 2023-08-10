@@ -153,7 +153,7 @@ class GroupsController extends DwController {
     this.onTagClick("recover-data-key", async () => {
       const scAPI = require("opendsu").loadAPI("sc");
       const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
-      const enclaveRecord = await enclaveDB.readKeyAsync(constants.EPI_SHARED_ENCLAVE);
+      const enclaveRecord = await enclaveDB.readKeyAsync(constants.SHARED_ENCLAVE);
 
       this.recoveryDataKeyModal = this.showModalFromTemplate("dw-dialog-data-recovery/template", () => {
       }, () => {
@@ -184,8 +184,8 @@ class GroupsController extends DwController {
           return;
         }
         let enclaveRecord = await utils.initSharedEnclave(recoveryCode, epiEnclaveMsg);
-       // await $$.promisify(typicalBusinessLogicHub.setSharedEnclave)(recoveryCode);
-      //  await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, recoveryCode);
+        await $$.promisify(typicalBusinessLogicHub.setSharedEnclave)(recoveryCode);
+        await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, recoveryCode);
 
       } catch (e) {
         this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
