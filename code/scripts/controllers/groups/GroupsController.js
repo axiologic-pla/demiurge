@@ -151,21 +151,24 @@ class GroupsController extends DwController {
 
 
     this.onTagClick("recover-data-key", async () => {
-      const scAPI = require("opendsu").loadAPI("sc");
-      const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
-      const enclaveRecord = await enclaveDB.readKeyAsync(constants.SHARED_ENCLAVE);
+      const config = require("opendsu").loadAPI("config");
+      try {
+        let enclaveKeySSI = await $$.promisify(config.getEnv)("sharedEnclaveKeySSI");
+        this.recoveryDataKeyModal = this.showModalFromTemplate("dw-dialog-data-recovery/template", () => {
+        }, () => {
+        }, {
+          model: {
+            dataRecoveryKey: enclaveKeySSI,
+          },
+          disableClosing: false,
+          showCancelButton: false,
+          disableExpanding: true,
+          disableFooter: true,
+        })
+      } catch (e) {
+        this.notificationHandler.reportUserRelevantError(`Couldn't get sharedEnclaveKeySSI.`);
+      }
 
-      this.recoveryDataKeyModal = this.showModalFromTemplate("dw-dialog-data-recovery/template", () => {
-      }, () => {
-      }, {
-        model: {
-          dataRecoveryKey: enclaveRecord.enclaveKeySSI,
-        },
-        disableClosing: false,
-        showCancelButton: false,
-        disableExpanding: true,
-        disableFooter: true,
-      })
     })
 
     this.onTagClick("data-recovery-key-submit", async () => {
