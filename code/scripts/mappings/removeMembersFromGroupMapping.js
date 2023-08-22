@@ -15,9 +15,10 @@ async function removeMemberFromGroup(message) {
   const msg = {
     messageType: message.messageType
   };
-  await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), memberDID_Document);
+
   const groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(message.groupDID);
   await $$.promisify(groupDIDDocument.removeMembers)([message.memberDID]);
+  await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), memberDID_Document);
 }
 
 

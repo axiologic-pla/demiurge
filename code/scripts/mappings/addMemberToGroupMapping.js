@@ -76,8 +76,8 @@ async function addMemberToGroupMapping(message) {
     sender: adminDID
   };
 
-  await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), memberDID_Document);
   await promisify(groupDIDDocument.addMember)(member.did, member);
+  await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), memberDID_Document);
 }
 
 require("opendsu").loadAPI("m2dsu").defineMapping(checkIfAddMemberToGroupMessage, addMemberToGroupMapping);
