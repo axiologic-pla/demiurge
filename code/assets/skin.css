@@ -98,6 +98,10 @@ webc-app-menu[mode='vertical'] {
     --scrollbar-track-background: unset;
 }
 
+webc-app-menu[mode=mobile][active] .app-menu-backdrop {
+    background: #FFFFFF;
+}
+
 webc-app-container {
     --background: rgb(var(--sl-color-gray-50));
 }
@@ -193,6 +197,7 @@ dw-subdomains {
 .dw-icon-button .button-label {
     font-size: 18px;
     flex-grow: 1;
+    height: 20px;
 }
 
 .dw-action-button {
@@ -200,7 +205,7 @@ dw-subdomains {
     box-shadow: none;
     border: 1px solid var(--dw-app-color);
     color: white;
-    padding: 8px 16px;
+    padding: 10px 16px;
     margin-right: 10px;
     border-radius: 5px;
     margin-bottom: 1rem;
@@ -385,16 +390,26 @@ webc-app-menu[mode=vertical] .app-menu {
     font-weight: 600;
 }
 
-.link-active .menu-item-container {
+webc-app-menu[mode=mobile] .menu-item-container {
+    flex-direction: row;
+    gap: 10px;
+}
+
+.link-active .menu-item-container,
+.menu-item-container:hover {
     color: var(--dw-active-item-color)
 }
 
-.menu-item-container svg {
+.menu-item-container svg,
+.menu-item-container svg circle {
     fill: var(--dw-inactive-item-color);
     margin-bottom: 10px;
 }
 
-.link-active .menu-item-container svg {
+.link-active .menu-item-container svg,
+.link-active .menu-item-container svg circle,
+.menu-item-container:hover svg,
+.menu-item-container:hover svg circle {
     fill: var(--dw-active-item-color)
 }
 
