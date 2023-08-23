@@ -49,6 +49,7 @@ template.innerHTML = `
     font-style: normal;
     font-weight: 700;
     margin-right: 10px;
+    cursor: pointer;
 }
 
  </style>

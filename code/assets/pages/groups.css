@@ -38,6 +38,7 @@
     font-size: 1.2em;
     position: relative;
     width: max-content;
+    cursor: pointer;
 }
 
 .tab-header.selected {

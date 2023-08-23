@@ -167,6 +167,10 @@ dw-subdomains {
 
 }
 
+button {
+    cursor: pointer;
+}
+
 .dw-icon-button {
     display: flex;
     gap: 10px;
@@ -211,6 +215,7 @@ dw-subdomains {
     margin-bottom: 1rem;
     width: 15%;
     min-width: 190px;
+    cursor: pointer;
 }
 
 .dw-action-button:hover {
