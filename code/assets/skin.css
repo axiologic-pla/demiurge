@@ -1,8 +1,4 @@
 @import "./components.css";
-@import "./parts/buttons.css";
-@import "./parts/labels.css";
-@import "./parts/tables.css";
-@import "./parts/forms.css";
 @import url("./fonts/fontawesome/font-awesome.min.css");
 
 /* dm-sans-regular - latin-ext_latin */
@@ -387,24 +383,51 @@ webc-app-menu[mode=vertical] .app-menu {
     align-items: center;
 }
 
-.menu-item-container {
+webc-app-menu .app-menu webc-app-menu-item a {
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: var(--dw-inactive-item-color);
-    font-weight: 600;
+    font-size: 1.2em;
 }
 
-webc-app-menu[mode=mobile] .menu-item-container {
+webc-app-menu[mode=mobile] .app-menu webc-app-menu-item a {
     flex-direction: row;
     gap: 10px;
 }
 
-.link-active .menu-item-container,
-.menu-item-container:hover {
-    color: var(--dw-active-item-color)
+webc-app-menu[mode=vertical] .app-menu webc-app-menu-item a.link-active,
+webc-app-menu[mode=vertical] .app-menu webc-app-menu-item a:hover,
+webc-app-menu[mode=mobile] .app-menu webc-app-menu-item a.link-active,
+webc-app-menu[mode=mobile] .app-menu webc-app-menu-item a:hover {
+    color: var(--dw-active-item-color) !important;
 }
 
+webc-app-menu[mode=vertical] .app-menu webc-app-menu-item a,
+webc-app-menu[mode=mobile] .app-menu webc-app-menu-item a {
+    color: var(--dw-inactive-item-color) !important;
+}
+
+webc-app-menu[mode=vertical] .app-menu webc-app-menu-item a:before {
+    content: "";
+    background-color: var(--dw-inactive-item-color);
+    color: var(--dw-inactive-item-color);
+    height: 55px;
+    aspect-ratio: 1;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+    margin-bottom: 10px;
+}
+
+webc-app-menu[mode=vertical] .app-menu webc-app-menu-item a.link-active:before,
+webc-app-menu[mode=vertical] .app-menu webc-app-menu-item a:hover::before {
+    background-color: var(--dw-active-item-color);
+}
+
+/*
 .menu-item-container svg,
 .menu-item-container svg circle {
     fill: var(--dw-inactive-item-color);
@@ -417,11 +440,32 @@ webc-app-menu[mode=mobile] .menu-item-container {
 .menu-item-container:hover svg circle {
     fill: var(--dw-active-item-color)
 }
+*/
 
 webc-app-menu[mode=vertical] .app-menu webc-app-menu-item[level="0"],
 webc-app-menu[mode=vertical] .app-menu webc-app-menu-item,
 webc-app-menu[mode=vertical] .app-menu webc-app-menu-item[level="0"]:last-child {
     border: none;
+}
+
+webc-app-menu .items :nth-child(1) a:before {
+    -webkit-mask-image: url("../assets/images/icons/menu-groups.svg");
+    mask-image: url("../assets/images/icons/menu-groups.svg");
+}
+
+webc-app-menu .items :nth-child(2) a:before {
+    -webkit-mask-image: url("../assets/images/icons/menu-my-identities.svg");
+    mask-image: url("../assets/images/icons/menu-my-identities.svg");
+}
+
+webc-app-menu .items :nth-child(3) a:before {
+    -webkit-mask-image: url("../assets/images/icons/menu-audit.svg");
+    mask-image: url("../assets/images/icons/menu-audit.svg");
+}
+
+webc-app-menu .items :nth-child(4) a:before {
+    -webkit-mask-image: url("../assets/images/icons/menu-logout.svg");
+    mask-image: url("../assets/images/icons/menu-logout.svg");
 }
 
 .toast-container {

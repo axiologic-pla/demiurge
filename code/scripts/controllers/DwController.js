@@ -197,7 +197,7 @@ class DwUI {
     }
 
     if (typeof duration !== "number") {
-      duration = 30000;
+      duration = 5000;
     }
 
     utils.renderToast(message, type, duration);
