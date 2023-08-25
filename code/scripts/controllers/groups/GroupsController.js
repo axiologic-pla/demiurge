@@ -171,6 +171,17 @@ class GroupsController extends DwController {
 
     })
 
+    this.element.addEventListener("copy-paste-change", (e) => {
+      if (e.target.id !== "data-recovery-key-input") {
+        return;
+      }
+      if (e.detail.value && e.detail.value.trim()) {
+        document.querySelector(".submit-recovery-button").disabled = false;
+      } else {
+        document.querySelector(".submit-recovery-button").disabled = true;
+      }
+    })
+
     this.onTagClick("data-recovery-key-submit", async () => {
       const w3cDID = require("opendsu").loadAPI("w3cdid");
       const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();

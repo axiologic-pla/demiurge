@@ -54,16 +54,6 @@
 }
 
 .csv-export-btn {
-    background-color: #328569;
-    box-shadow: none;
-    border: 1px solid #328569;
-    color: white;
-    padding: 8px 16px;
-    margin-right: 10px;
-    border-radius: 5px;
-    margin-bottom: 1rem;
-    width: 15%;
-    min-width: 150px;
     margin-top: 15px;
 }
 

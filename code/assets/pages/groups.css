@@ -217,7 +217,7 @@
 }
 
 .delete-member-button:hover {
-    background: rgb(var(--sl-color-primary-50));
+    background: var(--dw-app-color);
     -moz-box-shadow: 1px 1px 1px rgba(0, 0, 0, .65);
     -webkit-box-shadow: 1px 1px 1px rgba(0, 0, 0, .65);
     box-shadow: 1px 1px 1px rgba(0, 0, 0, .65);

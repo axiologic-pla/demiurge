@@ -49,12 +49,12 @@ class MembersUI extends DwController {
 
   // methods
 
-/*
+  /*
 
-  async addMember(model, target) {
-    return await this.ui.submitGenericForm(model, target);
-  }
-*/
+    async addMember(model, target) {
+      return await this.ui.submitGenericForm(model, target);
+    }
+  */
 
   loadMemberPage(state) {
     const src = new URL(`/pages/member.html`, window.location).pathname;
@@ -99,8 +99,18 @@ class MembersController extends DwController {
     ui.page = new MembersUI(...props);
     ui.page.addPasteMemberDIDFromClipboardListener();
 
+    this.element.addEventListener("copy-paste-change", (e) => {
+      if (e.detail.value && e.detail.value.trim()) {
+        document.querySelector(".add-member-button").disabled = false;
+      } else {
+        document.querySelector(".add-member-button").disabled = true;
+      }
+    })
 
     this.onTagClick("member.add", async (model, button) => {
+      if (document.querySelector(".add-member-button").disabled) {
+        return
+      }
       let inputElement = document.querySelector("#add-member-input");
 
       const newMemberDid = inputElement.value;

@@ -14,7 +14,11 @@
                     <i class="fa fa-check"></i>
                 </span>
             </div>
-            <button class="csv-export-btn" data-tag="audit-export"> Export as CSV</button>
+            <button type="primary"
+                    class="dw-icon-button dw-action-button csv-export-btn" data-tag="audit-export">
+                <span class="button-label">Export as CSV</span>
+
+            </button>
         </div>
         <webc-datatable datasource="@logsDataSource" hide-pagination>
             <div class="fist-table-header first-column" slot="header">UserId</div>

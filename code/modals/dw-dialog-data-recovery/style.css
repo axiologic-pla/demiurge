@@ -3,6 +3,10 @@ webc-modal::part(content) {
     background-color: #f4f4f5;
 }
 
+h4 {
+    margin-bottom: 8px;
+}
+
 #did-div {
     margin-bottom: 16px;
     padding-bottom: 20px;
@@ -44,11 +48,6 @@ webc-modal::part(content) {
 
 dw-copy-paste-input {
     flex-grow: 1;
-}
-
-.recovery-code-actions-wrapper .dw-action-button {
-    min-width: 100px;
-    margin: unset;
 }
 
 /*
