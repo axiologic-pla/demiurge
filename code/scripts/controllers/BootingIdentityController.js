@@ -38,7 +38,7 @@ function BootingIdentityController(...props) {
     }
   });
 
-  self.onReceivedInitMessage = (message) => {
+  self.finishingFirstAdmin = () => {
     self.initialisingModal.destroy();
     setWalletStatus(constants.ACCOUNT_STATUS.CREATED).then(() => {
       self.showModalFromTemplate("dw-dialog-break-glass-recovery/template", () => {
@@ -374,9 +374,9 @@ function BootingIdentityController(...props) {
           self.notificationHandler.reportUserRelevantInfo("Created enclaves");
           await self.createGroups();
           self.notificationHandler.reportUserRelevantInfo("Created groups");
-          window.commHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onReceivedInitMessage);
           await self.firstOrRecoveryAdminToAdministrationGroup(didDocument, self.userDetails);
           self.notificationHandler.reportUserRelevantInfo("Waiting for final initialization steps");
+          self.finishingFirstAdmin();
         } catch (e) {
           return alert(`Failed to initialise. Probably an infrastructure issue. ${e.message}`);
         }
