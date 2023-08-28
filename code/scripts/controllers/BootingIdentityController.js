@@ -374,7 +374,7 @@ function BootingIdentityController(...props) {
           self.notificationHandler.reportUserRelevantInfo("Created enclaves");
           await self.createGroups();
           self.notificationHandler.reportUserRelevantInfo("Created groups");
-          //typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onReceivedInitMessage)
+          window.commHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onReceivedInitMessage);
           await self.firstOrRecoveryAdminToAdministrationGroup(didDocument, self.userDetails);
           self.notificationHandler.reportUserRelevantInfo("Waiting for final initialization steps");
         } catch (e) {
