@@ -153,6 +153,9 @@ function BootingIdentityController(...props) {
     })
 
     self.onTagClick("continue", async (model, target, event) => {
+      if (target.disabled) {
+        return
+      }
       try {
         const recoveryCode = document.getElementById("add-member-input").value;
         if (recoveryCode === "") {
@@ -161,6 +164,7 @@ function BootingIdentityController(...props) {
         }
 
         target.loading = true;
+        target.disabled = true;
         await self.setSharedEnclaveKeySSI(recoveryCode);
         let sharedEnclave = await self.getSharedEnclave();
         self.keySSI = await self.getSharedEnclaveKeySSI(sharedEnclave);
@@ -171,6 +175,7 @@ function BootingIdentityController(...props) {
         self.notificationHandler.reportUserRelevantError("Failed to gain access to the wallet. Check your recovery code and try again");
         self.notificationHandler.reportDevRelevantInfo("Failed to gain access to the wallet with recovery code: ", e);
         target.loading = false;
+        target.disabled = false;
       }
     })
   }
