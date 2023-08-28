@@ -38,7 +38,7 @@ function BootingIdentityController(...props) {
     }
   });
 
-  self.finishingFirstAdmin = () => {
+  self.finishingStepOfWalletCreation = () => {
     self.initialisingModal.destroy();
     setWalletStatus(constants.ACCOUNT_STATUS.CREATED).then(() => {
       self.showModalFromTemplate("dw-dialog-break-glass-recovery/template", () => {
@@ -113,7 +113,7 @@ function BootingIdentityController(...props) {
       self.accessWallet();
     });
 
-    self.showModalFromTemplate("waiting-approval/template", () => {
+    let waitApprovalModal = self.showModalFromTemplate("waiting-approval/template", () => {
     }, () => {
     }, {
       model: {did: did},
@@ -142,6 +142,8 @@ function BootingIdentityController(...props) {
         await self.storeDID(self.did);
         await self.firstOrRecoveryAdminToAdministrationGroup(self.did, self.userDetails, constants.OPERATIONS.BREAK_GLASS_RECOVERY);
         target.loading = false;
+        waitApprovalModal.destroy();
+        self.accessWallet();
       } catch (e) {
         self.notificationHandler.reportUserRelevantError("Failed to gain access to the wallet. Check your recovery code and try again");
         self.notificationHandler.reportDevRelevantInfo("Failed to gain access to the wallet with recovery code: ", e);
@@ -376,7 +378,7 @@ function BootingIdentityController(...props) {
           self.notificationHandler.reportUserRelevantInfo("Created groups");
           await self.firstOrRecoveryAdminToAdministrationGroup(didDocument, self.userDetails);
           self.notificationHandler.reportUserRelevantInfo("Waiting for final initialization steps");
-          self.finishingFirstAdmin();
+          self.finishingStepOfWalletCreation();
         } catch (e) {
           return alert(`Failed to initialise. Probably an infrastructure issue. ${e.message}`);
         }
