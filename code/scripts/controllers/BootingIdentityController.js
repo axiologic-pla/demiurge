@@ -2,6 +2,7 @@ import {getStoredDID, setStoredDID, setWalletStatus, setMainDID} from "../servic
 import constants from "../constants.js";
 import utils from "../utils.js";
 import MessagesService from "../services/MessagesService.js";
+import {getPermissionsWatcher} from "../services/PermissionsWatcher.js";
 
 const {DwController} = WebCardinal.controllers;
 
@@ -10,15 +11,32 @@ const scAPI = openDSU.loadAPI("sc");
 const w3cDID = openDSU.loadAPI("w3cdid");
 const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();
 
+
 function BootingIdentityController(...props) {
   let self = new DwController(...props);
+
+  self.initPermissionsWatcher = () => {
+    //we don't need any permissions watcher at this point in time
+  };
+
   self.isFirstAdmin = history.state.state.isFirstAdmin;
   self.model = {
     domain: self.domain, username: self.userDetails
   };
 
-  const {ui} = self
+  const {ui} = self;
+  ui.disableMenu();
 
+  self.onTagClick("paste-from-clipboard", async (model, target, event) => {
+    const result = await navigator.permissions.query({
+      name: "clipboard-read",
+    });
+    if (result.state === "granted" || result.state === "prompt") {
+      const did = await navigator.clipboard.readText();
+      target.parentElement.value = did;
+      return {did};
+    }
+  });
 
   self.onReceivedInitMessage = (message) => {
     self.initialisingModal.destroy();
@@ -35,34 +53,7 @@ function BootingIdentityController(...props) {
         disableHeader: true
       })
       self.notificationHandler.reportDevRelevantInfo("Finished processing message " + JSON.stringify(message));
-
-      /*       self.showModalFromTemplate("dw-dialog-break-glass-recovery/template", {
-               sharedEnclaveKeySSI: self.keySSI,
-             }, {
-               parentElement: self.element, disableClosing: false, onClose: () => {
-                 self.accessWallet();
-               }
-             }).then(() => {
-               self.notificationHandler.reportDevRelevantInfo("Finished processing message " + JSON.stringify(message));
-             })
-           }).catch(e => {
-             self.notificationHandler.reportUserRelevantInfo("Failed to initialise wallet: ", e);
-           })*/
     })
-
-    // submitElement.loading = false;
-
-    self.onTagClick("paste-from-clipboard", async (model, target, event) => {
-      const result = await navigator.permissions.query({
-        name: "clipboard-read",
-      });
-      if (result.state === "granted" || result.state === "prompt") {
-        const did = await navigator.clipboard.readText();
-        target.parentElement.value = did;
-        return {did};
-      }
-    });
-
 
   }
   self.onAccessGranted = (message) => {
@@ -89,27 +80,7 @@ function BootingIdentityController(...props) {
       self.notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
       return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${e.message}`);
     }
-
   }
-
-
-  /*  self.getAdminGroup = async (sharedEnclave) => {
-      const tryToGetAdminGroup = async () => {
-        let groups = [];
-        try {
-          groups = await utils.promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
-          let adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE || gr.name === constants.EPI_ADMIN_GROUP_NAME) || {};
-          if (!adminGroup) {
-            throw new Error("Admin group not created yet.")
-          }
-          return adminGroup;
-        } catch (e) {
-          self.notificationHandler.reportUserRelevantInfo(`Failed to get info about admin group. Retrying ...`, e);
-          return await tryToGetAdminGroup();
-        }
-      }
-      return await tryToGetAdminGroup();
-    }*/
 
   self.showInitDialog = async (did) => {
     if (typeof did === "object") {
@@ -130,17 +101,17 @@ function BootingIdentityController(...props) {
     })
   }
 
+
+
   self.waitForApproval = async (did) => {
     if (typeof did !== "string") {
       did = did.getIdentifier();
     }
     self.did = did;
-    typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onAccessGranted);
-    /*    await self.ui.showDialogFromComponent("dw-dialog-waiting-approval", {
-          did: did,
-        }, {
-          parentElement: self.element, disableClosing: true
-        });*/
+
+    getPermissionsWatcher(did, ()=>{
+      self.accessWallet();
+    });
 
     self.showModalFromTemplate("waiting-approval/template", () => {
     }, () => {
@@ -403,7 +374,7 @@ function BootingIdentityController(...props) {
           self.notificationHandler.reportUserRelevantInfo("Created enclaves");
           await self.createGroups();
           self.notificationHandler.reportUserRelevantInfo("Created groups");
-          typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onReceivedInitMessage)
+          //typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onReceivedInitMessage)
           await self.firstOrRecoveryAdminToAdministrationGroup(didDocument, self.userDetails);
           self.notificationHandler.reportUserRelevantInfo("Waiting for final initialization steps");
         } catch (e) {

@@ -32,7 +32,6 @@ function waitForSharedEnclave(callback) {
 
 async function setupGlobalErrorHandlers() {
 
-
   notificationHandler.observeUserRelevantMessages(constants.NOTIFICATION_TYPES.WARN, (notification) => {
     dwUIInstance.showToast(notification.message, {type: "warning"});
   });
@@ -53,20 +52,6 @@ async function setupGlobalErrorHandlers() {
 
 async function onUserLoginMessage(message) {
   await utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
-}
-
-async function onUserRemovedMessage(message) {
-  notificationHandler.reportUserRelevantWarning("Your account was deleted. Please contact an admin to see the reason");
-
-  typicalBusinessLogicHub.stop();
-//audit logs should already be registered during process message
-  try {
-    await utils.removeSharedEnclaveFromEnv();
-    await setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL);
-    $$.navigateToPage("groups");
-  } catch (err) {
-    $$.navigateToPage("groups");
-  }
 }
 
 async function watchAndHandleExecution(fnc) {
@@ -138,7 +123,6 @@ function finishInit() {
     await import("../components/dw-copy-paste-input/dw-copy-paste-input.js");
 
     typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_LOGIN, onUserLoginMessage);
-    typicalBusinessLogicHub.strongSubscribe(constants.MESSAGE_TYPES.USER_REMOVED, onUserRemovedMessage);
 
     // load Demiurge base Controller
     await setupDefaultModel(userData);

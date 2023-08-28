@@ -63,30 +63,18 @@ async function setWalletStatus(walletStatus) {
     } catch (e) {
       return console.log(e, err);
     }
-    console.log(err);
+    throw new Error("Failed to ensure wallet state.");
   }
 }
 
 async function getWalletStatus() {
   let walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-  /*
-
-    let sharedEnclave;
-    try {
-      sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
-    } catch (err) {
-    }
-
-    if (sharedEnclave) {
-      return constants.ACCOUNT_STATUS.CREATED;
-    }
-  */
-
   let record;
 
   try {
     record = await walletStorage.readKeyAsync(constants.WALLET_STATUS);
   } catch (err) {
+    //ignorable at this point in time
   }
 
   return record;
