@@ -149,7 +149,7 @@ class MembersController extends DwController {
         }, {
           model: {
             action: "Adding",
-            did: model.did
+            did: newMemberDid
           },
           disableClosing: false,
           showCancelButton: false,
