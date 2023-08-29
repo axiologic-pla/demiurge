@@ -95,14 +95,22 @@ class PermissionsWatcher {
     }
 
     //setup of credential check interval to prevent edge cases
-    /*if(!window.credentialsCheckInterval){
+    if(!window.credentialsCheckInterval){
       const interval = 30*1000;
       window.credentialsCheckInterval = setInterval(async()=>{
         console.debug("Permissions check ...");
-        let userRights;
-        let unAuthorizedPages = ["generate-did", "landing-page"];
+        let hasAccess;
+        let unAuthorizedPages = ["booting-identity", "landing-page"];
         try{
-          userRights = await this.getUserRights();
+          hasAccess = await this.checkAccess();
+          if(!hasAccess){
+            throw new Error("No access");
+          }
+
+          hasAccess = await this.isInAdminGroup();
+          if(!hasAccess){
+            throw new Error("Not in group");
+          }
         }catch (err){
           //if we have errors user doesn't have any rights
           if(window.lastUserRights || unAuthorizedPages.indexOf(WebCardinal.state.page.tag)===1){
@@ -117,27 +125,19 @@ class PermissionsWatcher {
 
           //there is no else that we need to take care of it...
         }
-        //if no error user has rights, and we need just to check that nothing changed since last check
-        if(userRights && window.lastUserRights && userRights !== window.lastUserRights){
-          //this case is possible if the Admin fails to send the message with the credential due to network issue or something and this is why we should ask for a review of the authorization process.
-          console.debug("Permissions check *");
-          this.notificationHandler.reportUserRelevantInfo("Your credentials have changed. The application will refresh soon...");
-          $$.forceTabRefresh();
-          return;
-        }
 
         //if user has rights but is on a page that doesn't need authorization
         // we could believe that app state didn't change properly by various causes...
         // let's try to refresh...
-        if(userRights && unAuthorizedPages.indexOf(WebCardinal.state.page.tag) === 1){
+        if(hasAccess && unAuthorizedPages.indexOf(WebCardinal.state.page.tag) === 1){
           this.notificationHandler.reportUserRelevantInfo("A possible wrong app state was detected based on current state and credentials. The application will refresh soon...");
-          $$.forceTabRefresh();
+          setTimeout($$.forceTabRefresh, 5000);
           return;
         }
 
       }, interval);
       console.log(`Permissions will be checked once every ${interval}ms`);
-    }*/
+    }
 
   }
 
@@ -216,7 +216,7 @@ class PermissionsWatcher {
     return adminGroup;
   }
 
-  async isInAdminGroup(did) {
+  async isInAdminGroup() {
     const openDSU = require("opendsu");
     let resolveDID = $$.promisify(openDSU.loadApi("w3cdid").resolveDID);
     let didDocument = await resolveDID(this.did);
