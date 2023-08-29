@@ -4,14 +4,13 @@ const openDSU = require("opendsu");
 const dbAPI = openDSU.loadAPI("db");
 const scAPI = openDSU.loadAPI("sc");
 const w3cDID = openDSU.loadAPI("w3cdid");
-const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();
 
 /**
  * @param {string} did - identifier of DIDDocument
  */
 async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING_APPROVAL) {
+  const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
   const tryToSetStoredDID = async () => {
-    const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
     if (typeof did !== "string") {
       did = did.getIdentifier();
     }
@@ -28,6 +27,17 @@ async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING
       await tryToSetStoredDID();
     }
   }
+  let identity;
+  try {
+    identity = await walletStorage.readKeyAsync(constants.IDENTITY);
+  } catch (e) {
+    identity = undefined;
+  }
+
+  if(identity && identity.did === did && identity.walletStatus === walletStatus){
+    return;
+  }
+
   await tryToSetStoredDID();
 }
 
