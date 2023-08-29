@@ -25,7 +25,7 @@ template.innerHTML = `
     height: calc(2.5rem - 1px * 2);
     margin: 0 1rem;
     flex: 1 1 auto;
-    font-family: inherit;
+    font-family: "DM Sans medium";
     font-size: inherit;
     font-weight: inherit;
     min-width: 0px;
