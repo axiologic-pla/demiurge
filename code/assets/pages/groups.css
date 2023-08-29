@@ -17,7 +17,11 @@
 #groups-page,
 #groups-page main {
     display: grid;
-    gap: var(--sl-spacing-large);
+}
+
+#groups-page.dw-container {
+    margin: unset;
+    padding: 45px 0 0 0px;
 }
 
 /*
@@ -425,7 +429,7 @@ sl-menu-item::part(base):hover {
 /* Credentials, Databases and Members */
 
 #groups-page .dw-members--header {
-    margin-top: var(--sl-spacing-large);
+    margin-top: var(--sl-spacing-xx-large);
     display: flex;
     flex-direction: column;
     gap: var(--sl-spacing-large);
@@ -439,11 +443,9 @@ sl-menu-item::part(base):hover {
     border-radius: var(--sl-border-radius-medium);
 }
 
-#groups-page .dw-credentials--header dw-title > [slot=subheader]:last-child,
-#groups-page .dw-databases--header dw-title > [slot=subheader]:last-child {
-    color: var(--subheader-color);
-    font-size: 80%;
-    margin-top: 10px;
+#groups-page dw-title[header="Groups"] {
+    margin-left: 28px;
+    margin-bottom: 15px;
 }
 
 #groups-page .dw-credentials--header {
@@ -467,8 +469,8 @@ sl-menu-item::part(base):hover {
 
 #dw-group-content {
     overflow: hidden;
-    margin-right: 56px;
-    background: #ffffff;
+    padding: 0 28px;
+    background: #fff;
 }
 
 *[disabled_feature] {

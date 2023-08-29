@@ -99,7 +99,10 @@ webc-app-menu[mode=mobile][active] .app-menu-backdrop {
 }
 
 webc-app-container {
-    --background: rgb(var(--sl-color-gray-50));
+    --background: #FFFFFF;
+    height: 100%;
+    overflow: inherit;
+    margin: 0 0 50px 0;
 }
 
 webc-app-container > .container.before {
@@ -155,12 +158,6 @@ dw-subdomains {
     --check-background: rgb(var(--sl-color-gray-300));
     --delete-color: rgb(var(--sl-color-neutral-1000));
     --delete-background: rgb(var(--sl-color-primary-50));
-}
-
-.container.app-container {
-    background: url("../assets/images/background-shape.svg") no-repeat center;
-    background-size: cover;
-
 }
 
 button {
@@ -313,7 +310,7 @@ button:disabled {
 
 .dw-default-input {
     border-radius: 8px;
-    border: 1px solid #00CA86;
+    border: 1px solid var(--dw-app-color);
     background: #FFF;
     font-size: 1rem;
     height: 2.5rem;
@@ -328,6 +325,10 @@ button:disabled {
     transition: 150ms color, 150ms border, 150ms box-shadow;
     cursor: text;
     padding: 0 0 0px 1rem;
+}
+
+input:focus {
+    outline: none;
 }
 
 .dw-select {
