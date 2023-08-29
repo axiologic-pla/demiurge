@@ -51,8 +51,7 @@ function BootingIdentityController(...props) {
         disableExpanding: true,
         disableFooter: true,
         disableHeader: true
-      })
-      self.notificationHandler.reportDevRelevantInfo("Finished processing message " + JSON.stringify(message));
+      });
     })
 
   }
