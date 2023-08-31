@@ -69,6 +69,13 @@ sl-tab-group sl-tab:active::part(base) {
     color: var(--dw-custom-success-color-100);
 }
 */
+html {
+    overflow: hidden;
+}
+
+body {
+    overflow: auto;
+}
 
 [disable-menu] webc-app-menu > .content,
 [disable-menu] webc-app-menu > .after {
