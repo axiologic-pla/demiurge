@@ -108,7 +108,11 @@ class LogsDataSource extends DataSource {
         await $$.promisify(this.sharedEnclaveDB.refresh.bind(this.sharedEnclaveDB))();
         this.dataSourceRezults = await $$.promisify(this.sharedEnclaveDB.filter.bind(this.sharedEnclaveDB))(this.tableName, "__timestamp > 0", "dsc", this.itemsOnPage * 2);
       }
-      this.dataSourceRezults.length > this.itemsOnPage ? document.querySelector(".pagination-container").hidden = false : document.querySelector(".pagination-container").hidden = true;
+
+      let pagContainer = document.querySelector(".pagination-container");
+      if(pagContainer){
+        this.dataSourceRezults.length > this.itemsOnPage ? pagContainer.hidden = false : pagContainer.hidden = true;
+      }
       resultData = this.dataSourceRezults.slice(startOffset, startOffset + dataLengthForCurrentPage);
       this.hasMoreLogs = this.dataSourceRezults.length >= startOffset + dataLengthForCurrentPage + 1;
 
