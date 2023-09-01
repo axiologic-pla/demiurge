@@ -38,7 +38,7 @@ async function createGroup(message) {
     group.did = groupDIDDocument.getIdentifier();
 
     const sharedEnclaveDB = await $$.promisify(scAPI.getSharedEnclave)();
-    await sharedEnclaveDB.safeBeginBatchAsync();
+    let batchId = await sharedEnclaveDB.startOrAttachBatchAsync();
     try {
       await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS, group.did, group);
 
@@ -55,7 +55,7 @@ async function createGroup(message) {
       });
     } catch (e) {
       try{
-        await sharedEnclaveDB.cancelBatchAsync();
+        await sharedEnclaveDB.cancelBatchAsync(batchId);
       }catch (err) {
         console.log(err);
       }
@@ -63,10 +63,10 @@ async function createGroup(message) {
       throw e;
     }
     try{
-      await sharedEnclaveDB.commitBatchAsync();
+      await sharedEnclaveDB.commitBatchAsync(batchId);
     }catch (e) {
       try{
-        await sharedEnclaveDB.cancelBatchAsync();
+        await sharedEnclaveDB.cancelBatchAsync(batchId);
       } catch (err) {
         console.log(err);
       }

@@ -282,7 +282,7 @@ function BootingIdentityController(...props) {
     const mainEnclave = await self.getMainEnclave();
     const enclaves = await $$.promisify(mainEnclave.getAllRecords)(constants.TABLES.GROUP_ENCLAVES);
     const sharedEnclave = await self.getSharedEnclave();
-    await sharedEnclave.safeBeginBatchAsync();
+    let batchId = await sharedEnclave.startOrAttachBatchAsync();
     try {
       for (let i = 0; i < enclaves.length; i++) {
         await sharedEnclave.writeKeyAsync(enclaves[i].enclaveName, enclaves[i]);
@@ -290,14 +290,14 @@ function BootingIdentityController(...props) {
       }
     } catch (e) {
       try {
-        await sharedEnclave.cancelBatchAsync();
+        await sharedEnclave.cancelBatchAsync(batchId);
       } catch (err) {
         console.log(err);
       }
       throw e;
     }
 
-    await sharedEnclave.commitBatchAsync();
+    await sharedEnclave.commitBatchAsync(batchId);
     self.keySSI = await self.getSharedEnclaveKeySSI(sharedEnclave);
   }
 

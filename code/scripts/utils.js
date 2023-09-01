@@ -59,14 +59,14 @@ async function sendUserMessage(sender, group, member, content, contentType, reci
 async function writeEnvironmentFile(mainDSU, env) {
   const openDSU = require("opendsu");
   const scAPI = openDSU.loadAPI("sc");
-  await mainDSU.safeBeginBatchAsync();
+  let batchId = await mainDSU.startOrAttachBatchAsync();
   try {
     await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
-    await mainDSU.commitBatchAsync();
+    await mainDSU.commitBatchAsync(batchId);
   } catch (e) {
     const writeFileError = createOpenDSUErrorWrapper(`Failed to write environment.json`, e);
     try {
-      await mainDSU.cancelBatchAsync();
+      await mainDSU.cancelBatchAsync(batchId);
     } catch (e) {
       throw createOpenDSUErrorWrapper(`Failed to cancel batch`, e, writeFileError);
     }
@@ -103,9 +103,10 @@ async function initSharedEnclave(keySSI, enclaveConfig) {
   const enclaveKeySSI = await $$.promisify(enclave.getKeySSI)();
 
   let tables = Object.keys(enclaveConfig.enclaveIndexesMap);
+  let bID;
 
   try {
-    await enclave.safeBeginBatchAsync();
+    bID = await enclave.startOrAttachBatchAsync();
   } catch (e) {
     return notificationHandler.reportUserRelevantWarning('Failed to begin batch on enclave: ', e)
   }
@@ -116,7 +117,7 @@ async function initSharedEnclave(keySSI, enclaveConfig) {
       } catch (e) {
         const addIndexError = createOpenDSUErrorWrapper(`Failed to add index ${indexField} on table ${dbTableName}`, e);
         try {
-          await enclave.cancelBatchAsync();
+          await enclave.cancelBatchAsync(bID);
         } catch (error) {
           return notificationHandler.reportUserRelevantWarning('Failed to cancel batch on enclave: ', error, addIndexError)
         }
@@ -126,7 +127,7 @@ async function initSharedEnclave(keySSI, enclaveConfig) {
   }
 
   try {
-    await enclave.commitBatchAsync();
+    await enclave.commitBatchAsync(bID);
   } catch (e) {
     return notificationHandler.reportUserRelevantWarning('Failed to commit batch on enclave: ', e)
   }
@@ -138,10 +139,10 @@ async function initSharedEnclave(keySSI, enclaveConfig) {
     enclaveName: enclaveConfig.enclaveName,
   };
 
-  await enclaveDB.safeBeginBatchAsync();
+  let batchId = await enclaveDB.startOrAttachBatchAsync();
   await enclaveDB.writeKeyAsync(enclaveConfig.enclaveName, enclaveRecord);
   await enclaveDB.insertRecordAsync(constants.TABLES.GROUP_ENCLAVES, enclaveRecord.enclaveDID, enclaveRecord);
-  await enclaveDB.commitBatchAsync();
+  await enclaveDB.commitBatchAsync(batchId);
   return enclaveRecord;
 }
 
