@@ -98,6 +98,12 @@ class PermissionsWatcher {
     if(!window.credentialsCheckInterval){
       const interval = 30*1000;
       window.credentialsCheckInterval = setInterval(async()=>{
+        if (this.adminGroupDSU) {
+          const hasNewVersion = await $$.promisify(this.adminGroupDSU.hasNewVersion, this.adminGroupDSU)();
+          if(!hasNewVersion){
+            return;
+          }
+        }
         console.debug("Permissions check ...");
         let hasAccess;
         let unAuthorizedPages = ["booting-identity", "landing-page"];
@@ -221,9 +227,10 @@ class PermissionsWatcher {
     let resolveDID = $$.promisify(openDSU.loadApi("w3cdid").resolveDID);
     let didDocument = await resolveDID(this.did);
     let groupDID = `did:ssi:group:${didDocument.getDomain()}:${constants.EPI_ADMIN_GROUP}`
-
     let groupDIDDocument = await resolveDID(groupDID);
-    await $$.promisify(groupDIDDocument.dsu.refresh)();
+    if(!this.adminGroupDSU){
+      this.adminGroupDSU = groupDIDDocument.dsu;
+    }
     let groupMembers = await $$.promisify(groupDIDDocument.listMembersByIdentity, groupDIDDocument)();
     for (let member of groupMembers) {
       if (member === this.did) {
