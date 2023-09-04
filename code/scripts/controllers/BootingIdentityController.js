@@ -13,6 +13,13 @@ const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();
 
 
 function BootingIdentityController(...props) {
+
+  if (history.state.isBack) {
+    history.back();
+    history.back();
+    return;
+  }
+
   let self = new DwController(...props);
 
   self.initPermissionsWatcher = () => {
@@ -74,6 +81,7 @@ function BootingIdentityController(...props) {
       const sharedEnclave = await self.getSharedEnclave();
       let adminGroup = await utils.getAdminGroup(sharedEnclave);
       await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, adminGroup.name, self.userName);
+      history.replaceState({isBack: true}, "");
       self.navigateToPageTag("groups");
     } catch (e) {
       self.notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
@@ -101,14 +109,13 @@ function BootingIdentityController(...props) {
   }
 
 
-
   self.waitForApproval = async (did) => {
     if (typeof did !== "string") {
       did = did.getIdentifier();
     }
     self.did = did;
 
-    getPermissionsWatcher(did, ()=>{
+    getPermissionsWatcher(did, () => {
       self.accessWallet();
     });
 
@@ -140,6 +147,7 @@ function BootingIdentityController(...props) {
         self.keySSI = await self.getSharedEnclaveKeySSI(sharedEnclave);
         await self.storeDID(self.did);
         await self.firstOrRecoveryAdminToAdministrationGroup(self.did, self.userDetails, constants.OPERATIONS.BREAK_GLASS_RECOVERY);
+        await setWalletStatus(constants.ACCOUNT_STATUS.CREATED);
         target.loading = false;
         waitApprovalModal.destroy();
         self.accessWallet();

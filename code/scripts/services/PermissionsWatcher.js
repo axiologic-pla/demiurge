@@ -260,7 +260,7 @@ class PermissionsWatcher {
 
     try{
       await utils.addSharedEnclaveToEnv(message.enclave.enclaveType, message.enclave.enclaveDID, message.enclave.enclaveKeySSI);
-      this.notificationHandler.reportUserRelevantInfo("Credentials were save with success");
+      this.notificationHandler.reportUserRelevantInfo("Credentials saved with success");
     }catch(err){
       this.notificationHandler.reportUserRelevantError(`Failed to save info about the shared enclave`, e);
       this.notificationHandler.reportUserRelevantError("Request reauthorization!");
