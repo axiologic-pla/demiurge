@@ -151,9 +151,13 @@ class GroupsController extends DwController {
 
 
     this.onTagClick("recover-data-key", async () => {
-      const config = require("opendsu").loadAPI("config");
+      const openDSU = require("opendsu");
+      const config = openDSU.loadAPI("config");
+      const scAPI = openDSU.loadAPI("sc");
       try {
-        let enclaveKeySSI = await $$.promisify(config.getEnv)("sharedEnclaveKeySSI");
+        const mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
+        const epiEnclaveRecord = await $$.promisify(mainEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
+        let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
         this.recoveryDataKeyModal = this.showModalFromTemplate("dw-dialog-data-recovery/template", () => {
         }, () => {
         }, {
@@ -197,7 +201,18 @@ class GroupsController extends DwController {
           this.notificationHandler.reportUserRelevantError(`Wrong or missing enclave name`);
           return;
         }
-        let enclaveRecord = await utils.initSharedEnclave(recoveryCode, epiEnclaveMsg);
+        let enclaveRecord;
+        try{
+          enclaveRecord = await utils.initSharedEnclave(recoveryCode, epiEnclaveMsg, true);
+        } catch (e) {
+        if (e.rootCause === "EnclaveAlreadyExists") {
+          alert("A shared enclave already exists. Nothing to restore.")
+          this.recoveryDataKeyModal.destroy()
+          return;
+        }
+
+          this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
+        }
         await $$.promisify(typicalBusinessLogicHub.setSharedEnclave)(recoveryCode);
         await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, recoveryCode);
 

@@ -76,13 +76,25 @@ async function writeEnvironmentFile(mainDSU, env) {
   scAPI.refreshSecurityContext();
 }
 
-async function initSharedEnclave(keySSI, enclaveConfig) {
+//recovery arg is used to determine if the enclave is created for the first time or a recovery is performed
+async function initSharedEnclave(keySSI, enclaveConfig, recovery) {
   const openDSU = require("opendsu");
   const scAPI = openDSU.loadAPI("sc");
   const enclaveAPI = openDSU.loadAPI("enclave");
+  const resolver = openDSU.loadAPI("resolver");
   const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
   let notificationHandler = openDSU.loadAPI("error");
-
+  if(recovery){
+    let dsu;
+    try{
+      dsu = await $$.promisify(resolver.loadDSU)(keySSI);
+    } catch (e) {
+    }
+    if (dsu) {
+      throw createOpenDSUErrorWrapper(`Enclave already exists for this group`, Error(`Enclave already exists for this group`), undefined, "EnclaveAlreadyExists");
+    }
+    await $$.promisify(resolver.createDSUForExistingSSI)(keySSI);
+  }
   let enclave;
   try {
     enclave = enclaveAPI.initialiseWalletDBEnclave(keySSI);
