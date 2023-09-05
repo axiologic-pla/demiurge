@@ -1,7 +1,6 @@
 import constants from "../../constants.js";
 import utils from "../../utils.js";
 import {cloneTemplate} from "../../../components/utils.js";
-import getStorageService from "../../services/StorageService.js";
 import MessagesService from "../../services/MessagesService.js";
 
 const {DwController} = WebCardinal.controllers;
