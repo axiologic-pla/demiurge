@@ -85,15 +85,11 @@ async function initSharedEnclave(keySSI, enclaveConfig, recovery) {
   const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
   let notificationHandler = openDSU.loadAPI("error");
   if(recovery){
-    let dsu;
     try{
-      dsu = await $$.promisify(resolver.loadDSU)(keySSI);
+      await $$.promisify(resolver.loadDSU)(keySSI);
     } catch (e) {
+      await $$.promisify(resolver.createDSUForExistingSSI)(keySSI);
     }
-    if (dsu) {
-      throw createOpenDSUErrorWrapper(`Enclave already exists for this group`, Error(`Enclave already exists for this group`), undefined, "EnclaveAlreadyExists");
-    }
-    await $$.promisify(resolver.createDSUForExistingSSI)(keySSI);
   }
   let enclave;
   try {
@@ -169,6 +165,11 @@ async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
   env[openDSU.constants.SHARED_ENCLAVE.DID] = enclaveDID;
   env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = enclaveKeySSI;
   await writeEnvironmentFile(mainDSU, env);
+}
+async function setEpiEnclave(epiEnclaveKeySSI) {
+  const openDSU = require("opendsu");
+  const config = openDSU.loadAPI("config");
+  await $$.promisify(config.setEnv)(constants.EPI_SHARED_ENCLAVE, epiEnclaveKeySSI);
 }
 
 async function removeSharedEnclaveFromEnv() {
@@ -331,5 +332,6 @@ export default {
   getAdminGroup,
   renderToast,
   readMappingEngineMessages,
-  initSharedEnclave
+  initSharedEnclave,
+  setEpiEnclave
 };

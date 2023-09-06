@@ -204,16 +204,10 @@ class GroupsController extends DwController {
         try{
           enclaveRecord = await utils.initSharedEnclave(recoveryCode, epiEnclaveMsg, true);
         } catch (e) {
-        if (e.rootCause === "EnclaveAlreadyExists") {
-          alert("A shared enclave already exists. Nothing to restore.")
           this.recoveryDataKeyModal.destroy()
-          return;
-        }
-
           this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
         }
-        await $$.promisify(typicalBusinessLogicHub.setSharedEnclave)(recoveryCode);
-        await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, recoveryCode);
+        await utils.setEpiEnclave(recoveryCode);
 
       } catch (e) {
         this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
