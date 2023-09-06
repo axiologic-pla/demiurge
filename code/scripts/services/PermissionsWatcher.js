@@ -231,6 +231,12 @@ class PermissionsWatcher {
     if(!this.adminGroupDSU){
       this.adminGroupDSU = groupDIDDocument.dsu;
     }
+
+    const hasNewVersion = await $$.promisify(this.adminGroupDSU.hasNewVersion, this.adminGroupDSU)();
+    if(hasNewVersion){
+      await $$.promisify(this.adminGroupDSU.refresh)();
+    }
+
     let groupMembers = await $$.promisify(groupDIDDocument.listMembersByIdentity, groupDIDDocument)();
     for (let member of groupMembers) {
       if (member === this.did) {
