@@ -72,10 +72,9 @@ export default class LogService {
     const openDSU = require("opendsu");
     const scAPI = openDSU.loadAPI("sc");
     scAPI.getSharedEnclave((err, sharedEnclave) => {
-      if (err) {
+      if (err || !sharedEnclave) {
         return callback(err);
-      }
-
+      }      
       this.storageService = sharedEnclave;
       callback(undefined, this.storageService);
     });
