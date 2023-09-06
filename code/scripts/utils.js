@@ -222,10 +222,8 @@ async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, pr
     }
     await $$.promisify(logService.log, logService)(logMsg);
   } catch (e) {
-    console.log("Failed to add log message", e);
-    return await addLogMessage(userDID, action, userGroup, actionUserId, logPk, privileges);
+      console.error("Very highly improbable fail to record a log (maybe the user is without network connection or without permissions) ", e);    
   }
-
 }
 
 function uuidv4() {
