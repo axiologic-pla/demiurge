@@ -108,8 +108,8 @@ async function initSharedEnclave(keySSI, enclaveConfig, recovery) {
 
 
   const enclaveDID = await $$.promisify(enclave.getDID)();
-  const enclaveKeySSI = await $$.promisify(enclave.getKeySSI)();
-
+  let enclaveKeySSI = await $$.promisify(enclave.getKeySSI)();
+  enclaveKeySSI = enclaveKeySSI.getIdentifier();
   let tables = Object.keys(enclaveConfig.enclaveIndexesMap);
   let bID;
 
@@ -166,10 +166,13 @@ async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
   env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = enclaveKeySSI;
   await writeEnvironmentFile(mainDSU, env);
 }
-async function setEpiEnclave(epiEnclaveKeySSI) {
+async function setEpiEnclave(enclaveRecord) {
   const openDSU = require("opendsu");
   const config = openDSU.loadAPI("config");
-  await $$.promisify(config.setEnv)(constants.EPI_SHARED_ENCLAVE, epiEnclaveKeySSI);
+  const scAPI = openDSU.loadAPI("sc");
+  const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  await sharedEnclave.writeKeyAsync(constants.EPI_SHARED_ENCLAVE,enclaveRecord);
+  await $$.promisify(config.setEnv)(constants.EPI_SHARED_ENCLAVE, enclaveRecord.enclaveKeySSI);
 }
 
 async function removeSharedEnclaveFromEnv() {
