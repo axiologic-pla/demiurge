@@ -33,7 +33,10 @@ class PermissionsWatcher {
         try{
           identity = await $$.promisify(mainEnclave.readKey)(constants.IDENTITY);
         }catch(err){
-
+          this.notificationHandler.reportUserRelevantError(`Failed to read Identity`, err);
+          this.notificationHandler.reportUserRelevantInfo(
+            "Application will refresh soon to ensure proper state. If you see this message again, check network connectivity and if necessary get in contact with Admin.");
+          return $$.forceTabRefresh();
         }
         did = identity.did;
         this.setup(did);
