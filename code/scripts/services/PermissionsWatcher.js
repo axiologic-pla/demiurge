@@ -1,5 +1,6 @@
 import constants from "./../constants.js";
 import utils from "../utils.js";
+import {getGroupCredential} from "../mappings/utils.js";
 
 const openDSU = require("opendsu");
 const scAPI = openDSU.loadAPI("sc");
@@ -123,7 +124,117 @@ class PermissionsWatcher {
       }
       console.debug("Caught an error during checking access", err);
     }
-    return false;
+    let migrationDone = await this.testAndMigrateFromMQs();
+    if(!migrationDone){
+      return false;
+    }
+    return await this.checkAccess();
+  }
+
+  async migrateGroup (groupDID, enclaveData, includeAllPossible){
+    const w3cdid = require("opendsu").loadApi("w3cdid");
+    let domain = await $$.promisify(scAPI.getVaultDomain)();
+    let didDocument;
+    try{
+      didDocument = await $$.promisify(w3cdid.resolveDID)(groupDID);
+    }catch(err){
+      this.notificationHandler.reportUserRelevantError(`Error: Failed to resolve ${groupDID}`, err);
+    }
+    if(!didDocument){
+      this.notificationHandler.reportUserRelevantInfo(`Migration status: ${groupDID} not resolved. Skipping...`);
+    }else{
+      let groupCredential;
+      try{
+        groupCredential = await getGroupCredential(groupDID);
+        if(includeAllPossible){
+          let allPossibleGroups = [
+            {"name":"ePI Write Group","tags":"DSU_Fabric","enclaveName":"epiEnclave","accessMode":"write","did":`did:ssi:group:${domain}:ePI_Write_Group`},
+            {"name":"ePI Read Group","tags":"DSU_Fabric","enclaveName":"epiEnclave","accessMode":"read","did":`did:ssi:group:${domain}:ePI_Read_Group`}
+          ];
+          groupCredential.allPossibleGroups = allPossibleGroups;
+        }
+        let users = await $$.promisify(didDocument.listMembersByIdentity, didDocument)();
+        for(let user of users){
+          await this.handler.authorizeUser(user, groupCredential, enclaveData);
+        }
+        this.notificationHandler.reportUserRelevantInfo(`Migration status: ${groupDID} is resolved. Continuing...`);
+      }catch(err){
+        this.notificationHandler.reportUserRelevantError(`Error: Failed to authorize ${groupDID} users`, err);
+        this.notificationHandler.reportUserRelevantInfo(`Migration status: ${groupDID} not resolved. Skipping...`);
+      }
+    }
+  }
+
+  async testAndMigrateFromMQs(){
+    if(window.migrationInProgress){
+      if(!this.pendingPromises){
+        this.pendingPromises = [];
+      }
+      return new Promise((resolve, reject)=>{
+        this.pendingPromises.push(resolve);
+      });
+    }
+    window.migrationInProgress = true;
+    let migrationDone = false;
+    let enclaveData = await utils.getSharedEnclaveDataFromEnv();
+    const w3cdid = require("opendsu").loadApi("w3cdid");
+    let migrationDID;
+    try{
+      migrationDID = await $$.promisify(w3cdid.getKeyDIDFromSecret)("Migration_2023.2.0");
+    }catch(err){
+      console.log(err);
+    }
+    if(enclaveData && enclaveData.enclaveKeySSI){
+      //we have the data in env... so we need to test if migration need to be performed
+
+      let domain = await $$.promisify(scAPI.getVaultDomain)();
+      let groupName = constants.EPI_ADMIN_GROUP;
+      let adminGroupDID = `did:ssi:group:${domain}:${groupName}`;
+
+      let adminDIDDocument;
+      try{
+        adminDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroupDID);
+      }catch(err){
+        return;
+      }
+      try{
+        migrationDone = await this.handler.getDIDSecret(migrationDID, "mqMigration");
+      }catch(err){
+        let knownStatus = [404, 500];
+        if(err.code && knownStatus.indexOf(err.code)!==-1){
+          migrationDone = false;
+        }
+        //for any other errors is best to don't do the migration...
+      }
+      if(!migrationDone){
+
+        this.notificationHandler.reportUserRelevantInfo(`System Alert: Migration of Access Control Mechanisms is Currently Underway. Your Patience is Appreciated.`);
+        await this.migrateGroup(adminGroupDID, enclaveData);
+
+        let writeGroup = constants.EPI_WRITE_GROUP;
+        let writeGroupDID = `did:ssi:group:${domain}:${writeGroup}`;
+        let sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+
+        let groupEnclaveData = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
+
+        await this.migrateGroup(writeGroupDID, groupEnclaveData, true);
+
+        let readGroup = constants.EPI_READ_GROUP;
+        let readGroupDID = `did:ssi:group:${domain}:${readGroup}`;
+        await this.migrateGroup(readGroupDID, groupEnclaveData, true);
+
+        await this.handler.storeDIDSecret(migrationDID, {enclave: enclaveData.enclaveKeySSI}, "mqMigration");
+        this.notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
+        migrationDone = true;
+      }
+    }
+    window.migrationInProgress = false;
+    if(this.pendingPromises){
+      for(let resolve of this.pendingPromises){
+        resolve(migrationDone);
+      }
+    }
+    return migrationDone;
   }
 }
 
