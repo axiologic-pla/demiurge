@@ -117,6 +117,15 @@ webc-app-container > .container.before {
     background: var(--background);
 }
 
+webc-spinner.text-below .circle-fade:after {
+    content: "Checking for permissions...";
+    position: absolute;
+    display: block;
+    top: 50px;
+    left: -78px;
+    width: 300px;
+}
+
 dw-header {
     --items-color: rgb(var(--sl-color-gray-800));
     --border-color: rgb(var(--sl-color-gray-300));

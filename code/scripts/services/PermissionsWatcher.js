@@ -9,8 +9,10 @@ class PermissionsWatcher {
   constructor(did, isAuthorizedHandler) {
     this.notificationHandler = openDSU.loadAPI("error");
     this.isAuthorizedHandler = isAuthorizedHandler || defaultHandler;
-
-    this.checkAccessAndAct().catch(err=>{
+    utils.showTextLoader();
+    this.checkAccessAndAct().then(()=>{
+      utils.hideTextLoader();
+    }).catch(err=>{
       console.debug('Caught an error during booting of the PermissionsWatcher...', err);
     });
 
@@ -34,9 +36,14 @@ class PermissionsWatcher {
       if(hasAccess){
         if(unAuthorizedPages.indexOf(WebCardinal.state.page.tag) !== -1) {
           //if we are on a booting page then we need to redirect...
-          return this.isAuthorizedHandler();
+          this.isAuthorizedHandler();
         }
       }else{
+        if(unAuthorizedPages.indexOf(WebCardinal.state.page.tag) !== -1) {
+          //if we are on a booting page then we do nothing..,
+          return;
+        }
+
         //we try to reset no matter if we had or no any credentials...
         await this.resettingCredentials();
 

@@ -381,6 +381,20 @@ async function getWalletStatus() {
   return record;
 }
 
+function showTextLoader() {
+  if (document.querySelector("stencil-route:not([style='display: none;'])")) {
+    document.querySelector("stencil-route:not([style='display: none;'])").classList.add("hidden");
+  }
+  window.WebCardinal.loader.hidden = false;
+  window.WebCardinal.loader.classList.add("text-below");
+}
+
+function hideTextLoader() {
+  window.WebCardinal.loader.hidden = true;
+  window.WebCardinal.loader.classList.remove("text-below");
+  document.querySelector("stencil-route:not([style='display: none;'])").classList.remove("hidden");
+}
+
 export default {
   autoAuthorization,
   promisify,
@@ -402,5 +416,7 @@ export default {
   initSharedEnclave,
   setEpiEnclave,
   setWalletStatus,
-  getWalletStatus
+  getWalletStatus,
+  showTextLoader,
+  hideTextLoader
 };
