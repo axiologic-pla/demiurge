@@ -22,7 +22,6 @@ export default {
     DATABASE: "db",
     GROUP_MEMBER: "group_member"
   },
-  IDENTITY_KEY: "did",
   DB_KEY_SSI_PATH: "/dbKeySSI",
   SECURITY_CONTEXT_KEY_SSI_PATH: "security-context",
   IDENTITY_PK: "identity_pk",

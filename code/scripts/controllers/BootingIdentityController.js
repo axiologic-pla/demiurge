@@ -1,4 +1,4 @@
-import {getStoredDID, setStoredDID, setWalletStatus, setMainDID} from "../services/BootingIdentityService.js";
+import {getStoredDID, setStoredDID, setMainDID} from "../services/BootingIdentityService.js";
 import constants from "../constants.js";
 import utils from "../utils.js";
 import MessagesService from "../services/MessagesService.js";
@@ -47,10 +47,11 @@ function BootingIdentityController(...props) {
 
   self.finishingStepOfWalletCreation = () => {
     self.initialisingModal.destroy();
-    setWalletStatus(constants.ACCOUNT_STATUS.CREATED).then(() => {
+    utils.setWalletStatus(constants.ACCOUNT_STATUS.CREATED).then(() => {
       self.showModalFromTemplate("dw-dialog-break-glass-recovery/template", () => {
-      }, () => {
-        self.accessWallet()
+      }, async () => {
+        await utils.autoAuthorization(self.did);
+        self.accessWallet();
       }, {
         model: {sharedEnclaveKeySSI: self.keySSI},
         disableClosing: false,
@@ -65,7 +66,7 @@ function BootingIdentityController(...props) {
   self.onAccessGranted = (message) => {
     utils.addSharedEnclaveToEnv(message.enclave.enclaveType, message.enclave.enclaveDID, message.enclave.enclaveKeySSI)
       .then(() => {
-        setWalletStatus(constants.ACCOUNT_STATUS.CREATED)
+        utils.setWalletStatus(constants.ACCOUNT_STATUS.CREATED)
           .then(() => self.accessWallet()).catch(e => {
           self.notificationHandler.reportUserRelevantInfo("Failed to initialise wallet: ", e);
         });
@@ -147,7 +148,7 @@ function BootingIdentityController(...props) {
         self.keySSI = await self.getSharedEnclaveKeySSI(sharedEnclave);
         await self.storeDID(self.did);
         await self.firstOrRecoveryAdminToAdministrationGroup(self.did, self.userDetails, constants.OPERATIONS.BREAK_GLASS_RECOVERY);
-        await setWalletStatus(constants.ACCOUNT_STATUS.CREATED);
+        await utils.setWalletStatus(constants.ACCOUNT_STATUS.CREATED);
         target.loading = false;
         waitApprovalModal.destroy();
         self.accessWallet();
@@ -384,6 +385,10 @@ function BootingIdentityController(...props) {
           await self.createGroups();
           self.notificationHandler.reportUserRelevantInfo("Created groups");
           await self.firstOrRecoveryAdminToAdministrationGroup(didDocument, self.userDetails);
+
+          //we need to auto-authorize because we are the first one...
+          await utils.autoAuthorization(self.did);
+
           self.notificationHandler.reportUserRelevantInfo("Waiting for final initialization steps");
           self.finishingStepOfWalletCreation();
         } catch (e) {

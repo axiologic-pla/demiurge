@@ -1,4 +1,4 @@
-import {getStoredDID, getWalletStatus} from "../services/BootingIdentityService.js";
+import {getStoredDID} from "../services/BootingIdentityService.js";
 import utils from "../utils.js";
 import constants from "../constants.js";
 
@@ -117,7 +117,7 @@ async function setupDefaultModel(userData) {
   let userName = userData.userName || "-";
 
   wallet.did = await getStoredDID();
-  wallet.status = await getWalletStatus();
+  wallet.status = await utils.getWalletStatus();
   wallet.managedFeatures = await utils.getManagedFeatures();
 }
 

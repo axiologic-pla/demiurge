@@ -16,6 +16,7 @@ async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING
     }
     let batchId = await walletStorage.startOrAttachBatchAsync();
     try {
+      await scAPI.setMainDIDAsync(did);
       await walletStorage.writeKeyAsync(constants.IDENTITY, {did, walletStatus});
       await walletStorage.commitBatchAsync(batchId);
     } catch (e) {
@@ -59,37 +60,6 @@ async function getStoredDID() {
 
   return record.did;
 }
-
-async function setWalletStatus(walletStatus) {
-  const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-  let batchId = await walletStorage.startOrAttachBatchAsync();
-
-  try {
-    await walletStorage.writeKeyAsync(constants.WALLET_STATUS, walletStatus);
-    await walletStorage.commitBatchAsync(batchId);
-  } catch (err) {
-    try {
-      await walletStorage.cancelBatchAsync(batchId);
-    } catch (e) {
-      return console.log(e, err);
-    }
-    throw new Error("Failed to ensure wallet state.");
-  }
-}
-
-async function getWalletStatus() {
-  let walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-  let record;
-
-  try {
-    record = await walletStorage.readKeyAsync(constants.WALLET_STATUS);
-  } catch (err) {
-    //ignorable at this point in time
-  }
-
-  return record;
-}
-
 async function didWasApproved(did) {
   if (typeof did !== "string") {
     did = did.getIdentifier();
@@ -122,4 +92,4 @@ async function setMainDID(typicalBusinessLogicHub, didDocument, notificationHand
   }
 }
 
-export {getStoredDID, setStoredDID, getWalletStatus, didWasApproved, setWalletStatus, setMainDID};
+export {getStoredDID, setStoredDID, didWasApproved, setMainDID};

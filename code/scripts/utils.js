@@ -1,6 +1,7 @@
 import Message from "./utils/Message.js";
 import constants from "./constants.js";
 import LogService from "./services/LogService.js";
+import {getGroupCredential} from "./mappings/utils.js";
 
 function promisify(fun) {
   return function (...args) {
@@ -166,6 +167,21 @@ async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
   env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = enclaveKeySSI;
   await writeEnvironmentFile(mainDSU, env);
 }
+
+async function getSharedEnclaveDataFromEnv(){
+  const openDSU = require("opendsu");
+  const scAPI = openDSU.loadAPI("sc");
+  const mainDSU = await $$.promisify(scAPI.getMainDSU)();
+  let env = await $$.promisify(mainDSU.readFile)("/environment.json");
+  env = JSON.parse(env.toString());
+  let data = {
+    "enclaveType": env[openDSU.constants.SHARED_ENCLAVE.TYPE],
+    "enclaveDID": env[openDSU.constants.SHARED_ENCLAVE.DID],
+    "enclaveKeySSI": env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI]
+  }
+  return data;
+}
+
 async function setEpiEnclave(enclaveRecord) {
   const openDSU = require("opendsu");
   const config = openDSU.loadAPI("config");
@@ -181,6 +197,9 @@ async function removeSharedEnclaveFromEnv() {
   const mainDSU = await $$.promisify(scAPI.getMainDSU)();
   let env = await $$.promisify(mainDSU.readFile)("/environment.json");
   env = JSON.parse(env.toString());
+  if(!env[openDSU.constants.SHARED_ENCLAVE.TYPE]){
+    return;
+  }
   env[openDSU.constants.SHARED_ENCLAVE.TYPE] = undefined;
   env[openDSU.constants.SHARED_ENCLAVE.DID] = undefined;
   env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = undefined;
@@ -319,7 +338,51 @@ async function readMappingEngineMessages(path, DSUStorage) {
   return messages;
 }
 
+async function autoAuthorization(did){
+
+  const scAPI = require("opendsu").loadAPI("sc");
+  let SecretsHandler = require("opendsu").loadApi("w3cdid").SecretsHandler;
+  let handler = await SecretsHandler.getInstance(did);
+  let domain = await $$.promisify(scAPI.getVaultDomain)();
+  const enclaveData = await getSharedEnclaveDataFromEnv();
+  let groupCredential = await getGroupCredential(`did:ssi:name:${domain}:${constants.EPI_ADMIN_GROUP}`);
+  await handler.authorizeUser(did, groupCredential, enclaveData);
+}
+
+async function setWalletStatus(walletStatus) {
+  const scAPI = require("opendsu").loadAPI("sc");
+  const walletStorage = await $$.promisify(scAPI.getMainEnclave)();
+  let batchId = await walletStorage.startOrAttachBatchAsync();
+
+  try {
+    await walletStorage.writeKeyAsync(constants.WALLET_STATUS, walletStatus);
+    await walletStorage.commitBatchAsync(batchId);
+  } catch (err) {
+    try {
+      await walletStorage.cancelBatchAsync(batchId);
+    } catch (e) {
+      return console.log(e, err);
+    }
+    throw new Error("Failed to ensure wallet state.");
+  }
+}
+
+async function getWalletStatus() {
+  const dbAPI = require("opendsu").loadAPI("sc");
+  let walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
+  let record;
+
+  try {
+    record = await walletStorage.readKeyAsync(constants.WALLET_STATUS);
+  } catch (err) {
+    //ignorable at this point in time
+  }
+
+  return record;
+}
+
 export default {
+  autoAuthorization,
   promisify,
   getPKFromContent,
   sendGroupMessage,
@@ -332,9 +395,12 @@ export default {
   isValidDID,
   waitForEnclave,
   removeSharedEnclaveFromEnv,
+  getSharedEnclaveDataFromEnv,
   getAdminGroup,
   renderToast,
   readMappingEngineMessages,
   initSharedEnclave,
-  setEpiEnclave
+  setEpiEnclave,
+  setWalletStatus,
+  getWalletStatus
 };

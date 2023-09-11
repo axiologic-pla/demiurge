@@ -1,4 +1,4 @@
-import {getWalletStatus, setWalletStatus, getStoredDID, setMainDID} from "./services/BootingIdentityService.js";
+import {getStoredDID, setMainDID} from "./services/BootingIdentityService.js";
 import utils from "./utils.js";
 import constants from "./constants.js";
 
@@ -136,7 +136,7 @@ function finishInit() {
     const envData = await getEnvironmentDataAsync() || {};
     const enableGovernance = envData.enableGovernance || false;
 
-    let status = await getWalletStatus();
+    let status = await utils.getWalletStatus();
 
     if (status === constants.ACCOUNT_STATUS.CREATED) {
       await watchAndHandleExecution(async () => {
@@ -166,65 +166,6 @@ function finishInit() {
       const firstAdmin = await isFirstAdmin();
       navigateToPageTag("booting-identity", {isFirstAdmin: firstAdmin});
     }
-
-   /* document.querySelectorAll("webc-app-menu-item").forEach(item => {
-      if (!item.querySelector("a")) {
-        return;
-      }
-
-      const menuLink = item.querySelector("a");
-      const menuItemName = menuLink.innerHTML;
-      item.setAttribute("icon-name", menuItemName);
-      if (menuItemName === "Requests") {
-        menuLink.classList.add("requests", "menu-link");
-        item.querySelector("a").innerHTML = `<div class="menu-item-container">
-
-       <span>Requests</span></div>`
-      }
-
-      if (menuItemName === "My Identities") {
-        menuLink.classList.add("my-identities", "menu-link");
-        item.querySelector("a").innerHTML = `<div class="menu-item-container">
-
-       <span>My Identities</span></div>`
-      }
-
-      if (menuItemName === "Groups") {
-        menuLink.classList.add("groups", "menu-link")
-        item.querySelector("a").innerHTML = `<div class="menu-item-container">
-
-       <span>Groups</span></div>`
-      }
-
-      if (menuItemName === "Audit") {
-        menuLink.classList.add("audit", "menu-link")
-        item.querySelector("a").innerHTML = `<div class="menu-item-container">
-
-         <span>Audit</span></div>`
-      }
-
-      if (menuItemName === "Logout") {
-        menuLink.classList.add("logout", "menu-link")
-        item.querySelector("a").innerHTML = `<div class="menu-item-container">
-
-         <span>Logout</span></div>`
-      }
-    });
-*/
-
-    //go to home page and clear selected menu item
-    /* try {
-       document.querySelector(".logo-container").addEventListener("click", async () => {
-         if (document.querySelector("webc-app-menu-item[active]")) {
-           document.querySelector("webc-app-menu-item[active]").removeAttribute("active");
-         }
-         await navigateToPageTag("home", {skipLoginAudit: true});
-       })
-     } catch (e) {
-       console.log("Menu not initialized yet.", e);
-     }*/
-
-
   });
 
 }
