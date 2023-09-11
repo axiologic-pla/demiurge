@@ -73,6 +73,9 @@ class PermissionsWatcher {
       env[openDSU.constants.SHARED_ENCLAVE.DID] = enclave.enclaveDID;
       env[openDSU.constants.SHARED_ENCLAVE.KEY_SSI] = enclave.enclaveKeySSI;
       await $$.promisify(scAPI.configEnvironment)(env);
+
+      await utils.setWalletStatus(constants.ACCOUNT_STATUS.CREATED);
+
     } catch (e) {
       this.notificationHandler.reportUserRelevantError(`Failed to save info about the shared enclave`, e);
     }
