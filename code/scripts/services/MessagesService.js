@@ -43,8 +43,8 @@ async function processMessagesWithoutGrouping(storageService, messages, callback
     }
   } catch (err) {
     console.log("Error on digestMessages", err);
-    for(let message of messages){
-      undigestedMessages.push({message: message, error:"skipped because of previous errors"});
+    for (let message of messages) {
+      undigestedMessages.push({message: message, error: "skipped because of previous errors"});
     }
     error = err;
   }

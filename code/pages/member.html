@@ -1,157 +1,33 @@
 <link rel="stylesheet" href="./assets/pages/member.css">
-<link rel="stylesheet" href="./assets/parts/credentials.css">
 
 <webc-container controller="member/MemberController" id="member-page" class="dw-container">
-  <main>
-    <dw-title header="Member"></dw-title>
+    <main>
+        <dw-title header="Member"></dw-title>
 
-    <div class="dw-member-profile">
-      <sl-input label="Username" value="@selectedMember.username" readonly></sl-input>
-
-      <dw-clipboard-input label="DID" value="@selectedMember.did" readonly></dw-clipboard-input>
-    </div>
-  </main>
-
-  <section>
-
-    <div class="dw-group-profile">
-      <sl-input label="Group name" value="@selectedGroup.name" readonly></sl-input>
-
-      <dw-clipboard-input label="DID" value="@selectedGroup.did" readonly></dw-clipboard-input>
-    </div>
-
-  </section>
-
-  <!-- Member content -->
-  <section id="dw-member-content">
-    <sl-tab-group class="dw-member-content" disabled_feature="@disable_credentials_management">
-      <sl-tab slot="nav" panel="credentials">
-        <sl-icon name="key-fill"></sl-icon>
-        Credentials
-      </sl-tab>
-      <sl-tab slot="nav" panel="databases" disabled_feature="@disable_enclaves_management">
-        <sl-icon name="hdd-stack-fill"></sl-icon>
-        Databases
-      </sl-tab>
-
-      <sl-tab-panel name="credentials" disabled_feature="@disable_credentials_management">
-        <!-- Member credentials -->
-        <webc-container controller="member/CredentialsController">
-          <section class="dw-credentials--header">
-            <dw-title>
-              <p slot="subheader">Manage credentials of member "{{ @selectedMember.username }}"</p>
-            </dw-title>
-
-            <sl-button type="success" data-tag="toggle.credential.assign" class="dw-action-button">
-              Assign credential to Member
-              <sl-icon slot="prefix" name="plus"></sl-icon>
-            </sl-button>
-          </section>
-
-          <div class='dw-credentials dw-data-grid'>
-            <div class='dw-data-table' data-if='@hasCredentials'>
-              <div class='no-data' data-if='@areCredentialsLoaded' slot='false'>
-                <dw-spinner content='Credentials are loading' slot='false'></dw-spinner>
-                <p class='no-data' slot='true'>There are no credentials generated for this member!</p>
-              </div>
-
-              <article class='dw-data-grid-header dw-col-3' slot='true'>
-                <div><label>Credential Token</label></div>
-                <div><label>Credential Tags</label></div>
-                <div><label>Options</label></div>
-              </article>
-
-              <article class='dw-data-grid-item dw-col-3' data-for='@credentials' slot='true'>
-                <div><label>{{@token}}</label></div>
-                <div><label>{{@tags}}</label></div>
-                <div class='dw-table-options'>
-                  <sl-button data-tag='member.credential.select' outline type='success'>
-                    <sl-icon name='clipboard' slot='prefix'></sl-icon>
-                  </sl-button>
-                  <sl-button data-tag='member.credential.inspect' outline type='primary'>
-                    <sl-icon name='eye' slot='prefix'></sl-icon>
-                  </sl-button>
-                  <sl-button data-tag='member.credential.delete' outline type='danger'>
-                    <sl-icon name='trash' slot='prefix'></sl-icon>
-                  </sl-button>
-                </div>
-              </article>
+        <div class="dw-member-profile">
+            <div>
+                <label>Username</label>
+                <input class="dw-default-input" value="@selectedMember.username" readonly/>
             </div>
-          </div>
+            <div>
+                <label>DID</label>
+                <dw-copy-paste-input button-label="Copy" value="@selectedMember.did" readonly></dw-copy-paste-input>
 
-          <div data-if="@isAssignCredentialOpened">
-            <section class="dw-credentials--header">
-              <dw-title>
-                <p slot="subheader">List of credentials that can be assigned</p>
-                <p slot="subheader"></p>
-              </dw-title>
-            </section>
-
-            <div class='dw-credentials dw-data-grid'>
-              <div class='dw-data-table' data-if='@hasGovernanceCredentials'>
-                <div class='no-data' data-if='@areCredentialsLoaded' slot='false'>
-                  <dw-spinner content='Credentials are loading' slot='false'></dw-spinner>
-                  <p class='no-data' slot='true'>There are no credentials generated!</p>
-                </div>
-
-                <article class='dw-data-grid-header dw-col-3' slot='true'>
-                  <div><label>Credential Token</label></div>
-                  <div><label>Credential Tags</label></div>
-                  <div><label>Options</label></div>
-                </article>
-
-                <article class='dw-data-grid-item dw-col-3' data-for='@governanceCredentials' slot='true'>
-                  <div><label>{{@token}}</label></div>
-                  <div><label>{{@tags}}</label></div>
-                  <div class='dw-table-options'>
-                    <sl-button data-tag='member.credential.select' outline type='success'>
-                      <sl-icon name='clipboard' slot='prefix'></sl-icon>
-                    </sl-button>
-                    <sl-button data-tag='member.credential.inspect' outline type='primary'>
-                      <sl-icon name='eye' slot='prefix'></sl-icon>
-                    </sl-button>
-                    <sl-button data-tag='member.credential.assign' outline type='warning'>
-                      <sl-icon name='plus' slot='prefix'></sl-icon>
-                    </sl-button>
-                  </div>
-                </article>
-              </div>
             </div>
-          </div>
+        </div>
+    </main>
 
-        </webc-container>
-      </sl-tab-panel>
-      <sl-tab-panel name="databases" disabled_feature="@disable_enclaves_management">
-        <!-- Member databases -->
-        <webc-container controller="member/DatabasesController">
-          <section class="dw-databases--header">
-            <dw-title>
-              <p slot="subheader">Manage databases of member "{{ @selectedMember.username }}"</p>
-            </dw-title>
-            <sl-form>
-              <sl-input label="Database name" required clearable name="name"></sl-input>
-              <sl-button type="primary" data-tag="database.add" class="dw-action-button">
-                New database <sl-icon slot="prefix" name="plus-lg"></sl-icon>
-              </sl-button>
-            </sl-form>
-          </section>
-
-          <section class="dw-databases dw-data-grid" data-for="@databases">
-            <article class="dw-data-grid-item">
-              <sl-menu-item value="@keySSI" data-tag="database.select">
-                <div class="dw-database--data">
-                  <strong>{{ @name }}</strong>
-                </div>
-              </sl-menu-item>
-              <sl-icon-button data-tag="database.delete" name="trash"></sl-icon-button>
-            </article>
-            <div slot="no-data" data-if="@areDatabasesLoaded">
-              <dw-spinner slot="false" content="Databases are loading"></dw-spinner>
-              <p slot="true" class="no-data">There are no databases shared for this member!</p>
+    <section>
+        <div class="dw-group-profile">
+            <div>
+                <label>Group name</label>
+                <input class="dw-default-input" value="@selectedGroup.name" readonly/>
             </div>
-          </section>
-        </webc-container>
-      </sl-tab-panel>
-    </sl-tab-group>
-  </section>
+            <div>
+                <label>DID</label>
+                <dw-copy-paste-input button-label="Copy" value="@selectedGroup.did" readonly></dw-copy-paste-input>
+            </div>
+        </div>
+    </section>
+
 </webc-container>

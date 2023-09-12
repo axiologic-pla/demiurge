@@ -12,6 +12,7 @@ class LogsDataSource extends DataSource {
     this.dsuStorage = customOptions.dsuStorage;
     this.tableName = customOptions.tableName;
     this.searchField = customOptions.searchField;
+    this.notificationHandler = customOptions.notificationHandler
     this.setPageSize(this.itemsOnPage);
     this.dataSourceRezults = [];
     this.hasMoreLogs = false;
@@ -58,7 +59,7 @@ class LogsDataSource extends DataSource {
       await this.getSharedEnclave();
       if (inputValue) {
         await $$.promisify(this.sharedEnclaveDB.refresh.bind(this.sharedEnclaveDB))();
-        let result = await $$.promisify(this.sharedEnclaveDB.filter, this.sharedEnclaveDB)(this.tableName, `${this.searchField} == ${inputValue}`, "dsc");
+        let result = await $$.promisify(this.sharedEnclaveDB.filter, this.sharedEnclaveDB)(this.tableName, ["__timestamp > 0", `${this.searchField} == ${inputValue}`], "dsc");
 
         if (result && result.length > 0) {
           foundIcon.style.display = "inline";
@@ -72,7 +73,7 @@ class LogsDataSource extends DataSource {
         this.forceUpdate(true);
       }
     } catch (e) {
-      console.log("Error on filter async page data  ", e);
+      this.notificationHandler.reportUserRelevantWarning("Error on filter async page data  ", e);
     }
 
   }
@@ -107,7 +108,11 @@ class LogsDataSource extends DataSource {
         await $$.promisify(this.sharedEnclaveDB.refresh.bind(this.sharedEnclaveDB))();
         this.dataSourceRezults = await $$.promisify(this.sharedEnclaveDB.filter.bind(this.sharedEnclaveDB))(this.tableName, "__timestamp > 0", "dsc", this.itemsOnPage * 2);
       }
-      this.dataSourceRezults.length > this.itemsOnPage ? document.querySelector(".pagination-container").hidden = false : document.querySelector(".pagination-container").hidden = true;
+
+      let pagContainer = document.querySelector(".pagination-container");
+      if(pagContainer){
+        this.dataSourceRezults.length > this.itemsOnPage ? pagContainer.hidden = false : pagContainer.hidden = true;
+      }
       resultData = this.dataSourceRezults.slice(startOffset, startOffset + dataLengthForCurrentPage);
       this.hasMoreLogs = this.dataSourceRezults.length >= startOffset + dataLengthForCurrentPage + 1;
 
@@ -118,11 +123,11 @@ class LogsDataSource extends DataSource {
       }
 
     } catch (e) {
-      console.log("Error on get async page data  ", e);
+      this.notificationHandler.reportUserRelevantError("Failed to get table page data ", e);
     }
 
     if (resultData.length === 0) {
-      if(document.querySelector(".search-container")){
+      if (document.querySelector(".search-container")) {
         document.querySelector(".search-container").hidden = true;
       }
     }
@@ -142,7 +147,10 @@ class AuditController extends DwController {
     };
 
     this.model.logsDataSource = new LogsDataSource({
-      dsuStorage: this.DSUStorage, tableName: constants.TABLES.LOGS_TABLE, searchField: "userDID"
+      dsuStorage: this.DSUStorage,
+      tableName: constants.TABLES.LOGS_TABLE,
+      searchField: "userDID",
+      notificationHandler: this.notificationHandler
     });
     this.attachHandlers();
   }
@@ -153,12 +161,14 @@ class AuditController extends DwController {
     let notFoundIcon = this.querySelector(".fa-ban");
     if (searchInput) {
       searchInput.addEventListener("search", async (event) => {
-        await this.model.logsDataSource.searchHandler(event.target.value, foundIcon, notFoundIcon)
+        window.WebCardinal.loader.hidden = false;
+        await this.model.logsDataSource.searchHandler(event.target.value, foundIcon, notFoundIcon);
+        window.WebCardinal.loader.hidden = true;
       })
     }
 
     this.onTagClick("audit-export", async (model, target, event) => {
-      const waitCsv = this.showModalFromTemplate('wait-download');
+      const waitCsv = this.showModalFromTemplate('wait-download/template');
       let csvResult = await this.model.logsDataSource.exportToCSV();
       let url = window.URL.createObjectURL(csvResult);
       let anchor = document.createElement("a");

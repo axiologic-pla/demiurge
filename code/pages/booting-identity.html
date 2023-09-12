@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="./assets/pages/booting-identity.css">
+
+<webc-container controller="BootingIdentityController" id="home-page" class="dw-container">
+
+    <div id="booting-page">
+        <dw-title>Booting Identity</dw-title>
+
+        <div class="info-container">
+            <img src="./assets/images/icons/exclamation-triangle.svg"/>
+            You do not have a DID, so we will create one.
+        </div>
+        <did-generator
+                domain="@domain" name="@username"
+                default="did:ssi:name"
+                readonly="did:ssi:name, did:ssi:key"
+                disable="did:ssi:group, did:web"
+                data-tag="did-component">
+        </did-generator>
+    </div>
+
+
+</webc-container>

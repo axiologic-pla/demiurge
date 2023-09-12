@@ -1,0 +1,47 @@
+<link href="modals/waiting-approval/style.css" rel="stylesheet" xmlns="http://www.w3.org/1999/html">
+<main>
+    <div id="did-div">
+        <h3>
+            <img src="./assets/images/icons/person-bounding-box.svg"/>
+            Waiting for administrator to grant access
+        </h3>
+        <br>
+        <h4>Copy this DID and give it to the right administrator.</h4>
+        <dw-copy-paste-input button-label="Copy" value="@did" readonly></dw-copy-paste-input>
+    </div>
+    <div id="recovery-code-div">
+        <h3>
+            <img src="./assets/images/icons/clipboard-check.svg"/>
+
+            Or go ahead and
+        </h3>
+        <br>
+        <h4>Paste and submit your recovery code here to gain access.</h4>
+
+
+        <div class="recovery-code-actions-wrapper">
+            <dw-copy-paste-input button-label="Paste" button-type="paste"
+                                 placeholder="recovery code"
+                                 type="password"
+                                 id="add-member-input" required clearable></dw-copy-paste-input>
+
+
+            <button type="primary" data-tag="continue" class="dw-action-button">
+                <span class="button-label">Submit</span>
+            </button>
+
+
+        </div>
+
+       <!-- <sl-input name="recovery-code" placeholder="recovery code" id="add-member-input" type="password" required
+                  clearable>
+            <sl-button slot="suffix" type="text" data-tag="paste-from-clipboard" class="dw-paste">
+                Paste
+            </sl-button>
+            <sl-button data-tag="continue" type="primary" slot="suffix" class="submit&#45;&#45;did dw-action-button">
+                <sl-icon slot="suffix" name="arrow-right-short"></sl-icon>
+            </sl-button>
+
+        </sl-input>-->
+    </div>
+</main>

@@ -1,21 +1,20 @@
-#booting-page {
-    gap: var(--sl-spacing-medium);
-    background: #fff;
-    padding: 15px;
+#home-page {
     margin-right: 56px;
 }
 
-#booting-page sl-alert {
-    margin: var(--sl-spacing-large) 0;
+.info-container {
+    border-radius: 7px;
+    border: 0.5px solid lightgray;
+    padding: 20px 15px;
+    align-items: baseline;
+    display: flex;
+    font-size: 14px;
+    margin-bottom: 15px;
+    margin-top: 15px;
 }
 
-#booting-page sl-alert::part(base) {
-    padding: 0 var(--sl-spacing-medium);
-    background: none;
-    color: rgb(var(--sl-color-neutral-0));
-    border: 1px solid rgb(var(--sl-color-gray-200));
-}
-
-#booting-page sl-alert sl-icon {
-    color: rgb(var(--sl-color-neutral-0));
+.info-container img {
+    height: 20px;
+    margin-right: 20px;
+    align-self: center;
 }

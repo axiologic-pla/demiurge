@@ -1,0 +1,130 @@
+webc-modal::part(content) {
+    border-radius: 7px;
+    background-color: #f4f4f5;
+}
+
+webc-modal::part(header) {
+    display: none;
+}
+
+#did-div {
+    margin-bottom: 16px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgb(var(--sl-input-border-color));
+}
+
+#did-div img {
+    width: 18.5px;
+    height: 18.5px;
+    top: 3px;
+    position: relative;
+}
+
+#recovery-code-div img {
+    width: 18.5px;
+    height: 18.5px;
+}
+
+#recovery-code-div {
+    margin-bottom: 10px;
+}
+
+
+#recovery-code-div .button__label:hover {
+    color: rgb(var(--sl-color-primary-50));
+}
+
+#recovery-code-div > h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--sl-spacing-small);
+    margin-left: 6px;
+}
+
+.recovery-code-actions-wrapper {
+    display: flex;
+    gap: 10px
+}
+
+dw-copy-paste-input {
+    flex-grow: 1;
+}
+
+.recovery-code-actions-wrapper .dw-action-button {
+    min-width: 100px;
+    margin: unset;
+}
+
+/*
+
+.recovery-code-actions-container input {
+    height: calc(var(--sl-input-height-medium) - var(--sl-input-border-width) * 2);
+    margin: 0 var(--sl-input-spacing-medium);
+    flex: 1 1 auto;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    min-width: 0px;
+    color: rgb(var(--sl-input-color));
+    border: none;
+    background: none;
+    box-shadow: none;
+    padding: 0px;
+    cursor: inherit;
+    appearance: none;
+}
+
+.paste-button {
+    font-size: var(--sl-button-font-size-medium);
+    height: var(--sl-input-height-medium);
+    line-height: calc(var(--sl-input-height-medium) - var(--sl-input-border-width) * 2);
+    border-radius: var(--sl-input-border-radius-medium);
+    color: rgb(var(--sl-color-primary-green));
+    background-color: transparent;
+    border-color: transparent;
+    width: 67px;
+}
+
+.button {
+    display: inline-flex;
+    align-items: stretch;
+    justify-content: center;
+    width: 100%;
+    border-style: solid;
+    border-width: var(--sl-input-border-width);
+    font-family: var(--sl-input-font-family);
+    font-weight: var(--sl-font-weight-semibold);
+    text-decoration: none;
+    user-select: none;
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 0px;
+    transition: var(--sl-transition-fast) background-color, var(--sl-transition-fast) color, var(--sl-transition-fast) border, var(--sl-transition-fast) box-shadow;
+    cursor: inherit;
+}
+
+.submit--did {
+    color: #ffffff;
+    border-radius: unset;
+    background: rgb(var(--sl-color-primary-green));
+    color: #ffffff;
+    border: none;
+    padding-right: var(--sl-spacing-small);
+    font-size: var(--sl-button-font-size-medium);
+    height: var(--sl-input-height-medium);
+    line-height: calc(var(--sl-input-height-medium) - var(--sl-input-border-width) * 2);
+}
+
+.submit--did button {
+    background: transparent;
+    border: none;
+    width: 38px;
+}
+
+.submit--did img {
+    currentcolor: #fff;
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+*/

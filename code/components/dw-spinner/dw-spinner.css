@@ -6,7 +6,3 @@
   cursor: wait;
   color: var(--color);
 }
-
-.dw-spinner sl-spinner {
-  margin-top: 3px;
-}
