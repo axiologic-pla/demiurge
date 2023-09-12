@@ -85,8 +85,8 @@ async function initSharedEnclave(keySSI, enclaveConfig, recovery) {
   const resolver = openDSU.loadAPI("resolver");
   const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
   let notificationHandler = openDSU.loadAPI("error");
-  if(recovery){
-    try{
+  if (recovery) {
+    try {
       await $$.promisify(resolver.loadDSU)(keySSI);
     } catch (e) {
       await $$.promisify(resolver.createDSUForExistingSSI)(keySSI);
@@ -168,7 +168,7 @@ async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
   await writeEnvironmentFile(mainDSU, env);
 }
 
-async function getSharedEnclaveDataFromEnv(){
+async function getSharedEnclaveDataFromEnv() {
   const openDSU = require("opendsu");
   const scAPI = openDSU.loadAPI("sc");
   const mainDSU = await $$.promisify(scAPI.getMainDSU)();
@@ -187,7 +187,7 @@ async function setEpiEnclave(enclaveRecord) {
   const config = openDSU.loadAPI("config");
   const scAPI = openDSU.loadAPI("sc");
   const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
-  await sharedEnclave.writeKeyAsync(constants.EPI_SHARED_ENCLAVE,enclaveRecord);
+  await sharedEnclave.writeKeyAsync(constants.EPI_SHARED_ENCLAVE, enclaveRecord);
   await $$.promisify(config.setEnv)(constants.EPI_SHARED_ENCLAVE, enclaveRecord.enclaveKeySSI);
 }
 
@@ -197,7 +197,7 @@ async function removeSharedEnclaveFromEnv() {
   const mainDSU = await $$.promisify(scAPI.getMainDSU)();
   let env = await $$.promisify(mainDSU.readFile)("/environment.json");
   env = JSON.parse(env.toString());
-  if(!env[openDSU.constants.SHARED_ENCLAVE.TYPE]){
+  if (!env[openDSU.constants.SHARED_ENCLAVE.TYPE]) {
     return;
   }
   env[openDSU.constants.SHARED_ENCLAVE.TYPE] = undefined;
@@ -245,7 +245,7 @@ async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, pr
     }
     await $$.promisify(logService.log, logService)(logMsg);
   } catch (e) {
-      console.error("Very highly improbable fail to record a log (maybe the user is without network connection or without permissions) ", e);    
+    console.error("Very highly improbable fail to record a log (maybe the user is without network connection or without permissions) ", e);
   }
 }
 
@@ -338,7 +338,7 @@ async function readMappingEngineMessages(path, DSUStorage) {
   return messages;
 }
 
-async function autoAuthorization(did){
+async function autoAuthorization(did) {
 
   const scAPI = require("opendsu").loadAPI("sc");
   let SecretsHandler = require("opendsu").loadApi("w3cdid").SecretsHandler;
@@ -390,9 +390,13 @@ function showTextLoader() {
 }
 
 function hideTextLoader() {
-  window.WebCardinal.loader.hidden = true;
-  window.WebCardinal.loader.classList.remove("text-below");
-  document.querySelector("stencil-route:not([style='display: none;'])").classList.remove("hidden");
+  setTimeout(() => {
+    window.WebCardinal.loader.hidden = true;
+    window.WebCardinal.loader.classList.remove("text-below");
+    if (document.querySelector("stencil-route.hidden")) {
+      document.querySelector("stencil-route.hidden").classList.remove("hidden");
+    }
+  })
 }
 
 export default {
