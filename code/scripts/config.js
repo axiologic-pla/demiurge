@@ -59,7 +59,7 @@ async function watchAndHandleExecution(fnc) {
     await fnc();
   } catch (err) {
     if (err.rootCause === "security") {
-      await setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL);
+      await utils.setWalletStatus(constants.ACCOUNT_STATUS.WAITING_APPROVAL);
       return;
     }
     if (window.confirm("Looks that your application is not properly initialized or in an invalid state. Would you like to reset it?")) {
