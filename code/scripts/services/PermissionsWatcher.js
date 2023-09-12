@@ -226,6 +226,9 @@ class PermissionsWatcher {
         await this.handler.storeDIDSecret(migrationDID, {enclave: enclaveData.enclaveKeySSI}, "mqMigration");
         this.notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
         migrationDone = true;
+      }else{
+        //we need to set migration to false in order to escape the loop from the check access method
+        migrationDone = false;
       }
     }
     window.migrationInProgress = false;
