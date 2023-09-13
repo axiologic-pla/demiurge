@@ -391,8 +391,11 @@ function showTextLoader() {
 
 function hideTextLoader() {
   setTimeout(() => {
-    window.WebCardinal.loader.hidden = true;
-    window.WebCardinal.loader.classList.remove("text-below");
+    if (window.WebCardinal.loader.classList.contains("text-below")) {
+      window.WebCardinal.loader.hidden = true;
+      window.WebCardinal.loader.classList.remove("text-below");
+    }
+    
     if (document.querySelector("stencil-route.hidden")) {
       document.querySelector("stencil-route.hidden").classList.remove("hidden");
     }
