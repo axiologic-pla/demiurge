@@ -154,7 +154,9 @@ function finishInit() {
       try {
         const sharedEnclave = await $$.promisify(waitForSharedEnclave)();
         let adminGroup = await utils.getAdminGroup(sharedEnclave);
-        await utils.addLogMessage(did, constants.OPERATIONS.LOGIN, adminGroup.name, userData.userName);
+        const segments = adminGroup.did.split(":");
+        let groupName = segments.pop();
+        await utils.addLogMessage(did, constants.OPERATIONS.LOGIN, groupName, userData.userName);
       } catch (e) {
         notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
         return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${e.message}`);
