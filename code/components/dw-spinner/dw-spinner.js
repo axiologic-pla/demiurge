@@ -4,8 +4,6 @@ customElements.define(
     constructor() {
       super();
 
-      this.spinnerElement = document.createElement('sl-spinner');
-
       this.pointsElement = document.createElement('span');
       setInterval(() => {
         if (this.pointsElement.innerText.length === 3) {
@@ -23,7 +21,7 @@ customElements.define(
         `;
 
       this.rootElement = this.querySelector('.dw-spinner');
-      this.rootElement.append(this.pointsElement, this.spinnerElement);
+      this.rootElement.append(this.pointsElement);
     }
   }
 );

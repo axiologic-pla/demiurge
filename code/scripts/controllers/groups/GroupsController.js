@@ -1,7 +1,6 @@
 import constants from "../../constants.js";
 import utils from "../../utils.js";
 import {cloneTemplate} from "../../../components/utils.js";
-import getStorageService from "../../services/StorageService.js";
 import MessagesService from "../../services/MessagesService.js";
 
 const {DwController} = WebCardinal.controllers;
@@ -10,6 +9,7 @@ const {promisify} = utils;
 class GroupsUI extends DwController {
   constructor(...props) {
     super(...props);
+
   }
 
   // listeners
@@ -47,7 +47,7 @@ class GroupsUI extends DwController {
     const part = "group-content";
     const rootElement = this.querySelector(`#dw-${part}`);
     const subParts = {
-      [part]: ["group-members", "group-credentials", "group-databases"],
+      [part]: ["group-members"],
     };
 
     this.model.onChange("selectedGroup", ({targetChain}) => {
@@ -63,6 +63,13 @@ class GroupsUI extends DwController {
         return;
       }
 
+      this.element.querySelectorAll(".tab-header").forEach((tabHeader, index) => {
+        tabHeader.classList.remove("selected");
+        if (index === this.model.selectedTabIndex) {
+          tabHeader.classList.add("selected");
+        }
+      })
+
       const documentFragment = cloneTemplate(part);
 
       for (const subPart of subParts[part]) {
@@ -73,38 +80,42 @@ class GroupsUI extends DwController {
       }
 
 
-      rootElement.hidden = true;
       rootElement.append(documentFragment);
 
-      const tabGroupElement = rootElement.querySelector("sl-tab-group");
+      const tabGroupElement = rootElement.querySelector(".dw-group-members-container");
+
       const storedActiveTab = localStorage.getItem(key);
 
-      tabGroupElement.addEventListener("sl-tab-show", (event) => {
-        const tab = event.detail.name;
+      /*  tabGroupElement.addEventListener("sl-tab-show", (event) => {
+          const tab = event.detail.name;
 
-        if (tab === "members") {
-          localStorage.removeItem(key);
+          if (tab === "members") {
+            localStorage.removeItem(key);
+          }
+
+          localStorage.setItem(key, tab);
+        });
+
+        if (tabGroupElement && storedActiveTab) {
+          setTimeout(async () => {
+            await tabGroupElement.show(storedActiveTab);
+            rootElement.hidden = false;
+          });
+        } else {
+          rootElement.hidden = false;
         }
 
-        localStorage.setItem(key, tab);
-      });
-
-      if (tabGroupElement && storedActiveTab) {
-        setTimeout(async () => {
-          await tabGroupElement.show(storedActiveTab);
-          rootElement.hidden = false;
-        });
-      } else {
-        rootElement.hidden = false;
-      }
+       */
     });
   }
 
   // methods
 
-  async addGroup(model, target) {
-    return await this.ui.submitGenericForm(model, target);
-  }
+  /*
+    async addGroup(model, target) {
+      return await this.ui.submitGenericForm(model, target);
+    }
+  */
 
   async selectGroup(model, target) {
     if (target.checked) {
@@ -131,6 +142,7 @@ class GroupsController extends DwController {
       groups: [],
       selectedGroup: undefined,
       areGroupsLoaded: false,
+      selectedTabIndex: 0
     };
 
     ui.page = new GroupsUI(...props);
@@ -138,6 +150,72 @@ class GroupsController extends DwController {
     ui.page.addGroupContentListener.call(this);
 
 
+    this.onTagClick("recover-data-key", async () => {
+      const openDSU = require("opendsu");
+      const config = openDSU.loadAPI("config");
+      const scAPI = openDSU.loadAPI("sc");
+      try {
+        const mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
+        const epiEnclaveRecord = await $$.promisify(mainEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
+        let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
+        this.recoveryDataKeyModal = this.showModalFromTemplate("dw-dialog-data-recovery/template", () => {
+        }, () => {
+        }, {
+          model: {
+            dataRecoveryKey: enclaveKeySSI,
+          },
+          disableClosing: false,
+          showCancelButton: false,
+          disableExpanding: true,
+          disableFooter: true,
+        })
+      } catch (e) {
+        this.notificationHandler.reportUserRelevantError(`Couldn't get sharedEnclaveKeySSI.`);
+      }
+
+    })
+
+    this.element.addEventListener("copy-paste-change", (e) => {
+      if (e.target.id !== "data-recovery-key-input") {
+        return;
+      }
+      if (e.detail.value && e.detail.value.trim()) {
+        document.querySelector(".submit-recovery-button").disabled = false;
+      } else {
+        document.querySelector(".submit-recovery-button").disabled = true;
+      }
+    })
+
+    this.onTagClick("data-recovery-key-submit", async () => {
+      const w3cDID = require("opendsu").loadAPI("w3cdid");
+      const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();
+      const recoveryCode = document.getElementById("data-recovery-key-input").value;
+      if (recoveryCode === "") {
+        this.notificationHandler.reportUserRelevantError(`Please insert Recovery Data Key.`);
+        return;
+      }
+      try {
+        let messages = await utils.readMappingEngineMessages(constants.ENCLAVE_MESSAGES_PATH, this.DSUStorage);
+        let epiEnclaveMsg = messages.find((msg) => msg.enclaveName === this.model.selectedGroup.enclaveName)
+        if (!epiEnclaveMsg) {
+          this.notificationHandler.reportUserRelevantError(`Wrong or missing enclave name`);
+          return;
+        }
+        let enclaveRecord;
+        try{
+          enclaveRecord = await utils.initSharedEnclave(recoveryCode, epiEnclaveMsg, true);
+        } catch (e) {
+          this.recoveryDataKeyModal.destroy()
+          this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
+        }
+        await utils.setEpiEnclave(enclaveRecord);
+
+      } catch (e) {
+        this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
+      }
+
+      this.recoveryDataKeyModal.destroy()
+    })
     this.onTagClick("group.add", async (...props) => {
       try {
         const {name} = await ui.page.addGroup(...props);
@@ -146,15 +224,21 @@ class GroupsController extends DwController {
         this.model.groups.push(group);
         // await ui.showToast(group);
       } catch (err) {
-        console.log(err);
+        this.notificationHandler.reportDevRelevantInfo("Caught an error", err)
       }
     });
 
-    const groupSelect = document.querySelector('sl-select');
-    groupSelect.addEventListener('sl-change', event => {
-      this.model.selectedGroup = event.target.value;
-    });
+    /*    const groupSelect = document.querySelector('select.group-select');
+        groupSelect.addEventListener('change', event => {
+          this.model.selectedGroup = this.model.groups.find(group => group.pk === event.target.value);
+          //after select is done focus out select input
+          groupSelect.blur();
+        });*/
 
+    this.onTagClick("select-tab", (model, target, event) => {
+      this.model.selectedTabIndex = this.model.groups.findIndex(group => group.pk === target.getAttribute("tab-name"));
+      this.model.selectedGroup = this.model.groups[this.model.selectedTabIndex];
+    })
 
     this.onTagClick("group.delete", async (deletedGroup) => {
       try {
@@ -163,7 +247,7 @@ class GroupsController extends DwController {
         this.model.groups = this.model.groups.filter((group) => group.did !== deletedGroup.did);
         // await ui.showToast(deletedGroup);
       } catch (err) {
-        console.log(err);
+        this.notificationHandler.reportDevRelevantInfo("Caught an error", err)
       }
     });
 
@@ -173,6 +257,7 @@ class GroupsController extends DwController {
         if (scAPI.sharedEnclaveExists()) {
           this.model.groups = await utils.fetchGroups();
           this.model.defaultGroup = this.model.groups[0];
+          this.model.selectedGroup = this.model.groups[0];
           this.model.areGroupsLoaded = true;
         } else {
           __waitForSharedEnclave();
@@ -211,9 +296,9 @@ class GroupsController extends DwController {
 
     const processMessages = async (storageService) => {
       let undigestedMessages;
-      try{
+      try {
         undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, createGroupMessage)
-      }catch (e) {
+      } catch (e) {
         undigestedMessages = [createGroupMessage];
       }
 
@@ -243,14 +328,14 @@ class GroupsController extends DwController {
         }
       };
 
-      try{
+      try {
         undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, addMemberToGroupMessage)
-      }catch (e) {
+      } catch (e) {
         undigestedMessages = [addMemberToGroupMessage];
       }
       if (undigestedMessages && undigestedMessages.length > 0) {
-        this.ui.showToast(`Failed add member ${addMemberToGroupMessage.memberDID} to group ${group.name}`, {type: 'danger'});
-        console.log("Undigested messages:", undigestedMessages);
+        this.notificationHandler.reportDevRelevantInfo("Undigested messages: ", JSON.stringify(undigestedMessages))
+        this.notificationHandler.reportUserRelevantError(`Failed add member ${addMemberToGroupMessage.memberDID} to group ${group.name}`)
       }
     }
   }

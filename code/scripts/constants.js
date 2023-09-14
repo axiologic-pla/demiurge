@@ -26,7 +26,7 @@ export default {
   SECURITY_CONTEXT_KEY_SSI_PATH: "security-context",
   IDENTITY_PK: "identity_pk",
   IDENTITY: "identity",
-  WALLET_STATUS:"walletStatus",
+  WALLET_STATUS: "walletStatus",
   RECIPIENT_TYPES: {
     USER_RECIPIENT: "user",
     GROUP_RECIPIENT: "group"
@@ -63,6 +63,7 @@ export default {
   EPI_ADMIN_GROUP_NAME: "ePI Administration Group",
   EPI_ADMIN_GROUP: "ePI_Administration_Group",
   EPI_READ_GROUP: "ePI_Read_Group",
+  EPI_WRITE_GROUP: "ePI_Write_Group",
   EPI_SHARED_ENCLAVE: "epiEnclave",
 
   JWT_ENCODING: "JWT_ENCODING",
@@ -93,5 +94,24 @@ export default {
     RECEIVED_APPROVAL: "receivedApproval",
     DID_CREATED: "didCreated",
     ADD_MEMBER_TO_GROUP: "AddMemberToGroup"
+  },
+  HOOKS: {
+    BEFORE_PAGE_LOADS: "beforePageLoads",
+    WHEN_PAGE_CLOSE: "whenPageClose",
+    BEFORE_APP_LOADS: "beforeAppLoads",
+    AFTER_APP_LOADS: "afterAppLoads"
+  },
+  NOTIFICATION_TYPES: {
+    WARN: "warn",
+    INFO: "info",
+    ERROR: "error"
+  },
+  HTML_EVENTS: {
+    CLOSED: "closed",
+    CONFIRMED: "confirmed",
+    SEARCH: "search",
+    CLICK: "click",
+    FOCUSOUT: "focusout",
+    CHANGE: "change"
   }
 };

@@ -9,17 +9,36 @@ const w3cDID = openDSU.loadAPI("w3cdid");
  * @param {string} did - identifier of DIDDocument
  */
 async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING_APPROVAL) {
+  const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
   const tryToSetStoredDID = async () => {
-    try{
-      const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-      if (typeof did !== "string") {
-        did = did.getIdentifier();
-      }
+    if (typeof did !== "string") {
+      did = did.getIdentifier();
+    }
+    let batchId = await walletStorage.startOrAttachBatchAsync();
+    try {
+      await scAPI.setMainDIDAsync(did);
       await walletStorage.writeKeyAsync(constants.IDENTITY, {did, walletStatus});
-    }catch (e) {
+      await walletStorage.commitBatchAsync(batchId);
+    } catch (e) {
+      try {
+        await walletStorage.cancelBatchAsync(batchId);
+      } catch (err) {
+        console.log(err);
+      }
       await tryToSetStoredDID();
     }
   }
+  let identity;
+  try {
+    identity = await walletStorage.readKeyAsync(constants.IDENTITY);
+  } catch (e) {
+    identity = undefined;
+  }
+
+  if(identity && identity.did === did && identity.walletStatus === walletStatus){
+    return;
+  }
+
   await tryToSetStoredDID();
 }
 
@@ -41,39 +60,6 @@ async function getStoredDID() {
 
   return record.did;
 }
-
-async function setWalletStatus(walletStatus) {
-  const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-  try {
-    await walletStorage.writeKeyAsync(constants.WALLET_STATUS,  walletStatus);
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-async function getWalletStatus() {
-  let walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-
-  let sharedEnclave;
-  try {
-    sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
-  } catch (err) {
-  }
-
-  if (sharedEnclave) {
-    return constants.ACCOUNT_STATUS.CREATED;
-  }
-
-  let record;
-
-  try {
-    record = await walletStorage.readKeyAsync(constants.WALLET_STATUS);
-  } catch (err) {
-  }
-
-  return record;
-}
-
 async function didWasApproved(did) {
   if (typeof did !== "string") {
     did = did.getIdentifier();
@@ -94,4 +80,16 @@ async function didWasApproved(did) {
   return index >= 0;
 }
 
-export {getStoredDID, setStoredDID, getWalletStatus, didWasApproved, setWalletStatus};
+async function setMainDID(typicalBusinessLogicHub, didDocument, notificationHandler) {
+  if (typeof didDocument === "object") {
+    didDocument = didDocument.getIdentifier();
+  }
+  try {
+    await $$.promisify(typicalBusinessLogicHub.setMainDID)(didDocument);
+  } catch (e) {
+    notificationHandler.reportUserRelevantInfo(`Failed to initialise communication layer. Retrying ...`);
+    await setMainDID(typicalBusinessLogicHub, didDocument);
+  }
+}
+
+export {getStoredDID, setStoredDID, didWasApproved, setMainDID};

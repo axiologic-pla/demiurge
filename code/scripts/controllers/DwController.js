@@ -1,11 +1,15 @@
-import {escapeHTML, isHTMLElement} from "../../components/utils.js";
+import {getStoredDID} from "../services/BootingIdentityService.js";
+import utils from "../utils.js";
+import constants from "../constants.js";
 
 const {WebcController} = WebCardinal.controllers;
+import {getPermissionsWatcher} from "./../services/PermissionsWatcher.js";
 
 class DwController extends WebcController {
   constructor(...props) {
     super(...props);
     this._ui = new DwUI(...props);
+    this._ui.enableMenu()
     if (!$$.history) {
       $$.history = props[1];
     }
@@ -13,6 +17,15 @@ class DwController extends WebcController {
       this[item] = WebCardinal.wallet[item];
     }
     this.domain = WebCardinal.wallet.vaultDomain;
+    const openDSU = require("opendsu");
+    this.notificationHandler = openDSU.loadAPI("error");
+    setTimeout(()=>{
+      this.initPermissionsWatcher();
+    }, 0);
+  }
+
+  initPermissionsWatcher(){
+    getPermissionsWatcher();
   }
 
   get ui() {
@@ -91,63 +104,27 @@ class DwController extends WebcController {
   }
 }
 
+async function setupDefaultModel(userData) {
+  WebCardinal.wallet = {};
+  const wallet = WebCardinal.wallet;
+
+  const {getVaultDomainAsync} = await import("../hooks/getVaultDomain.js");
+
+  wallet.vaultDomain = await getVaultDomainAsync();
+
+  wallet.userDetails = userData.userAppDetails;
+  wallet.userName = userData.userName;
+  let userName = userData.userName || "-";
+
+  wallet.did = await getStoredDID();
+  wallet.status = await utils.getWalletStatus();
+  wallet.managedFeatures = await utils.getManagedFeatures();
+}
+
 class DwUI {
   constructor(element) {
     this._element = element;
     this._page = undefined;
-  }
-
-  async submitGenericForm(model, target) {
-    let element = target;
-    let slFormElement;
-
-    while (element) {
-      element = element.parentElement;
-
-      if (element.tagName === "SL-FORM") {
-        slFormElement = element;
-        break;
-      }
-    }
-
-    return new Promise(async (resolve, reject) => {
-      if (!slFormElement) {
-        return reject("'sl-form' element not found!");
-      }
-
-      function listener(event) {
-        const result = {};
-        const {formControls} = event.detail;
-
-        for (const element of formControls) {
-          const {name} = element;
-          if (!name) {
-            continue;
-          }
-          result[name] = element.value;
-          if (element.tagName === "SL-INPUT") {
-            const inputElement = element.shadowRoot.querySelector(
-              "[part=input]"
-            );
-            const baseElement = element.shadowRoot.querySelector(
-              "[part=clear-button]"
-            );
-            if (inputElement) {
-              element.value = "";
-              inputElement.value = "";
-            }
-            if (baseElement) {
-              baseElement.remove();
-            }
-          }
-          return resolve({...result, event});
-        }
-      }
-
-      slFormElement.addEventListener("sl-submit", listener);
-      await slFormElement.submit();
-      slFormElement.removeEventListener("sl-submit", listener);
-    });
   }
 
   /**
@@ -167,7 +144,7 @@ class DwUI {
     }
 
     if (typeof type !== "string") {
-      type = "primary";
+      type = constants.NOTIFICATION_TYPES.INFO;
     }
 
     if (typeof icon !== "string") {
@@ -175,26 +152,10 @@ class DwUI {
     }
 
     if (typeof duration !== "number") {
-      duration = 30000;
+      duration = 5000;
     }
 
-    if (typeof closable !== "boolean") {
-      closable = true;
-    }
-
-    const alert = Object.assign(document.createElement("sl-alert"), {
-      type: type,
-      closable: closable,
-      duration: duration,
-      innerHTML: `
-            ${icon ? `<sl-icon name="${icon}" slot="icon"></sl-icon>` : ""}
-            ${escapeHTML(message)}
-        `,
-    });
-
-    document.body.append(alert);
-
-    return alert.toast();
+    utils.renderToast(message, type, duration);
   }
 
   disableMenu() {
@@ -203,102 +164,6 @@ class DwUI {
 
   enableMenu() {
     document.body.removeAttribute("disable-menu");
-  }
-
-  /**
-   * @param {string} component
-   * @param {object | Proxy} [attributes]
-   * @param {object} [options]
-   * @param {function} [options.onClose]
-   * @param {HTMLElement} [options.parentElement]
-   * @param {boolean} [options.disableClosing]
-   */
-  async showDialogFromComponent(component, attributes = {}, options = {}) {
-    let {parentElement, onClose, disableClosing} = options;
-    if (typeof onClose !== "function") {
-      onClose = () => {
-      };
-    }
-
-    if (!isHTMLElement(parentElement)) {
-      parentElement = undefined;
-    }
-
-    const dialogElement = document.createElement(component);
-    for (const attribute of Object.keys(attributes)) {
-      dialogElement.setAttribute(attribute, escapeHTML(attributes[attribute]));
-    }
-
-    if (parentElement) {
-      parentElement.append(dialogElement);
-    } else {
-      WebCardinal.state.page.loader.append(dialogElement);
-    }
-
-    await dialogElement.componentOnReady();
-
-    const slElement = dialogElement.querySelector("sl-dialog");
-
-    if (!slElement) {
-      return;
-    }
-
-    if (disableClosing) {
-      slElement.addEventListener("sl-request-close", (event) => {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      });
-      slElement.addEventListener("sl-hide", (event) => {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      });
-    }
-
-    // const closeElements = slElement.querySelectorAll("[close]");
-    // closeElements.forEach((closeElement) => {
-    //   closeElement.addEventListener("click", async () => {
-    //     await slElement.hide();
-    //   });
-    // });
-
-    WebCardinal.state.page.dialogs = {
-      ...WebCardinal.state.page.dialogs,
-      [component]: slElement,
-    };
-
-    slElement.addEventListener("sl-request-close", async (event) => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-    });
-
-    slElement.addEventListener("sl-hide", async (event) => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      await onClose();
-    });
-
-    if (slElement.querySelector("sl-icon-button[close]")) {
-      slElement.querySelector("sl-icon-button[close]").addEventListener("click", async () => {
-        dialogElement.remove();
-        await onClose();
-      })
-    }
-
-
-    setTimeout(async () => {
-      await slElement.show();
-    });
-  }
-
-  /**
-   * @param {string} component
-   */
-  async hideDialogFromComponent(component) {
-    try{
-      await WebCardinal.state.page.dialogs[component].hide();
-    }catch(err){
-      //dialog not render and could generate error when trying to hide
-    }
   }
 
   get page() {
@@ -310,4 +175,4 @@ class DwUI {
   }
 }
 
-export {DwController, DwUI};
+export {DwController, DwUI, setupDefaultModel};

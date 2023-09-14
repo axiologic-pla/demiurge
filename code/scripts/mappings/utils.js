@@ -18,6 +18,16 @@ async function removeMemberFromGroup(message) {
     await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), memberDID_Document);
 }
 
+async function getGroupCredential(groupDID){
+    const openDSU = require("opendsu");
+    const scAPI = openDSU.loadAPI("sc");
+    const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+    const credentials = await sharedEnclave.filterAsync(constants.TABLES.GROUPS_CREDENTIALS, `groupDID == ${groupDID}`);
+    let groupCredential = credentials.find(el => el.credentialType === constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION);
+    return groupCredential;
+}
+
 export {
-    removeMemberFromGroup
+    removeMemberFromGroup,
+    getGroupCredential
 }

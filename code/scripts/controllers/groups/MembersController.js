@@ -38,10 +38,10 @@ class MembersUI extends DwController {
           target.parentElement.value = did;
           return {did};
         }
-        throw Error("Coping from clipboard is not possible!");
+        throw Error("Copying from clipboard is not possible!");
       } catch (err) {
         target.remove();
-        console.log(err);
+        this.notificationHandler.reportUserRelevantInfo("Failed to read data from clipboard", err);
         return "";
       }
     });
@@ -49,10 +49,12 @@ class MembersUI extends DwController {
 
   // methods
 
+  /*
 
-  async addMember(model, target) {
-    return await this.ui.submitGenericForm(model, target);
-  }
+    async addMember(model, target) {
+      return await this.ui.submitGenericForm(model, target);
+    }
+  */
 
   loadMemberPage(state) {
     const src = new URL(`/pages/member.html`, window.location).pathname;
@@ -84,6 +86,7 @@ class MembersController extends DwController {
 
     this.model = {
       selectedGroup,
+      hasRecoveryOption: selectedGroup.accessMode === "write",
       selectedMember: undefined,
       members: [],
       areMembersLoaded: false,
@@ -96,8 +99,18 @@ class MembersController extends DwController {
     ui.page = new MembersUI(...props);
     ui.page.addPasteMemberDIDFromClipboardListener();
 
+    this.element.addEventListener("copy-paste-change", (e) => {
+      if (e.detail.value && e.detail.value.trim()) {
+        document.querySelector(".add-member-button").disabled = false;
+      } else {
+        document.querySelector(".add-member-button").disabled = true;
+      }
+    })
 
     this.onTagClick("member.add", async (model, button) => {
+      if (document.querySelector(".add-member-button").disabled) {
+        return
+      }
       let inputElement = document.querySelector("#add-member-input");
 
       const newMemberDid = inputElement.value;
@@ -130,29 +143,32 @@ class MembersController extends DwController {
           button.loading = false;
           throw new Error("Member already registered in a group!");
         }
-        await ui.showDialogFromComponent(
-          "dw-dialog-group-members-update",
-          {
+
+        this.updateMemebersModal = this.showModalFromTemplate("dw-dialog-group-members-update/template", () => {
+        }, () => {
+        }, {
+          model: {
             action: "Adding",
-            did: model.did,
+            did: newMemberDid
           },
-          {
-            parentElement: this.element,
-            disableClosing: true,
-          }
-        );
+          disableClosing: false,
+          showCancelButton: false,
+          disableExpanding: true,
+          disableFooter: true,
+          disableHeader: true
+        })
         const member = await this.addMember(selectedGroup, {did: newMemberDid});
         this.model.members.push(member);
 
       } catch (e) {
-        ui.showToast("Could not add user to the group because: " + e.message, {type: 'danger'});
+        this.notificationHandler.reportUserRelevantError("Could not add user to the group because: ", e)
       }
 
       button.loading = false;
-      
-      setTimeout(async () => {
-        await ui.hideDialogFromComponent("dw-dialog-group-members-update")
-      }, 0)
+
+      if (this.updateMemebersModal) {
+        this.updateMemebersModal.destroy();
+      }
     });
 
     this.onTagClick("member.select", (selectedMember, ...props) => {
@@ -164,7 +180,7 @@ class MembersController extends DwController {
       if (model.did !== this.did) {
         await removeGroupMember(model.did, constants.OPERATIONS.REMOVE)
       } else {
-        await ui.showToast("You tried to delete your account. This operation is not allowed.", {type: 'danger'});
+        await ui.showToast("You tried to delete your account. This operation is not allowed.", constants.NOTIFICATION_TYPES.ERROR);
         return;
       }
       // ui.page.closeMultipleSelection();
@@ -176,22 +192,25 @@ class MembersController extends DwController {
     });
     let removeGroupMember = async (did, operation) => {
 
-      await ui.showDialogFromComponent(
-        "dw-dialog-group-members-update",
-        {
+      this.updateMemebersModal = this.showModalFromTemplate("dw-dialog-group-members-update/template", () => {
+      }, () => {
+      }, {
+        model: {
           action: operation === constants.OPERATIONS.REMOVE ? "Deleting" : "Deactivating",
           did: did,
         },
-        {
-          parentElement: this.element,
-          disableClosing: true,
-        }
-      );
-      let undeleted = await this.deleteMembers(this.model.selectedGroup, did, operation);
-      await ui.hideDialogFromComponent("dw-dialog-group-members-update");
+        disableClosing: false,
+        showCancelButton: false,
+        disableExpanding: true,
+        disableFooter: true,
+        disableHeader: true
+      })
 
+      let undeleted = await this.deleteMembers(this.model.selectedGroup, did, operation);
+      /*  await ui.hideDialogFromComponent("dw-dialog-group-members-update");*/
+      this.updateMemebersModal.destroy();
       if (undeleted.length > 0) {
-        await ui.showToast("Member could not be deleted", {type: 'danger'});
+        await ui.showToast("Member could not be deleted", constants.NOTIFICATION_TYPES.ERROR);
         return;
       }
       this.model.members = this.model.members.filter((member) => member.did !== did);
@@ -253,9 +272,9 @@ class MembersController extends DwController {
 
     let undigestedMessages = [];
     const messages = [addMemberToGroupMessage];
-    try{
+    try {
       undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(messages);
-    }catch (e) {
+    } catch (e) {
       throw Error('Failed to add member');
     }
 

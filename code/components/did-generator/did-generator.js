@@ -212,18 +212,19 @@ function createDidGeneratorSelect(types) {
     }
 
     connectedCallback() {
-      this._menuElement = createElement("sl-select", {
+      this._menuElement = createElement("select", {
         placeholder: this.placeholder,
         value: this.type ? this.type : "",
         disabled: this.disabled
       });
       const menuElements = {};
       for (const type of this.types) {
-        menuElements[type] = createElement("sl-menu-item", {
+        menuElements[type] = createElement("option", {
           size: "large",
           innerText: this._allTypes[type].LABEL,
           value: type,
-          disabled: true
+          disabled: true,
+          selected: type === this.type
         });
         menuElements[type].dataset.tag = type.toLowerCase();
         menuElements[type].addEventListener("click", () => {
@@ -257,7 +258,7 @@ function createDidGenerator(config) {
     ["did:ssi"]: (payload) => {
       submitElement.hidden = true;
 
-      const domainElement = createElement("sl-input", {
+      const domainElement = createElement("input", {
         className: "input--domain",
         value: payload.domain,
         placeholder: "domain",
@@ -323,7 +324,7 @@ function createDidGenerator(config) {
       return result;
     },
     ["did:ssi:name"]: (payload) => {
-      payload.inputElement = createElement("sl-input", {
+      payload.inputElement = createElement("input", {
         className: "input--name",
         placeholder: "Type name...",
         readonly: isReadOnlyDID("did:ssi:name"),
@@ -335,7 +336,7 @@ function createDidGenerator(config) {
       return payload.inputElement;
     },
     ["did:ssi:group"]: (payload) => {
-      payload.inputElement = createElement("sl-input", {
+      payload.inputElement = createElement("input", {
         className: "input--group",
         placeholder: "Type group...",
       });
@@ -343,7 +344,7 @@ function createDidGenerator(config) {
     },
     ["did:ssi:key"]: (payload) => {
       const {publicKey} = payload;
-      return createElement("sl-input", {
+      return createElement("input", {
         className: "input--key",
         value: publicKey,
         readonly: true,
@@ -354,17 +355,17 @@ function createDidGenerator(config) {
       const {hashPrivateKey, hashPublicKey, version} = payload;
 
       const baseElement = createElement("div");
-      const hashPrivateKeyElement = createElement("sl-input", {
+      const hashPrivateKeyElement = createElement("input", {
         className: "input--private-key",
         value: hashPrivateKey,
         readonly: true,
       });
-      const hashPublicKeyElement = createElement("sl-input", {
+      const hashPublicKeyElement = createElement("input", {
         className: "input--public-key",
         value: hashPublicKey,
         readonly: true,
       });
-      const versionElement = createElement("sl-input", {
+      const versionElement = createElement("input", {
         className: "input--version",
         value: version,
         readonly: true,
@@ -375,7 +376,7 @@ function createDidGenerator(config) {
     ["did:web"]: () => {
       submitElement.hidden = true;
       return [
-        createElement("sl-input", {
+        createElement("input", {
           className: "input--web",
           value: "internet_domain",
         }),
@@ -385,7 +386,7 @@ function createDidGenerator(config) {
       const {publicKey} = payload;
       // submitElement.hidden = true;
       return [
-        createElement("sl-input", {
+        createElement("input", {
           className: "input--key",
           value: publicKey,
           readonly: true,
@@ -523,21 +524,20 @@ function createDidGenerator(config) {
         className: "main",
         part: "main",
       });
-      submitElement = createElement("sl-button", {
-        className: "submit--did dw-action-button",
-        part: "submit",
+      submitElement = createElement("button", {
+        className: "submit--did dw-action-button dw-icon-button",
         type: "primary",
         hidden: true,
         innerHTML: `
-          <sl-icon slot="prefix" name="shield-fill-plus"></sl-icon>
-          Create identity
+           <div class="button-icon" icon-name="shield-fill-plus"></div>
+           <span class="button-label">Create identity</span>
         `,
       });
       const footerElement = createElement("div", {
         className: "footer",
         part: "footer",
       });
-      const didTagElement = createElement("sl-tag", {
+      const didTagElement = createElement("span", {
         className: "input--did",
         innerHTML: "did",
         size: "large"
@@ -564,7 +564,7 @@ function createDidGenerator(config) {
       });
 
       submitElement.addEventListener("click", async () => {
-        submitElement.loading = true;
+        submitElement.disabled = true;
         let {didDocument} = submitElement.data;
 
         if (!didDocument) {

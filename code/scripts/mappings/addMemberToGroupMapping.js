@@ -1,6 +1,7 @@
 import {getCredentialService} from "../services/JWTCredentialService.js";
 import constants from "../constants.js";
 import utils from "../utils.js";
+import {getGroupCredential} from "./utils.js";
 
 const promisify = utils.promisify;
 
@@ -12,7 +13,6 @@ async function addMemberToGroupMapping(message) {
   const openDSU = require("opendsu");
   const w3cdid = openDSU.loadAPI("w3cdid");
   const scAPI = openDSU.loadAPI("sc");
-  const crypto = openDSU.loadAPI("crypto");
   const mainDSU = await $$.promisify(scAPI.getMainDSU)();
   await $$.promisify(mainDSU.refresh)();
   const mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
@@ -25,8 +25,6 @@ async function addMemberToGroupMapping(message) {
   const groupDIDDocument = await promisify(w3cdid.resolveDID)(message.groupDID);
   let adminDID = await mainEnclave.readKeyAsync(constants.IDENTITY);
   adminDID = adminDID.did;
-  const adminDID_Document = await $$.promisify(w3cdid.resolveDID)(adminDID);
-  const memberDID_Document = await $$.promisify(w3cdid.resolveDID)(member.did);
 
   const enclaveName = message.enclaveName;
   let enclave = await sharedEnclave.readKeyAsync(enclaveName);
@@ -49,8 +47,7 @@ async function addMemberToGroupMapping(message) {
     }
   */
 
-  const credentials = await sharedEnclave.filterAsync(constants.TABLES.GROUPS_CREDENTIALS, `groupDID == ${message.groupDID}`);
-  let groupCredential = credentials.find(el => el.credentialType === constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION);
+  let groupCredential = await getGroupCredential(message.groupDID);
 
   if (!groupCredential) {
     const credentialService = getCredentialService();
@@ -76,9 +73,19 @@ async function addMemberToGroupMapping(message) {
     sender: adminDID
   };
 
-  await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), memberDID_Document);
   await promisify(groupDIDDocument.addMember)(member.did, member);
+  let secretsHandler = await this.getSecretsHandler(adminDID);
+  await secretsHandler.authorizeUser(member.did, groupCredential, enclave);
 }
 
-require("opendsu").loadAPI("m2dsu").defineMapping(checkIfAddMemberToGroupMessage, addMemberToGroupMapping);
+const m2dsu = require("opendsu").loadAPI("m2dsu");
+const w3cdid = require("opendsu").loadAPI("w3cdid");
+//loading SecretsHandler apis
+try{
+  m2dsu.defineApi("getSecretsHandler", w3cdid.SecretsHandler.getInstance);
+}catch(err){
+  console.log(err);
+}
+//defining mapping
+m2dsu.defineMapping(checkIfAddMemberToGroupMessage, addMemberToGroupMapping);
 export {addMemberToGroupMapping};

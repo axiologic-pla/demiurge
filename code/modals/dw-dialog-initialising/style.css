@@ -1,0 +1,13 @@
+*::part(header) {
+    display: none;
+}
+
+main {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+main img {
+    height: 24px;
+}

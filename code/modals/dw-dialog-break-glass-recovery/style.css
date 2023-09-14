@@ -1,0 +1,13 @@
+:host .header-actions button {
+    background: none;
+}
+
+.custom-modal-header {
+    display: flex;
+    gap: 10px;
+}
+
+.custom-modal-header img {
+    width: 24px;
+    height: 24px;
+}
