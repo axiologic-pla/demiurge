@@ -48,6 +48,13 @@ function BootingIdentityController(...props) {
   self.finishingStepOfWalletCreation = () => {
     self.initialisingModal.destroy();
     utils.setWalletStatus(constants.ACCOUNT_STATUS.CREATED).then(() => {
+      self.element.addEventListener("copy-to-clipboard", async (e) => {
+        let adminGroup = await utils.getAdminGroup(self.sharedEnclave);
+        let groupName = utils.getGroupName(adminGroup);
+        WebCardinal.wallet.groupName = groupName;
+        await utils.addLogMessage(self.did, "Copy Break Glass Recovery Code", groupName, self.userName);
+      })
+
       self.showModalFromTemplate("dw-dialog-break-glass-recovery/template", () => {
       }, async () => {
         await utils.autoAuthorization(self.did);
