@@ -81,7 +81,7 @@ function BootingIdentityController(...props) {
     try {
       const sharedEnclave = await self.getSharedEnclave();
       let adminGroup = await utils.getAdminGroup(sharedEnclave);
-      await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, adminGroup.name, self.userName);
+      await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, utils.getGroupName(adminGroup), self.userName);
       history.replaceState({isBack: true}, "");
       self.navigateToPageTag("groups");
     } catch (e) {
@@ -333,7 +333,7 @@ function BootingIdentityController(...props) {
     };
     self.did = did;
     await self.processMessages(sharedEnclave, addMemberToGroupMessage);
-    await utils.addLogMessage(did, logAction, adminGroup.name, self.userName || "-");
+    await utils.addLogMessage(did, logAction, utils.getGroupName(adminGroup), self.userName || "-");
   }
 
   self.processMessages = async (storageService, messages) => {

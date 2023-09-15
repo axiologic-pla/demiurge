@@ -298,6 +298,12 @@ async function getAdminGroup(sharedEnclave) {
   return await tryToGetAdminGroup();
 }
 
+function getGroupName(group) {
+  const segments = group.did.split(":");
+  let groupName = segments.pop();
+  return groupName;
+}
+
 function renderToast(message, type, timeoutValue = 15000) {
   let toastContainer = document.querySelector(".toast-container");
   let toastElement = document.createElement("div");
@@ -395,7 +401,7 @@ function hideTextLoader() {
       window.WebCardinal.loader.hidden = true;
       window.WebCardinal.loader.classList.remove("text-below");
     }
-    
+
     if (document.querySelector("stencil-route.hidden")) {
       document.querySelector("stencil-route.hidden").classList.remove("hidden");
     }
@@ -418,6 +424,7 @@ export default {
   removeSharedEnclaveFromEnv,
   getSharedEnclaveDataFromEnv,
   getAdminGroup,
+  getGroupName,
   renderToast,
   readMappingEngineMessages,
   initSharedEnclave,
