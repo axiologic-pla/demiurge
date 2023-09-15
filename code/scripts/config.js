@@ -156,6 +156,7 @@ function finishInit() {
         let adminGroup = await utils.getAdminGroup(sharedEnclave);
         const segments = adminGroup.did.split(":");
         let groupName = segments.pop();
+        WebCardinal.wallet.groupName = groupName;
         await utils.addLogMessage(did, constants.OPERATIONS.LOGIN, groupName, userData.userName);
       } catch (e) {
         notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);

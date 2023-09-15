@@ -29,6 +29,9 @@ h4 {
     margin-bottom: 10px;
 }
 
+#paste-recovery-key-div {
+    margin-top: 5px;
+}
 
 #recovery-code-div .button__label:hover {
     color: rgb(var(--sl-color-primary-50));

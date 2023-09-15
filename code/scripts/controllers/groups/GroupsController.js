@@ -175,7 +175,11 @@ class GroupsController extends DwController {
 
     })
 
-    this.element.addEventListener("copy-paste-change", (e) => {
+    this.element.addEventListener("copy-to-clipboard", async (e) => {
+      await utils.addLogMessage(this.did, "Copy Data Recovery Key", this.groupName, this.userName);
+    })
+
+    this.element.addEventListener("copy-paste-change", async (e) => {
       if (e.target.id !== "data-recovery-key-input") {
         return;
       }
@@ -202,7 +206,7 @@ class GroupsController extends DwController {
           return;
         }
         let enclaveRecord;
-        try{
+        try {
           enclaveRecord = await utils.initSharedEnclave(recoveryCode, epiEnclaveMsg, true);
         } catch (e) {
           this.recoveryDataKeyModal.destroy()
