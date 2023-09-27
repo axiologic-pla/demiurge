@@ -155,8 +155,8 @@ class GroupsController extends DwController {
       const config = openDSU.loadAPI("config");
       const scAPI = openDSU.loadAPI("sc");
       try {
-        const mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
-        const epiEnclaveRecord = await $$.promisify(mainEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
+        const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+        const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
         let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
         this.recoveryDataKeyModal = this.showModalFromTemplate("dw-dialog-data-recovery/template", () => {
         }, () => {
@@ -202,7 +202,7 @@ class GroupsController extends DwController {
           return;
         }
         let enclaveRecord;
-        try{
+        try {
           enclaveRecord = await utils.initSharedEnclave(recoveryCode, epiEnclaveMsg, true);
         } catch (e) {
           this.recoveryDataKeyModal.destroy()
