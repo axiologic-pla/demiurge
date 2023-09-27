@@ -125,13 +125,15 @@ class DwCopyPasteInput extends HTMLElement {
         // we ignore the error due to the fact that some browsers don't support one of the methods in the try block
       }
       try {
-        navigator.clipboard.writeText(this.inputElement.value).then(() => {
-        }, () => {
-        });
+        await navigator.clipboard.writeText(this.inputElement.value)
       } catch (err) {
         // we ignore the error due to the fact that some browsers don't support one of the methods in the try block
       }
       await this.showToast(`Copied to clipboard!`);
+      this.dispatchEvent(new CustomEvent("copy-to-clipboard", {
+        bubbles: true,
+        detail: {"value": this.inputElement.value}
+      }));
     }
   }
 
