@@ -51,7 +51,7 @@ async function setupGlobalErrorHandlers() {
 }
 
 async function onUserLoginMessage(message) {
-  await utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId)
+  await utils.addLogMessage(message.userDID, constants.OPERATIONS.LOGIN, message.userGroup, message.userId || "-", message.messageId, "-", message.actionDate)
 }
 
 async function watchAndHandleExecution(fnc) {

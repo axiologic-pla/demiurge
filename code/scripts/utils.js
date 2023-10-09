@@ -232,7 +232,7 @@ async function fetchGroups() {
   return groups;
 }
 
-async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, privileges = "-") {
+async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, privileges = "-", actionDate) {
   try {
     let logService = new LogService(constants.TABLES.LOGS_TABLE);
     let logMsg = {
@@ -243,6 +243,11 @@ async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, pr
       group: userGroup,
       privileges: privileges,
     }
+
+    if(actionDate){
+      logMsg.actionDate = actionDate;
+    }
+
     await $$.promisify(logService.log, logService)(logMsg);
   } catch (e) {
     console.error("Very highly improbable fail to record a log (maybe the user is without network connection or without permissions) ", e);
