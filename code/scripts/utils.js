@@ -232,7 +232,7 @@ async function fetchGroups() {
   return groups;
 }
 
-async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, privileges = "-") {
+async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, privileges = "-", actionDate) {
   try {
     let logService = new LogService(constants.TABLES.LOGS_TABLE);
     let logMsg = {
@@ -243,6 +243,11 @@ async function addLogMessage(userDID, action, userGroup, actionUserId, logPk, pr
       group: userGroup,
       privileges: privileges,
     }
+
+    if(actionDate){
+      logMsg.actionDate = actionDate;
+    }
+
     await $$.promisify(logService.log, logService)(logMsg);
   } catch (e) {
     console.error("Very highly improbable fail to record a log (maybe the user is without network connection or without permissions) ", e);
@@ -296,6 +301,12 @@ async function getAdminGroup(sharedEnclave) {
     }
   }
   return await tryToGetAdminGroup();
+}
+
+function getGroupName(group) {
+  const segments = group.did.split(":");
+  let groupName = segments.pop();
+  return groupName;
 }
 
 function renderToast(message, type, timeoutValue = 15000) {
@@ -395,7 +406,7 @@ function hideTextLoader() {
       window.WebCardinal.loader.hidden = true;
       window.WebCardinal.loader.classList.remove("text-below");
     }
-    
+
     if (document.querySelector("stencil-route.hidden")) {
       document.querySelector("stencil-route.hidden").classList.remove("hidden");
     }
@@ -418,6 +429,7 @@ export default {
   removeSharedEnclaveFromEnv,
   getSharedEnclaveDataFromEnv,
   getAdminGroup,
+  getGroupName,
   renderToast,
   readMappingEngineMessages,
   initSharedEnclave,

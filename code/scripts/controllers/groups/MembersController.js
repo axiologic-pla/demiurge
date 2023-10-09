@@ -265,7 +265,7 @@ class MembersController extends DwController {
       memberName: member.username,
       auditData: {
         action: constants.OPERATIONS.ADD,
-        userGroup: group.name,
+        userGroup: utils.getGroupName(group),
         userDID: member.did
       }
     };
@@ -297,7 +297,7 @@ class MembersController extends DwController {
       groupName: group.name,
       auditData: {
         action: operation === constants.OPERATIONS.REMOVE ? constants.OPERATIONS.REMOVE : constants.OPERATIONS.DEACTIVATE,
-        userGroup: group.name,
+        userGroup: utils.getGroupName(group),
         userDID: memberDID
       }
     };

@@ -48,6 +48,13 @@ function BootingIdentityController(...props) {
   self.finishingStepOfWalletCreation = () => {
     self.initialisingModal.destroy();
     utils.setWalletStatus(constants.ACCOUNT_STATUS.CREATED).then(() => {
+      self.element.addEventListener("copy-to-clipboard", async (e) => {
+        let adminGroup = await utils.getAdminGroup(self.sharedEnclave);
+        let groupName = utils.getGroupName(adminGroup);
+        WebCardinal.wallet.groupName = groupName;
+        await utils.addLogMessage(self.did, "Copy Break Glass Recovery Code", groupName, self.userName);
+      })
+
       self.showModalFromTemplate("dw-dialog-break-glass-recovery/template", () => {
       }, async () => {
         await utils.autoAuthorization(self.did);
@@ -81,7 +88,7 @@ function BootingIdentityController(...props) {
     try {
       const sharedEnclave = await self.getSharedEnclave();
       let adminGroup = await utils.getAdminGroup(sharedEnclave);
-      await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, adminGroup.name, self.userName);
+      await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, utils.getGroupName(adminGroup), self.userName);
       history.replaceState({isBack: true}, "");
       self.navigateToPageTag("groups");
     } catch (e) {
@@ -333,7 +340,7 @@ function BootingIdentityController(...props) {
     };
     self.did = did;
     await self.processMessages(sharedEnclave, addMemberToGroupMessage);
-    await utils.addLogMessage(did, logAction, adminGroup.name, self.userName || "-");
+    await utils.addLogMessage(did, logAction, utils.getGroupName(adminGroup), self.userName || "-");
   }
 
   self.processMessages = async (storageService, messages) => {

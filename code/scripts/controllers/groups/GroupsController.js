@@ -155,8 +155,8 @@ class GroupsController extends DwController {
       const config = openDSU.loadAPI("config");
       const scAPI = openDSU.loadAPI("sc");
       try {
-        const mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
-        const epiEnclaveRecord = await $$.promisify(mainEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
+        const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+        const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
         let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
         this.recoveryDataKeyModal = this.showModalFromTemplate("dw-dialog-data-recovery/template", () => {
         }, () => {
@@ -175,7 +175,11 @@ class GroupsController extends DwController {
 
     })
 
-    this.element.addEventListener("copy-paste-change", (e) => {
+    this.element.addEventListener("copy-to-clipboard", async (e) => {
+      await utils.addLogMessage(this.did, "Copy Data Recovery Key", this.groupName, this.userName);
+    })
+
+    this.element.addEventListener("copy-paste-change", async (e) => {
       if (e.target.id !== "data-recovery-key-input") {
         return;
       }
@@ -202,14 +206,14 @@ class GroupsController extends DwController {
           return;
         }
         let enclaveRecord;
-        try{
+        try {
           enclaveRecord = await utils.initSharedEnclave(recoveryCode, epiEnclaveMsg, true);
         } catch (e) {
           this.recoveryDataKeyModal.destroy()
           this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
         }
         await utils.setEpiEnclave(enclaveRecord);
-
+        await utils.addLogMessage(this.did, "Use of the Data Recovery Key", this.groupName, this.userName);
       } catch (e) {
         this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
       }
