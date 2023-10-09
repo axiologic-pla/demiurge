@@ -107,7 +107,7 @@ async function generateDidDocumentAfterSubmission(domain, type, subType, payload
 
   const tryToCreateDIDDocument = async () => {
     let didDocument;
-    try{
+    try {
       switch (didMethod) {
         case "ssi": {
           switch (didSubMethod) {
@@ -120,13 +120,14 @@ async function generateDidDocumentAfterSubmission(domain, type, subType, payload
           break;
         }
       }
-    }catch (e) {
+    } catch (e) {
       return await tryToCreateDIDDocument();
     }
   }
 
   return await tryToCreateDIDDocument();
 }
+
 // DOM Components
 
 function createDidGeneratorSelect(types) {
@@ -475,12 +476,12 @@ function createDidGenerator(config) {
       const tryToLoadDID = async () => {
         try {
           did = await $$.promisify(w3cDID.resolveDID)(
-              `did:${type.toLowerCase()}:${subType.toLowerCase()}:${domain}:${userId}`
+            `did:${type.toLowerCase()}:${subType.toLowerCase()}:${domain}:${userId}`
           );
         } catch (e) {
           if (!e.rootCause || e.rootCause === openDSU.constants.ERROR_ROOT_CAUSE.MISSING_DATA || e.rootCause === openDSU.constants.ERROR_ROOT_CAUSE.UNKNOWN_ERROR) {
             did = null;
-          }else{
+          } else {
             did = await tryToLoadDID();
           }
         }
@@ -564,6 +565,8 @@ function createDidGenerator(config) {
       });
 
       submitElement.addEventListener("click", async () => {
+        submitElement.innerHTML = `<i class="fa fa-circle-o-notch fa-spin" style="font-size:18px; width: 18px; height: 18px;"></i>`
+
         submitElement.disabled = true;
         let {didDocument} = submitElement.data;
 

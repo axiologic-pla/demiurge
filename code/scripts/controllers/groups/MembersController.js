@@ -177,12 +177,20 @@ class MembersController extends DwController {
     });
 
     this.onTagClick("member.delete", async (model, target, event) => {
+      if (target.disabled) {
+        return
+      }
+      target.disabled = true;
+      let targetContent = target.innerHTML;
+      target.innerHTML = `<i class="fa fa-circle-o-notch fa-spin" style="font-size:24px; top: 25%; position:relative; color: var(--dw-app-disabled-color);"></i>`
       if (model.did !== this.did) {
         await removeGroupMember(model.did, constants.OPERATIONS.REMOVE)
       } else {
         await ui.showToast("You tried to delete your account. This operation is not allowed.", constants.NOTIFICATION_TYPES.ERROR);
-        return;
       }
+      target.innerHTML = targetContent;
+      target.disabled = false;
+
       // ui.page.closeMultipleSelection();
     });
 
