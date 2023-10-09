@@ -191,7 +191,7 @@ class GroupsController extends DwController {
       const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();
       const recoveryCode = document.getElementById("data-recovery-key-input").value;
       if (recoveryCode === "") {
-        this.notificationHandler.reportUserRelevantError(`Please insert Recovery Data Key.`);
+        this.notificationHandler.reportUserRelevantError(`Please insert Data Recovery Key.`);
         return;
       }
       try {
@@ -202,7 +202,7 @@ class GroupsController extends DwController {
           return;
         }
         let enclaveRecord;
-        try{
+        try {
           enclaveRecord = await utils.initSharedEnclave(recoveryCode, epiEnclaveMsg, true);
         } catch (e) {
           this.recoveryDataKeyModal.destroy()
