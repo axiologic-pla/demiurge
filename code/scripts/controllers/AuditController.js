@@ -110,16 +110,16 @@ class LogsDataSource extends DataSource {
       }
 
       let pagContainer = document.querySelector(".pagination-container");
-      if(pagContainer){
+      if (pagContainer) {
         this.dataSourceRezults.length > this.itemsOnPage ? pagContainer.hidden = false : pagContainer.hidden = true;
-      }
-      resultData = this.dataSourceRezults.slice(startOffset, startOffset + dataLengthForCurrentPage);
-      this.hasMoreLogs = this.dataSourceRezults.length >= startOffset + dataLengthForCurrentPage + 1;
+        resultData = this.dataSourceRezults.slice(startOffset, startOffset + dataLengthForCurrentPage);
+        this.hasMoreLogs = this.dataSourceRezults.length >= startOffset + dataLengthForCurrentPage + 1;
 
-      if (!this.hasMoreLogs) {
-        document.querySelector(".pagination-container .next-page-btn").disabled = true;
-      } else {
-        document.querySelector(".pagination-container .next-page-btn").disabled = false;
+        if (!this.hasMoreLogs) {
+          document.querySelector(".pagination-container .next-page-btn").disabled = true;
+        } else {
+          document.querySelector(".pagination-container .next-page-btn").disabled = false;
+        }
       }
 
     } catch (e) {
