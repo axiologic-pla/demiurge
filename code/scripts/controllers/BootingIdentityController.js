@@ -88,7 +88,9 @@ function BootingIdentityController(...props) {
     try {
       const sharedEnclave = await self.getSharedEnclave();
       let adminGroup = await utils.getAdminGroup(sharedEnclave);
-      await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, utils.getGroupName(adminGroup), self.userName);
+      let groupName = utils.getGroupName(adminGroup);
+      WebCardinal.wallet.groupName = groupName;
+      await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, groupName, self.userName);
       history.replaceState({isBack: true}, "");
       self.navigateToPageTag("groups");
     } catch (e) {
