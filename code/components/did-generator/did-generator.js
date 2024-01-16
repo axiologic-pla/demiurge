@@ -479,7 +479,7 @@ function createDidGenerator(config) {
             `did:${type.toLowerCase()}:${subType.toLowerCase()}:${domain}:${userId}`
           );
         } catch (e) {
-          if (!e.rootCause || e.rootCause === openDSU.constants.ERROR_ROOT_CAUSE.MISSING_DATA || e.rootCause === openDSU.constants.ERROR_ROOT_CAUSE.UNKNOWN_ERROR) {
+          if (!e.rootCause || e.rootCause === openDSU.constants.ERROR_ROOT_CAUSE.MISSING_DATA_ERROR || e.rootCause === openDSU.constants.ERROR_ROOT_CAUSE.UNKNOWN_ERROR) {
             did = null;
           } else {
             did = await tryToLoadDID();
