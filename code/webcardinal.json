@@ -15,6 +15,10 @@
       "tag": "my-identities"
     },
     {
+      "name": "API keys",
+      "tag": "api-keys"
+    },
+    {
       "name": "Audit",
       "tag": "audit"
     },

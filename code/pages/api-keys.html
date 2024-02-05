@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="./assets/pages/api-keys.css"/>
+
+<webc-container controller="ApiKeysController" id="api-keys-page" class="dw-container">
+    <dw-title header="API Keys"></dw-title>
+
+    <div class="new-api-key-container">
+        <label>API key name</label>
+        <div id="generate-key-div">
+            <input class="dw-default-input" value="@api-key-name-input" required>
+            <button type="primary" data-tag="generate-api-key" disabled
+                    class="dw-icon-button dw-action-button add-key-button">
+                <div class="button-icon" icon-name="plus-lg"></div>
+                <span class="button-label">Generate</span>
+            </button>
+        </div>
+        <div class="copy-container" hidden>
+            <label>Generated API key</label>
+            <dw-copy-paste-input button-label="Copy" type="password" value="@generated-api-key"
+                                 readonly></dw-copy-paste-input>
+            <div class="api-key-note">Important! For security reasons, your API key will only be shown once. Please
+                store your API keys in a
+                safe and secure place as lost keys cannot be retrieved.
+            </div>
+        </div>
+    </div>
+
+    <section class="dw-keys dw-data-grid" data-for="@api-keys">
+        <article class="dw-data-grid-item">
+            <div class="api-key-item">
+                <div>
+                    <div><strong>{{ @api-key-name }}</strong></div>
+                    <div><code>{{ @api-key-mask }}</code></div>
+                </div>
+            </div>
+
+            <button type="primary" tooltip-text="Delete API key" data-tag="api-key-delete"
+                    class="dw-icon-button delete-key-button tooltip">
+                <div class="button-icon" icon-name="trash"></div>
+            </button>
+        </article>
+        <div slot="no-data" data-if="@noApiKeys" class="no-data">
+            <p> There are no API keys</p>
+        </div>
+    </section>
+</webc-container>

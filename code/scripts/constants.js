@@ -14,7 +14,8 @@ export default {
     GOVERNANCE_ORGANIZATIONS: "governance_organizations",
     VOTING_SESSIONS: "voting_sessions",
     VOTING_DATA_TABLE: "voting_data",
-    VOTES_LIST_TABLE: "votes_list"
+    VOTES_LIST_TABLE: "votes_list",
+    API_KEYS_TABLE:"api_keys_table"
   },
   VOTING_DATA_PK: "voting_data_pk",
   CONTENT_TYPE: {

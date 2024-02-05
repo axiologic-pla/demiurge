@@ -223,6 +223,7 @@ class MembersController extends DwController {
       }
       this.model.members = this.model.members.filter((member) => member.did !== did);
     }
+
     setTimeout(async () => {
       this.model.members = await this.fetchMembers();
       this.model.areMembersLoaded = true;

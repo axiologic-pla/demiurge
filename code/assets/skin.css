@@ -495,6 +495,11 @@ webc-app-menu .items :nth-child(3) a:before {
 }
 
 webc-app-menu .items :nth-child(4) a:before {
+    -webkit-mask-image: url("../assets/images/icons/menu-audit.svg");
+    mask-image: url("../assets/images/icons/menu-audit.svg");
+}
+
+webc-app-menu .items :nth-child(5) a:before {
     -webkit-mask-image: url("../assets/images/icons/menu-logout.svg");
     mask-image: url("../assets/images/icons/menu-logout.svg");
 }
