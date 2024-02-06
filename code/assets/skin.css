@@ -490,8 +490,8 @@ webc-app-menu .items :nth-child(2) a:before {
 }
 
 webc-app-menu .items :nth-child(3) a:before {
-    -webkit-mask-image: url("../assets/images/icons/menu-audit.svg");
-    mask-image: url("../assets/images/icons/menu-audit.svg");
+    -webkit-mask-image: url("../assets/images/icons/menu-api-key.svg");
+    mask-image: url("../assets/images/icons/menu-api-key.svg");
 }
 
 webc-app-menu .items :nth-child(4) a:before {
