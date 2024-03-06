@@ -156,7 +156,23 @@ function finishInit() {
         let adminGroup = await utils.getAdminGroup(sharedEnclave);
         let groupName = utils.getGroupName(adminGroup);
         WebCardinal.wallet.groupName = groupName;
+        const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
+        let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
         await utils.addLogMessage(did, constants.OPERATIONS.LOGIN, groupName, userData.userName);
+        let response = await fetch(`${window.location.origin}/integration/checkIfMigrationIsNeeded`);
+        if(response.status !== 200){
+            throw new Error(`Failed to check if migration is needed. Status: ${response.status}`);
+        }
+        let migrationNeeded = await response.text();
+        if (migrationNeeded === "true") {
+          notificationHandler.reportUserRelevantInfo(`System Alert: Migration of Access Control Mechanisms is Currently Underway. Your Patience is Appreciated.`);
+          await fetch(`${window.location.origin}/integration/doMigration`, {
+            body: JSON.stringify({epiEnclaveKeySSI: enclaveKeySSI}),
+            method: "PUT",
+            headers: {"Content-Type": "application/json"}
+          });
+          notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
+        }
       } catch (e) {
         notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
         return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${e.message}`);
