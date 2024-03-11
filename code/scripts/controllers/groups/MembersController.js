@@ -111,6 +111,7 @@ class MembersController extends DwController {
       if (document.querySelector(".add-member-button").disabled) {
         return
       }
+      document.querySelector(".add-member-button").disabled = true
       let inputElement = document.querySelector("#add-member-input");
 
       const newMemberDid = inputElement.value;
