@@ -15,8 +15,13 @@
       "tag": "my-identities"
     },
     {
-      "name": "API keys",
-      "tag": "api-keys"
+      "name": "Integration",
+      "tag": "integration"
+    },
+    {
+      "name": "Revoke authorisation",
+      "tag": "revoke-authorisation",
+      "indexed": false
     },
     {
       "name": "Audit",
