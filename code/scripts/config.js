@@ -155,7 +155,6 @@ function finishInit() {
       try {
         const sharedEnclave = await $$.promisify(waitForSharedEnclave)();
         adminGroup = await utils.getAdminGroup(sharedEnclave);
-        debugger
         let groupName = utils.getGroupName(adminGroup);
         WebCardinal.wallet.groupName = groupName;
         const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
@@ -201,8 +200,8 @@ function finishInit() {
           }
 
           await assignAccessToGroups(sharedEnclave);
-        }
           notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
+        }
       } catch (e) {
         notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
         return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${e.message}`);
