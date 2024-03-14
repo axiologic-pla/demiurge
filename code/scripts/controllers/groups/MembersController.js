@@ -308,6 +308,7 @@ class MembersController extends DwController {
             groupDID: group.did,
             memberDID: memberDID,
             groupName: group.name,
+            accessMode: group.accessMode,
             auditData: {
                 action: operation === constants.OPERATIONS.REMOVE ? constants.OPERATIONS.REMOVE : constants.OPERATIONS.DEACTIVATE,
                 userGroup: utils.getGroupName(group),

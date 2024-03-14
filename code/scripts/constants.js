@@ -61,12 +61,17 @@ export default {
     enclaveName: "epiEnclave",
     accessMode: "write"
   }],
+  APPS: {
+    DSU_FABRIC: "DSU_Fabric",
+    DEMIURGE: "Demiurge"
+  },
+  API_KEY_NAME: "apiKey",
   EPI_ADMIN_GROUP_NAME: "ePI Administration Group",
   EPI_ADMIN_GROUP: "ePI_Administration_Group",
   EPI_READ_GROUP: "ePI_Read_Group",
   EPI_WRITE_GROUP: "ePI_Write_Group",
   EPI_SHARED_ENCLAVE: "epiEnclave",
-
+  SOR_AUTHORIZATION: "sorAuthorization",
   JWT_ENCODING: "JWT_ENCODING",
   GS1_ENCODING: "GS1_ENCODING",
   OTHER_ENCODING: "OTHER_ENCODING",

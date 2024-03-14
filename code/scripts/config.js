@@ -151,9 +151,11 @@ function finishInit() {
         await setMainDID(typicalBusinessLogicHub, did, notificationHandler);
       }
       window.WebCardinal.loader.hidden = true;
+      let adminGroup;
       try {
         const sharedEnclave = await $$.promisify(waitForSharedEnclave)();
-        let adminGroup = await utils.getAdminGroup(sharedEnclave);
+        adminGroup = await utils.getAdminGroup(sharedEnclave);
+        debugger
         let groupName = utils.getGroupName(adminGroup);
         WebCardinal.wallet.groupName = groupName;
         const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
@@ -171,8 +173,36 @@ function finishInit() {
             method: "PUT",
             headers: {"Content-Type": "application/json"}
           });
-          notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
+
+          const openDSU = require("opendsu");
+          const apiKeySpace = openDSU.loadAPI("apiKey");
+          const crypto = openDSU.loadAPI("crypto");
+          const w3cdid = openDSU.loadAPI("w3cdid");
+          const apiKeyClient = apiKeySpace.getAPIKeysClient();
+          try{
+            await apiKeyClient.becomeSysAdmin(crypto.generateRandom(32).toString("base64"));
+          }catch (e) {
+            // another user is already sysadmin
+            // making every demiurge admin a sysadmin
+            let groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroup.did);
+            const members = await $$.promisify(groupDIDDocument.getMembers)();
+            console.log(members)
+            for(let member in members){
+              const memberObject = members[member];
+              if(member !== did){
+                await apiKeyClient.makeSysAdmin(utils.getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
+              }
+            }
+          }
+
+          async function assignAccessToGroups(sharedEnclave) {
+            await utils.associateGroupAccess(sharedEnclave, constants.WRITE_ACCESS_MODE);
+            await utils.associateGroupAccess(sharedEnclave, constants.READ_ONLY_ACCESS_MODE);
+          }
+
+          await assignAccessToGroups(sharedEnclave);
         }
+          notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
       } catch (e) {
         notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
         return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${e.message}`);

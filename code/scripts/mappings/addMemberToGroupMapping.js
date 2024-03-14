@@ -13,6 +13,9 @@ async function addMemberToGroupMapping(message) {
   const openDSU = require("opendsu");
   const w3cdid = openDSU.loadAPI("w3cdid");
   const scAPI = openDSU.loadAPI("sc");
+  const crypto = openDSU.loadAPI("crypto");
+  const apiKeyAPI = openDSU.loadAPI("apiKey");
+  const apiKeyClient = apiKeyAPI.getAPIKeysClient();
   const mainDSU = await $$.promisify(scAPI.getMainDSU)();
   await $$.promisify(mainDSU.refresh)();
   const mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
@@ -74,6 +77,24 @@ async function addMemberToGroupMapping(message) {
   };
 
   await promisify(groupDIDDocument.addMember)(member.did, member);
+  if(message.accessMode === constants.ADMIN_ACCESS_MODE){
+    try{
+        await apiKeyClient.becomeSysAdmin(crypto.sha256JOSE(crypto.generateRandom(32), "base64"));
+    }catch (e) {
+      console.log(e)
+      try{
+        await apiKeyClient.makeSysAdmin(utils.getUserIdFromUsername(member.username), crypto.sha256JOSE(crypto.generateRandom(32), "base64"));
+      }catch (err) {
+        console.log(err)
+      }
+    }
+  }else{
+    const apiKey = {
+      secret: crypto.sha256JOSE(crypto.generateRandom(32), "base64"),
+      scope: message.accessMode
+    }
+    await apiKeyClient.associateAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, utils.getUserIdFromUsername(member.username), JSON.stringify(apiKey));
+  }
   let secretsHandler = await this.getSecretsHandler(adminDID);
   await secretsHandler.authorizeUser(member.did, groupCredential, enclave);
 }

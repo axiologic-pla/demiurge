@@ -336,7 +336,8 @@ function BootingIdentityController(...props) {
       groupDID: adminGroup.did,
       enclaveName: adminGroup.enclaveName,
       memberDID: did,
-      memberName: userDetails
+      memberName: userDetails,
+      accessMode: constants.ADMIN_ACCESS_MODE
     };
     self.did = did;
     await self.processMessages(sharedEnclave, addMemberToGroupMessage);

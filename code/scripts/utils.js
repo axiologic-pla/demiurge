@@ -282,25 +282,68 @@ async function isValidDID(stringDID) {
     return false;
   }
 }
-
-async function getAdminGroup(sharedEnclave) {
-  const tryToGetAdminGroup = async () => {
-    let groups = [];
+async function getGroupByType(sharedEnclave, accessMode, groupName) {
+  const tryToGetGroup = async () => {
     try {
-      groups = await promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
-      let adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE || gr.name === constants.EPI_ADMIN_GROUP_NAME) || {};
-      if (!adminGroup) {
-        throw new Error("Admin group not created yet.")
+      const groups = await promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
+      const group = groups.find(gr => gr.accessMode === accessMode || gr.name === groupName) || {};
+      if (!group) {
+        throw new Error(`Group ${groupName} not found in the shared enclave`);
       }
-      return adminGroup;
+      return group;
     } catch (e) {
       let notificationHandler = require("opendsu").loadAPI("error");
       notificationHandler.reportUserRelevantWarning(`Failed to retrieve configuration data. Retrying ...`);
-      notificationHandler.reportUserRelevantInfo(`Failed to get info about admin group. Retrying ...`, e);
-      return await tryToGetAdminGroup();
+      notificationHandler.reportUserRelevantInfo(`Failed to get info about group. Retrying ...`, e);
+      return await tryToGetGroup();
     }
+  };
+  return await tryToGetGroup();
+}
+
+// Specific functions for admin, write, and read groups, utilizing the generic function
+async function getAdminGroup(sharedEnclave) {
+  return getGroupByType(sharedEnclave, constants.ADMIN_ACCESS_MODE, constants.EPI_ADMIN_GROUP_NAME);
+}
+
+async function getWriteGroup(sharedEnclave) {
+  return getGroupByType(sharedEnclave, constants.WRITE_ACCESS_MODE, constants.EPI_WRITE_GROUP);
+}
+
+async function getReadGroup(sharedEnclave) {
+  return getGroupByType(sharedEnclave, constants.READ_ONLY_ACCESS_MODE, constants.EPI_READ_GROUP);
+}
+
+async function associateGroupAccess(sharedEnclave, groupType) {
+  const AVAILABLE_ACCESS_MODES = [constants.WRITE_ACCESS_MODE, constants.READ_ONLY_ACCESS_MODE];
+  if (!AVAILABLE_ACCESS_MODES.includes(groupType)) {
+    throw new Error(`Invalid group type: ${groupType}`);
   }
-  return await tryToGetAdminGroup();
+
+  const openDSU = require("opendsu");
+  const apiKeySpace = openDSU.loadAPI("apiKey");
+  const crypto = openDSU.loadAPI("crypto");
+  const w3cdid = openDSU.loadAPI("w3cdid");
+  const apiKeyClient = apiKeySpace.getAPIKeysClient();
+
+  const group = groupType === constants.EPI_WRITE_GROUP ? await getWriteGroup(sharedEnclave) : await getReadGroup(sharedEnclave);
+  const groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(group.did);
+  const members = await $$.promisify(groupDIDDocument.getMembers)();
+  console.log(members);
+
+  for (let member in members) {
+    const memberObject = members[member];
+    const apiKey = {
+      scope: groupType,
+      secret: crypto.generateRandom(32).toString("base64")
+    };
+    await apiKeyClient.associateAPIKey(
+        constants.APPS.DSU_FABRIC,
+        groupType,
+        getUserIdFromUsername(memberObject.username), // Assuming this function exists and correctly extracts the user ID from the username
+        JSON.stringify(apiKey)
+    );
+  }
 }
 
 function getGroupName(group) {
@@ -413,6 +456,57 @@ function hideTextLoader() {
   })
 }
 
+function getUserIdFromUsername(username) {
+  let user = '';
+  let domain = '';
+
+  // Check if the input string contains an '@' symbol
+  if (username.includes('@')) {
+    // If '@' is present, split the string based on '/' and '@'
+    const [prefix, userDomain] = username.split('/');
+    [user, domain] = userDomain.split('@');
+  } else {
+    // If '@' is not present, assume format is 'prefix/username/domainWithExtra'
+    const parts = username.split('/');
+    user = parts[1];
+    domain = parts[2];
+  }
+
+  // Clean the domain by removing any trailing numbers using a regex
+  domain = domain.replace(/\d+$/, '');
+
+  return `${user}@${domain}`;
+}
+
+const sorIsAuthorized = async () => {
+  const openDSU = require("opendsu");
+  const config = openDSU.loadAPI("config");
+  const scAPI = openDSU.loadAPI("sc");
+  const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  let isAuthorized;
+  try{
+    isAuthorized = await $$.promisify(sharedEnclave.readKey)(constants.SOR_AUTHORIZATION);
+  }catch (e) {
+    // ignore
+  }
+
+  return isAuthorized;
+}
+
+const setSorAuthorization = async (isAuthorized) => {
+    const openDSU = require("opendsu");
+    const scAPI = openDSU.loadAPI("sc");
+    const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+    let batchId = await sharedEnclave.startOrAttachBatchAsync();
+    try {
+        await sharedEnclave.writeKeyAsync(constants.SOR_AUTHORIZATION, isAuthorized);
+        await sharedEnclave.commitBatchAsync(batchId);
+    } catch (e) {
+        await sharedEnclave.cancelBatchAsync(batchId);
+        throw e;
+    }
+}
+
 export default {
   autoAuthorization,
   promisify,
@@ -437,5 +531,11 @@ export default {
   setWalletStatus,
   getWalletStatus,
   showTextLoader,
-  hideTextLoader
+  hideTextLoader,
+  getUserIdFromUsername,
+  getWriteGroup,
+  getReadGroup,
+  associateGroupAccess,
+  sorIsAuthorized,
+  setSorAuthorization
 };
