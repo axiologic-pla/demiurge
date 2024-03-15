@@ -329,8 +329,6 @@ async function associateGroupAccess(sharedEnclave, groupType) {
   const group = groupType === constants.EPI_WRITE_GROUP ? await getWriteGroup(sharedEnclave) : await getReadGroup(sharedEnclave);
   const groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(group.did);
   const members = await $$.promisify(groupDIDDocument.getMembers)();
-  console.log(members);
-
   for (let member in members) {
     const memberObject = members[member];
     const apiKey = {

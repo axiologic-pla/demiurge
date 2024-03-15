@@ -90,6 +90,50 @@ function BootingIdentityController(...props) {
       let adminGroup = await utils.getAdminGroup(sharedEnclave);
       await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, utils.getGroupName(adminGroup), self.userName);
       history.replaceState({isBack: true}, "");
+      let response = await fetch(`${window.location.origin}/checkIfMigrationIsNeeded`);
+      if(response.status !== 200){
+        throw new Error(`Failed to check if migration is needed. Status: ${response.status}`);
+      }
+      let migrationNeeded = await response.text();
+      if (migrationNeeded === "true") {
+        self.notificationHandler.reportUserRelevantInfo(`System Alert: Migration of Access Control Mechanisms is Currently Underway. Your Patience is Appreciated.`);
+        const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
+        let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
+        await fetch(`${window.location.origin}/doMigration`, {
+          body: JSON.stringify({epiEnclaveKeySSI: enclaveKeySSI}),
+          method: "PUT",
+          headers: {"Content-Type": "application/json"}
+        });
+
+        const openDSU = require("opendsu");
+        const apiKeySpace = openDSU.loadAPI("apiKey");
+        const crypto = openDSU.loadAPI("crypto");
+        const w3cdid = openDSU.loadAPI("w3cdid");
+        const apiKeyClient = apiKeySpace.getAPIKeysClient();
+        try{
+          await apiKeyClient.becomeSysAdmin(crypto.generateRandom(32).toString("base64"));
+        }catch (e) {
+          // another user is already sysadmin
+          // making every demiurge admin a sysadmin
+          let groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroup.did);
+          const members = await $$.promisify(groupDIDDocument.getMembers)();
+          let did = await getStoredDID();
+          for(let member in members){
+            const memberObject = members[member];
+            if(member !== did){
+              await apiKeyClient.makeSysAdmin(utils.getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
+            }
+          }
+        }
+
+        async function assignAccessToGroups(sharedEnclave) {
+          await utils.associateGroupAccess(sharedEnclave, constants.WRITE_ACCESS_MODE);
+          await utils.associateGroupAccess(sharedEnclave, constants.READ_ONLY_ACCESS_MODE);
+        }
+
+        await assignAccessToGroups(sharedEnclave);
+        self.notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
+      }
       self.navigateToPageTag("groups");
     } catch (e) {
       self.notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
