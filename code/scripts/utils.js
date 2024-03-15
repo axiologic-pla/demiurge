@@ -327,19 +327,19 @@ async function associateGroupAccess(sharedEnclave, groupType) {
   const w3cdid = openDSU.loadAPI("w3cdid");
   const apiKeyClient = apiKeySpace.getAPIKeysClient();
 
-  const group = groupType === constants.EPI_WRITE_GROUP ? await getWriteGroup(sharedEnclave) : await getReadGroup(sharedEnclave);
+  const group = groupType === constants.WRITE_ACCESS_MODE ? await getWriteGroup(sharedEnclave) : await getReadGroup(sharedEnclave);
   const groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(group.did);
   const members = await $$.promisify(groupDIDDocument.getMembers)();
   for (let member in members) {
     const memberObject = members[member];
     const apiKey = {
       scope: groupType,
-      secret: crypto.generateRandom(32).toString("base64")
+      secret: crypto.sha256JOSE(crypto.generateRandom(32), "base64")
     };
     await apiKeyClient.associateAPIKey(
         constants.APPS.DSU_FABRIC,
         groupType,
-        getUserIdFromUsername(memberObject.username), // Assuming this function exists and correctly extracts the user ID from the username
+        getUserIdFromUsername(memberObject.username),
         JSON.stringify(apiKey)
     );
   }
