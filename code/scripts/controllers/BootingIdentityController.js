@@ -111,7 +111,8 @@ function BootingIdentityController(...props) {
         const w3cdid = openDSU.loadAPI("w3cdid");
         const apiKeyClient = apiKeySpace.getAPIKeysClient();
         try{
-          await apiKeyClient.becomeSysAdmin(crypto.generateRandom(32).toString("base64"));
+          const secret = crypto.sha256JOSE(crypto.generateRandom(32), "base64")
+          await apiKeyClient.becomeSysAdmin(secret);
         }catch (e) {
           // another user is already sysadmin
           // making every demiurge admin a sysadmin

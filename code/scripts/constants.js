@@ -72,6 +72,7 @@ export default {
   EPI_WRITE_GROUP: "ePI_Write_Group",
   EPI_SHARED_ENCLAVE: "epiEnclave",
   SOR_AUTHORIZATION: "sorAuthorization",
+  SYSADMIN_SECRET: "sysadminSecret",
   JWT_ENCODING: "JWT_ENCODING",
   GS1_ENCODING: "GS1_ENCODING",
   OTHER_ENCODING: "OTHER_ENCODING",

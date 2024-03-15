@@ -476,33 +476,47 @@ function getUserIdFromUsername(username) {
   return `${user}@${domain}`;
 }
 
-const sorIsAuthorized = async () => {
+const setSharedEnclaveKey = async (key, value) => {
   const openDSU = require("opendsu");
-  const config = openDSU.loadAPI("config");
   const scAPI = openDSU.loadAPI("sc");
   const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
-  let isAuthorized;
-  try{
-    isAuthorized = await $$.promisify(sharedEnclave.readKey)(constants.SOR_AUTHORIZATION);
-  }catch (e) {
+  let batchId = await sharedEnclave.startOrAttachBatchAsync();
+  try {
+    await sharedEnclave.writeKeyAsync(key, value);
+    await sharedEnclave.commitBatchAsync(batchId);
+  } catch (e) {
+    await sharedEnclave.cancelBatchAsync(batchId);
+    throw e;
+  }
+}
+
+const getSharedEnclaveKey = async (key) => {
+  const openDSU = require("opendsu");
+  const scAPI = openDSU.loadAPI("sc");
+  const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  let record;
+  try {
+    record = await sharedEnclave.readKeyAsync(key);
+  } catch (e) {
     // ignore
   }
+  return record;
+}
 
-  return isAuthorized;
+const sorIsAuthorized = async () => {
+  return await getSharedEnclaveKey(constants.SOR_AUTHORIZATION);
 }
 
 const setSorAuthorization = async (isAuthorized) => {
-    const openDSU = require("opendsu");
-    const scAPI = openDSU.loadAPI("sc");
-    const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
-    let batchId = await sharedEnclave.startOrAttachBatchAsync();
-    try {
-        await sharedEnclave.writeKeyAsync(constants.SOR_AUTHORIZATION, isAuthorized);
-        await sharedEnclave.commitBatchAsync(batchId);
-    } catch (e) {
-        await sharedEnclave.cancelBatchAsync(batchId);
-        throw e;
-    }
+    return await setSharedEnclaveKey(constants.SOR_AUTHORIZATION, isAuthorized);
+}
+
+const setSysadminSecret = async (secret) => {
+    return await setSharedEnclaveKey(constants.SYSADMIN_SECRET, secret);
+}
+
+const getSysadminSecret = async () => {
+    return await getSharedEnclaveKey(constants.SYSADMIN_SECRET);
 }
 
 export default {
@@ -535,5 +549,7 @@ export default {
   getReadGroup,
   associateGroupAccess,
   sorIsAuthorized,
-  setSorAuthorization
+  setSorAuthorization,
+  setSysadminSecret,
+  getSysadminSecret
 };
