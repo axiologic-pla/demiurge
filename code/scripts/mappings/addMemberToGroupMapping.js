@@ -76,7 +76,6 @@ async function addMemberToGroupMapping(message) {
     sender: adminDID
   };
 
-  await promisify(groupDIDDocument.addMember)(member.did, member);
   if(message.accessMode === constants.ADMIN_ACCESS_MODE){
     try{
         await apiKeyClient.becomeSysAdmin(crypto.sha256JOSE(crypto.generateRandom(32), "base64"));
@@ -95,6 +94,7 @@ async function addMemberToGroupMapping(message) {
     }
     await apiKeyClient.associateAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, utils.getUserIdFromUsername(member.username), JSON.stringify(apiKey));
   }
+  await promisify(groupDIDDocument.addMember)(member.did, member);
   let secretsHandler = await this.getSecretsHandler(adminDID);
   await secretsHandler.authorizeUser(member.did, groupCredential, enclave);
 }
