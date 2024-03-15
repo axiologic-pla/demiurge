@@ -13,14 +13,13 @@ class IntegrationController extends DwController {
             "secret-input": "",
             "token-endpoint-input": ""
         };
-        const self = this;
         setTimeout(async () => {
             const sorIsAuthorized = await utils.sorIsAuthorized();
             if (sorIsAuthorized) {
-                this.navigateToPageTag("revoke-authorisation");
+                this.history.push("revoke-authorisation");
                 return;
             }
-            self.onTagClick("authorize", async () => {
+            this.onTagClick("authorize", async () => {
                 if (!this.model["app-id-input"] || !this.model["scope-input"] || !this.model["secret-input"] || !this.model["token-endpoint-input"]) {
                     this.notificationHandler.reportUserRelevantError("All inputs are required!!!")
                     return;
@@ -40,7 +39,7 @@ class IntegrationController extends DwController {
 
                 let response;
                 try {
-                    response = await fetch("/userId", {
+                    response = await fetch("/clientAuthenticationProxy/getUserId", {
                         method: 'POST',
                         headers: {
                             'Cookie': localStorage.getItem("accessTokenCookie"),
@@ -49,7 +48,6 @@ class IntegrationController extends DwController {
                         body: JSON.stringify(body)
                     })
                 } catch (e) {
-                    debugger
                     console.log(e)
                     this.notificationHandler.reportUserRelevantError("Failed to authorize the application");
                     return;
