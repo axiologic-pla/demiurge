@@ -2,6 +2,7 @@ import Message from "./utils/Message.js";
 import constants from "./constants.js";
 import LogService from "./services/LogService.js";
 import {getGroupCredential} from "./mappings/utils.js";
+import {getStoredDID} from "./services/BootingIdentityService.js";
 
 function promisify(fun) {
   return function (...args) {
@@ -519,6 +520,59 @@ const getSorUserId = async () => {
   return await getSharedEnclaveKey(constants.SOR_USER_ID);
 }
 
+async function doMigration(sharedEnclave) {
+  const openDSU = require("opendsu");
+  const apiKeySpace = openDSU.loadAPI("apiKey");
+  const crypto = openDSU.loadAPI("crypto");
+  const w3cdid = openDSU.loadAPI("w3cdid");
+  let notificationHandler = openDSU.loadAPI("error");
+
+  let adminGroup = await getAdminGroup(sharedEnclave);
+  let response = await fetch(`${window.location.origin}/checkIfMigrationIsNeeded`);
+  if(response.status !== 200){
+    throw new Error(`Failed to check if migration is needed. Status: ${response.status}`);
+  }
+  let migrationNeeded = await response.text();
+  if (migrationNeeded === "true") {
+    notificationHandler.reportUserRelevantInfo(`System Alert: Migration of Access Control Mechanisms is Currently Underway. Your Patience is Appreciated.`);
+    const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
+    let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
+    await fetch(`${window.location.origin}/doMigration`, {
+      body: JSON.stringify({epiEnclaveKeySSI: enclaveKeySSI}),
+      method: "PUT",
+      headers: {"Content-Type": "application/json"}
+    });
+
+
+    const apiKeyClient = apiKeySpace.getAPIKeysClient();
+    try{
+      const secret = crypto.sha256JOSE(crypto.generateRandom(32), "base64")
+      await apiKeyClient.becomeSysAdmin(secret);
+    }catch (e) {
+      // another user is already sysadmin
+      // making every demiurge admin a sysadmin
+      let groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroup.did);
+      const members = await $$.promisify(groupDIDDocument.getMembers)();
+      let did = await getStoredDID();
+      for(let member in members){
+        const memberObject = members[member];
+        if(member !== did){
+          await apiKeyClient.makeSysAdmin(getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
+        }
+      }
+    }
+
+    async function assignAccessToGroups(sharedEnclave) {
+      await associateGroupAccess(sharedEnclave, constants.WRITE_ACCESS_MODE);
+      await associateGroupAccess(sharedEnclave, constants.READ_ONLY_ACCESS_MODE);
+    }
+
+    await assignAccessToGroups(sharedEnclave);
+    notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
+  }
+}
+
+
 export default {
   autoAuthorization,
   promisify,
@@ -551,5 +605,6 @@ export default {
   setSysadminSecret,
   getSysadminSecret,
   setSorUserId,
-  getSorUserId
+  getSorUserId,
+  doMigration
 };

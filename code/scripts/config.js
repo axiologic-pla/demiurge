@@ -158,6 +158,7 @@ function finishInit() {
         let groupName = utils.getGroupName(adminGroup);
         WebCardinal.wallet.groupName = groupName;
         await utils.addLogMessage(did, constants.OPERATIONS.LOGIN, groupName, userData.userName);
+        await utils.doMigration(sharedEnclave);
       } catch (e) {
         notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
         return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${e.message}`);
