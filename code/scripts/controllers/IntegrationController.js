@@ -1,24 +1,28 @@
 import constants from "../constants.js";
 import utils from "../utils.js";
+
 const {DwController} = WebCardinal.controllers;
 
 class IntegrationController extends DwController {
     constructor(...props) {
         super(...props);
         const {ui} = this;
-
+        window.WebCardinal.loader.hidden = false;
         this.model = {
             "app-id-input": "",
             "scope-input": "",
             "secret-input": "",
             "token-endpoint-input": ""
         };
+        let self = this;
         setTimeout(async () => {
-            const sorIsAuthorized = await utils.sorIsAuthorized();
+            let sorIsAuthorized = await utils.sorIsAuthorized();
             if (sorIsAuthorized) {
-                this.history.push("revoke-authorisation");
-                return;
+                self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
+            } else {
+                self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
             }
+            window.WebCardinal.loader.hidden = true;
             this.onTagClick("authorize", async () => {
                 if (!this.model["app-id-input"] || !this.model["scope-input"] || !this.model["secret-input"] || !this.model["token-endpoint-input"]) {
                     this.notificationHandler.reportUserRelevantError("All inputs are required!!!")
@@ -68,10 +72,18 @@ class IntegrationController extends DwController {
                 }
                 await apiKeyClient.associateAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, userId, JSON.stringify(apiKey));
                 await utils.setSorAuthorization(true);
-                this.navigateToPageTag("revoke-authorisation");
+                self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
+                self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
+            });
+            this.onTagClick("revoke-authorisation", async () => {
+                await utils.setSorAuthorization(false);
+                self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
+                self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
+
             });
         });
     }
+
 }
 
 export default IntegrationController;

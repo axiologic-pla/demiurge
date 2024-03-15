@@ -19,11 +19,6 @@
       "tag": "integration"
     },
     {
-      "name": "Revoke authorisation",
-      "tag": "revoke-authorisation",
-      "indexed": false
-    },
-    {
       "name": "Audit",
       "tag": "audit"
     },

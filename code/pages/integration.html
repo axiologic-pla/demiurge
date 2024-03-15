@@ -1,7 +1,7 @@
 <link rel="stylesheet" href="./assets/pages/integration.css"/>
 <webc-container controller="IntegrationController" id="integration-page" class="dw-container">
     <dw-title header="Integration"></dw-title>
-    <div id="inputs-container">
+    <div id="authorize-inputs-container" class="hidden">
         <label>Token endpoint</label>
         <input class="dw-default-input" id="token-endpoint" value="@token-endpoint-input" required>
         <label>Client ID</label>
@@ -16,4 +16,12 @@
             <span class="button-label">Authorize</span>
         </button>
     </div>
+    <div id="revoke-inputs-container" class="hidden">
+        <span class="button-label">Integration user is authorised</span>
+        <button type="primary" data-tag="revoke-authorisation"
+                class="dw-icon-button dw-action-button revoke-authorisation">
+            <span class="button-label">Revoke authorisation</span>
+        </button>
+    </div>
+
 </webc-container>
