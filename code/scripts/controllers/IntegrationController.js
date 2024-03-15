@@ -16,12 +16,16 @@ class IntegrationController extends DwController {
         };
         let self = this;
         setTimeout(async () => {
-            let sorIsAuthorized = await utils.sorIsAuthorized();
-            if (sorIsAuthorized) {
+            let sorUserId = await utils.getSorUserId();
+            if (sorUserId && sorUserId !== "") {
                 self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
             } else {
                 self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
             }
+            const openDSU = require("opendsu");
+            const crypto = openDSU.loadAPI("crypto");
+            const apiKeyAPI = openDSU.loadAPI("apiKey");
+            const apiKeyClient = apiKeyAPI.getAPIKeysClient();
             window.WebCardinal.loader.hidden = true;
             this.onTagClick("authorize", async () => {
                 if (!this.model["app-id-input"] || !this.model["scope-input"] || !this.model["secret-input"] || !this.model["token-endpoint-input"]) {
@@ -61,25 +65,27 @@ class IntegrationController extends DwController {
                     return;
                 }
                 const userId = await response.text();
-
-                const openDSU = require("opendsu");
-                const crypto = openDSU.loadAPI("crypto");
-                const apiKeyAPI = openDSU.loadAPI("apiKey");
-                const apiKeyClient = apiKeyAPI.getAPIKeysClient();
+                await utils.setSorUserId(userId);
                 const apiKey = {
                     secret: crypto.sha256JOSE(crypto.generateRandom(32), "base64"),
                     scope: constants.WRITE_ACCESS_MODE
                 }
                 await apiKeyClient.associateAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, userId, JSON.stringify(apiKey));
-                await utils.setSorAuthorization(true);
                 self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
                 self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
             });
             this.onTagClick("revoke-authorisation", async () => {
-                await utils.setSorAuthorization(false);
+                const sorUserId = await utils.getSorUserId();
+                await apiKeyClient.deleteAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, sorUserId);
+                await utils.setSorUserId("");
                 self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
                 self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
-
+                this.model = {
+                    "app-id-input": "",
+                    "scope-input": "",
+                    "secret-input": "",
+                    "token-endpoint-input": ""
+                };
             });
         });
     }
