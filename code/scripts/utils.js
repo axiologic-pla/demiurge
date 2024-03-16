@@ -554,17 +554,17 @@ async function doMigration(sharedEnclave) {
       const sysadminSecret = await response.text();
       await setSysadminSecret(sysadminSecret);
       let did = await getStoredDID();
+      const secret = crypto.sha256JOSE(crypto.generateRandom(32), "base64");
+      try {
+        await apiKeyClient.becomeSysAdmin(secret);
+      }catch (e) {
+        // already sysadmin
+      }
       let groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroup.did);
       const members = await $$.promisify(groupDIDDocument.getMembers)();
       for (let member in members) {
         const memberObject = members[member];
-        if (member === did) {
-          const sysadminSecret = await getSysadminSecret();
-          if (!sysadminSecret){
-            const secret = crypto.sha256JOSE(crypto.generateRandom(32), "base64");
-            await apiKeyClient.becomeSysAdmin(secret);
-          }
-        } else {
+        if (member !== did) {
           await apiKeyClient.makeSysAdmin(getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
         }
       }
