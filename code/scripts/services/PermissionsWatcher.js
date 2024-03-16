@@ -128,7 +128,6 @@ class PermissionsWatcher {
     // if(!migrationDone){
     //   return false;
     // }
-    return await this.checkAccess();
   }
 
   async migrateGroup (groupDID, enclaveData, includeAllPossible){
