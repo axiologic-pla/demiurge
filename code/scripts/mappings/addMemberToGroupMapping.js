@@ -78,22 +78,19 @@ async function addMemberToGroupMapping(message) {
 
   if(message.accessMode === constants.ADMIN_ACCESS_MODE){
     try{
-      const sysadminSecrets = await utils.getSysadminSecrets();
-      if(!sysadminSecrets || Object.keys(sysadminSecrets).length === 0){
+      const sysadminSecret = await utils.getSysadminSecret();
+      if(!sysadminSecret){
         const secret = await crypto.sha256JOSE(crypto.generateRandom(32), "base64");
         await apiKeyClient.becomeSysAdmin(secret);
-        await utils.addSysadminSecret(utils.getUserIdFromUsername(member.username), secret);
       } else {
         try{
           await apiKeyClient.makeSysAdmin(utils.getUserIdFromUsername(member.username), crypto.sha256JOSE(crypto.generateRandom(32), "base64"));
         }catch (err) {
-          const secret = Object.values(sysadminSecrets)[0];
           const body = {
-            secret,
+            secret: sysadminSecret,
             apiKey: crypto.sha256JOSE(crypto.generateRandom(32), "base64")
           }
           await apiKeyClient.becomeSysAdmin(JSON.stringify(body));
-          await utils.addSysadminSecret(utils.getUserIdFromUsername(member.username), body.apiKey);
         }
       }
     }catch (e) {

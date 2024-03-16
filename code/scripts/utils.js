@@ -504,28 +504,13 @@ const getSharedEnclaveKey = async (key) => {
   return record;
 }
 
-const addSysadminSecret = async (userId, secret) => {
-    let sysadminSecrets = await getSysadminSecrets();
-    if(!sysadminSecrets){
-        sysadminSecrets = {};
-    }
-    sysadminSecrets[userId] = secret;
-    return await setSharedEnclaveKey(constants.SYSADMIN_SECRET, sysadminSecrets);
+const setSysadminSecret = async (secret) => {
+  return await setSharedEnclaveKey(constants.SYSADMIN_SECRET, secret);
 }
 
-const deleteSysadminSecret = async (userId) => {
-    let sysadminSecrets = await getSysadminSecrets();
-    if(!sysadminSecrets){
-        return;
-    }
-    delete sysadminSecrets[userId];
-    return await setSharedEnclaveKey(constants.SYSADMIN_SECRET, sysadminSecrets);
-
+const getSysadminSecret = async () => {
+  return await getSharedEnclaveKey(constants.SYSADMIN_SECRET);
 }
-const getSysadminSecrets = async () => {
-    return await getSharedEnclaveKey(constants.SYSADMIN_SECRET);
-}
-
 const setSorUserId = async (userId) => {
   return await setSharedEnclaveKey(constants.SOR_USER_ID, userId);
 }
@@ -548,28 +533,36 @@ async function doMigration(sharedEnclave) {
   }
   let migrationNeeded = await response.text();
   if (migrationNeeded === "true") {
-    notificationHandler.reportUserRelevantInfo(`System Alert: Migration of Access Control Mechanisms is Currently Underway. Your Patience is Appreciated.`);
-    const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
-    let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
-    await fetch(`${window.location.origin}/doMigration`, {
-      body: JSON.stringify({epiEnclaveKeySSI: enclaveKeySSI}),
-      method: "PUT",
-      headers: {"Content-Type": "application/json"}
-    });
-
     const apiKeyClient = apiKeySpace.getAPIKeysClient();
     try {
+      notificationHandler.reportUserRelevantInfo(`System Alert: Migration of Access Control Mechanisms is Currently Underway. Your Patience is Appreciated.`);
+      const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
+      let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
+      await fetch(`${window.location.origin}/doMigration`, {
+        body: JSON.stringify({epiEnclaveKeySSI: enclaveKeySSI}),
+        method: "PUT",
+        headers: {"Content-Type": "application/json"}
+      });
+
+      const systemAPI = openDSU.loadAPI("system");
+      response = await fetch(`${systemAPI.getBaseURL()}/createSysadminSecret`, {
+        method: "POST"
+      });
+      if(response.status !== 200){
+        throw new Error(`Failed to put sysadmin secret. Status: ${response.status}`);
+      }
+      const sysadminSecret = await response.text();
+      await setSysadminSecret(sysadminSecret);
       let did = await getStoredDID();
       let groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroup.did);
       const members = await $$.promisify(groupDIDDocument.getMembers)();
       for (let member in members) {
         const memberObject = members[member];
         if (member === did) {
-          const sysadminSecrets = await getSysadminSecrets();
-          if (!sysadminSecrets || Object.keys(sysadminSecrets).length === 0) {
+          const sysadminSecret = await getSysadminSecret();
+          if (!sysadminSecret){
             const secret = crypto.sha256JOSE(crypto.generateRandom(32), "base64");
             await apiKeyClient.becomeSysAdmin(secret);
-            await addSysadminSecret(getUserIdFromUsername(memberObject.username), secret);
           }
         } else {
           await apiKeyClient.makeSysAdmin(getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
@@ -621,9 +614,8 @@ export default {
   getWriteGroup,
   getReadGroup,
   associateGroupAccess,
-  addSysadminSecret,
-  deleteSysadminSecret,
-  getSysadminSecrets,
+  setSysadminSecret,
+  getSysadminSecret,
   setSorUserId,
   getSorUserId,
   doMigration
