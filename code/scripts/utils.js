@@ -570,9 +570,9 @@ async function doMigration(sharedEnclave) {
             const secret = crypto.sha256JOSE(crypto.generateRandom(32), "base64");
             await apiKeyClient.becomeSysAdmin(secret);
             await addSysadminSecret(getUserIdFromUsername(memberObject.username), secret);
-          } else {
-            await apiKeyClient.makeSysAdmin(getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
           }
+        } else {
+          await apiKeyClient.makeSysAdmin(getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
         }
       }
     }catch (e) {
