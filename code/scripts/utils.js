@@ -557,23 +557,28 @@ async function doMigration(sharedEnclave) {
       headers: {"Content-Type": "application/json"}
     });
 
-
     const apiKeyClient = apiKeySpace.getAPIKeysClient();
-    try{
-      const secret = crypto.sha256JOSE(crypto.generateRandom(32), "base64")
-      await apiKeyClient.becomeSysAdmin(secret);
-    }catch (e) {
-      // another user is already sysadmin
-      // making every demiurge admin a sysadmin
+    try {
+      let did = await getStoredDID();
       let groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroup.did);
       const members = await $$.promisify(groupDIDDocument.getMembers)();
-      let did = await getStoredDID();
-      for(let member in members){
+      for (let member in members) {
         const memberObject = members[member];
-        if(member !== did){
-          await apiKeyClient.makeSysAdmin(getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
+        if (member === did) {
+          const sysadminSecrets = await getSysadminSecrets();
+          if (!sysadminSecrets || Object.keys(sysadminSecrets).length === 0) {
+            const secret = crypto.sha256JOSE(crypto.generateRandom(32), "base64");
+            await apiKeyClient.becomeSysAdmin(secret);
+            await addSysadminSecret(getUserIdFromUsername(memberObject.username), secret);
+          } else {
+            await apiKeyClient.makeSysAdmin(getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
+          }
         }
       }
+    }catch (e) {
+      console.log(e);
+      notificationHandler.reportUserRelevantError(`Failed to migrate Access Control Mechanisms.`);
+      return;
     }
 
     async function assignAccessToGroups(sharedEnclave) {
