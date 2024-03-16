@@ -20,6 +20,7 @@ async function removeMemberFromGroup(message) {
   const memberDIDDocument = await $$.promisify(w3cdid.resolveDID)(message.memberDID);
   if(message.accessMode === constants.ADMIN_ACCESS_MODE) {
     await apiKeyClient.deleteAdmin(utils.getUserIdFromUsername(memberDIDDocument.getName()));
+    await utils.deleteSysadminSecret(utils.getUserIdFromUsername(memberDIDDocument.getName()));
   } else {
     await apiKeyClient.deleteAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, utils.getUserIdFromUsername(memberDIDDocument.getName()));
   }

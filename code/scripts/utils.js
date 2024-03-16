@@ -504,11 +504,25 @@ const getSharedEnclaveKey = async (key) => {
   return record;
 }
 
-const setSysadminSecret = async (secret) => {
-    return await setSharedEnclaveKey(constants.SYSADMIN_SECRET, secret);
+const addSysadminSecret = async (userId, secret) => {
+    let sysadminSecrets = await getSysadminSecrets();
+    if(!sysadminSecrets){
+        sysadminSecrets = {};
+    }
+    sysadminSecrets[userId] = secret;
+    return await setSharedEnclaveKey(constants.SYSADMIN_SECRET, sysadminSecrets);
 }
 
-const getSysadminSecret = async () => {
+const deleteSysadminSecret = async (userId) => {
+    let sysadminSecrets = await getSysadminSecrets();
+    if(!sysadminSecrets){
+        return;
+    }
+    delete sysadminSecrets[userId];
+    return await setSharedEnclaveKey(constants.SYSADMIN_SECRET, sysadminSecrets);
+
+}
+const getSysadminSecrets = async () => {
     return await getSharedEnclaveKey(constants.SYSADMIN_SECRET);
 }
 
@@ -602,8 +616,9 @@ export default {
   getWriteGroup,
   getReadGroup,
   associateGroupAccess,
-  setSysadminSecret,
-  getSysadminSecret,
+  addSysadminSecret,
+  deleteSysadminSecret,
+  getSysadminSecrets,
   setSorUserId,
   getSorUserId,
   doMigration
