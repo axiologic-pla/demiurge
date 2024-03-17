@@ -283,8 +283,9 @@ async function isValidDID(stringDID) {
     return false;
   }
 }
+
 async function getGroupByType(sharedEnclave, accessMode, groupName) {
-  const tryToGetGroup = async () => {
+  const _getGroup = async () => {
     try {
       const groups = await promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
       const group = groups.find(gr => gr.accessMode === accessMode || gr.name === groupName) || {};
@@ -296,10 +297,10 @@ async function getGroupByType(sharedEnclave, accessMode, groupName) {
       let notificationHandler = require("opendsu").loadAPI("error");
       notificationHandler.reportUserRelevantWarning(`Failed to retrieve configuration data. Retrying ...`);
       notificationHandler.reportUserRelevantInfo(`Failed to get info about group. Retrying ...`, e);
-      return await tryToGetGroup();
+      throw e;
     }
-  };
-  return await tryToGetGroup();
+  }
+  return await retryAsyncFunction(_getGroup, 3, 100);
 }
 
 // Specific functions for admin, write, and read groups, utilizing the generic function
@@ -585,6 +586,26 @@ async function doMigration(sharedEnclave) {
 }
 
 
+function retryAsyncFunction(asyncFunction, maxTries, timeBetweenRetries, ...args) {
+  return new Promise(async (resolve, reject) => {
+    let attempt = 0;
+    while (attempt < maxTries) {
+      try {
+        const result = await asyncFunction(...args);
+        resolve(result); // Successful execution, resolve the promise with the result
+        return; // Exit the function
+      } catch (error) {
+        attempt++;
+        if (attempt >= maxTries) {
+           $$.forceTabRefresh();
+        } else {
+          await new Promise(resolve => setTimeout(resolve, timeBetweenRetries)); // Wait before the next retry
+        }
+      }
+    }
+  });
+}
+
 export default {
   autoAuthorization,
   promisify,
@@ -618,5 +639,6 @@ export default {
   getSysadminSecret,
   setSorUserId,
   getSorUserId,
-  doMigration
+  doMigration,
+  retryAsyncFunction
 };

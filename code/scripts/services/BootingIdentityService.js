@@ -1,5 +1,5 @@
 import constants from "../constants.js";
-
+import utils from "../utils.js";
 const openDSU = require("opendsu");
 const dbAPI = openDSU.loadAPI("db");
 const scAPI = openDSU.loadAPI("sc");
@@ -10,7 +10,7 @@ const w3cDID = openDSU.loadAPI("w3cdid");
  */
 async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING_APPROVAL) {
   const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-  const tryToSetStoredDID = async () => {
+  const _setStoredDID = async () => {
     if (typeof did !== "string") {
       did = did.getIdentifier();
     }
@@ -25,9 +25,10 @@ async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING
       } catch (err) {
         console.log(err);
       }
-      await tryToSetStoredDID();
+      throw e;
     }
-  }
+  };
+
   let identity;
   try {
     identity = await walletStorage.readKeyAsync(constants.IDENTITY);
@@ -39,7 +40,7 @@ async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING
     return;
   }
 
-  await tryToSetStoredDID();
+  await utils.retryAsyncFunction(_setStoredDID, 3, 100);
 }
 
 async function getStoredDID() {

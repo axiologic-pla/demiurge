@@ -256,13 +256,17 @@ function BootingIdentityController(...props) {
   }
 
   self.createInitialDID = async () => {
+    const _createDID = async () => {
     const didDomain = await self.getDIDDomain();
-    try {
-      await $$.promisify(w3cDID.createIdentity)(constants.SSI_NAME_DID_TYPE, didDomain, constants.INITIAL_IDENTITY_PUBLIC_NAME);
-    } catch (e) {
-      self.notificationHandler.reportUserRelevantWarning(`Failed to create DID. Retrying ...`);
-      await self.createInitialDID();
+      try {
+        await $$.promisify(w3cDID.createIdentity)(constants.SSI_NAME_DID_TYPE, didDomain, constants.INITIAL_IDENTITY_PUBLIC_NAME);
+      } catch (e) {
+        self.notificationHandler.reportUserRelevantWarning(`Failed to create DID. Retrying ...`);
+        throw e;
+      }
     }
+
+    await utils.retryAsyncFunction(_createDID, 3, 100);
   }
 
   self.createGroups = async () => {
@@ -281,18 +285,17 @@ function BootingIdentityController(...props) {
   }
 
   self.setSharedEnclave = async (mainEnclave) => {
-    const tryToSetSharedEnclave = async () => {
+    const _setSharedEnclave = async () => {
       try {
         const enclaveRecord = await mainEnclave.readKeyAsync(constants.SHARED_ENCLAVE);
         await $$.promisify(typicalBusinessLogicHub.setSharedEnclave)(enclaveRecord.enclaveKeySSI);
         await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
       } catch (e) {
         self.notificationHandler.reportUserRelevantWarning(`Failed to add shared enclave to environment. Retrying ...`);
-        await tryToSetSharedEnclave();
+        throw e;
       }
-    }
-
-    await tryToSetSharedEnclave();
+    };
+    await utils.retryAsyncFunction(_setSharedEnclave, 3, 100);
   }
 
   self.storeSharedEnclaves = async () => {
@@ -346,32 +349,41 @@ function BootingIdentityController(...props) {
   }
 
   self.processMessages = async (storageService, messages) => {
-    if (!messages) {
-      return
-    }
-    if (!Array.isArray(messages)) {
-      messages = [messages];
+    let remainingMessages = messages;
+    const _processMessages = async (messages) => {
+      if (!messages) {
+        return
+      }
+      if (!Array.isArray(messages)) {
+        messages = [messages];
+      }
+
+      let undigestedMessages = [];
+
+      for (let i = 0; i < messages.length; i++) {
+        try {
+          undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, [messages[i]]);
+        } catch (err) {
+          console.log(err);
+          remainingMessages = messages;
+          self.notificationHandler.reportUserRelevantWarning(`Failed to process message: ${err.message}. Retrying ...`);
+          throw err;
+        }
+        if (undigestedMessages && undigestedMessages.length > 0) {
+          ui.showToast(`Couldn't process all messages. Retrying`);
+          remainingMessages = undigestedMessages.map(msgObj => msgObj.message);
+          console.log("Remaining messages:", remainingMessages);
+          throw new Error("Couldn't process all messages.");
+        }
+      }
     }
 
-    let undigestedMessages = [];
-
-    for (let i = 0; i < messages.length; i++) {
-      try {
-        undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, [messages[i]]);
-      } catch (err) {
-        return await self.processMessages(storageService, messages);
-      }
-      if (undigestedMessages && undigestedMessages.length > 0) {
-        ui.showToast(`Couldn't process all messages. Retrying`);
-        const remainingMessages = undigestedMessages.map(msgObj => msgObj.message);
-        console.log("Remaining messages:", remainingMessages);
-        return await self.processMessages(storageService, remainingMessages);
-      }
-    }
+    await utils.retryAsyncFunction(_processMessages, 3, 100, remainingMessages);
   }
 
   typicalBusinessLogicHub.mainDIDCreated(async (error, did) => {
     if (error) {
+      console.log(error);
       return alert(`Failed to initialise. Probably an infrastructure issue. ${e.message}`);
     }
     if (self.isFirstAdmin) {
@@ -401,6 +413,7 @@ function BootingIdentityController(...props) {
           self.notificationHandler.reportUserRelevantInfo("Waiting for final initialization steps");
           self.finishingStepOfWalletCreation();
         } catch (e) {
+          console.log(e);
           return alert(`Failed to initialise. Probably an infrastructure issue. ${e.message}`);
         }
 
