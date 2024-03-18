@@ -553,6 +553,7 @@ async function doMigration(sharedEnclave) {
           apiKey
         }
         await apiKeyClient.becomeSysAdmin(JSON.stringify(body));
+        await setSysadminCreated(true);
       }catch (e) {
         // already sysadmin
       }
