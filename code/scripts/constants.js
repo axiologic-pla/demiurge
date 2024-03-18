@@ -73,6 +73,7 @@ export default {
   EPI_SHARED_ENCLAVE: "epiEnclave",
   SOR_USER_ID: "sorUserId",
   SYSADMIN_SECRET: "sysadminSecret",
+  SYSADMIN_CREATED: "sysadminCreated",
   JWT_ENCODING: "JWT_ENCODING",
   GS1_ENCODING: "GS1_ENCODING",
   OTHER_ENCODING: "OTHER_ENCODING",
