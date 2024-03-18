@@ -544,20 +544,15 @@ async function doMigration(sharedEnclave) {
         method: "PUT",
         headers: {"Content-Type": "application/json"}
       });
-
-      const systemAPI = openDSU.loadAPI("system");
-      response = await fetch(`${systemAPI.getBaseURL()}/createSysadminSecret`, {
-        method: "POST"
-      });
-      if(response.status !== 200){
-        throw new Error(`Failed to put sysadmin secret. Status: ${response.status}`);
-      }
-      const sysadminSecret = await response.text();
-      await setSysadminSecret(sysadminSecret);
       let did = await getStoredDID();
-      const secret = crypto.sha256JOSE(crypto.generateRandom(32), "base64");
       try {
-        await apiKeyClient.becomeSysAdmin(secret);
+        const sysadminSecret = await getBreakGlassRecoveryCode();
+        const apiKey = crypto.sha256JOSE(crypto.generateRandom(32), "base64");
+        const body = {
+          secret: sysadminSecret,
+          apiKey
+        }
+        await apiKeyClient.becomeSysAdmin(JSON.stringify(body));
       }catch (e) {
         // already sysadmin
       }
@@ -606,6 +601,17 @@ function retryAsyncFunction(asyncFunction, maxTries, timeBetweenRetries, ...args
   });
 }
 
+async function getBreakGlassRecoveryCode() {
+  const openDSU = require("opendsu");
+  const scAPI = openDSU.loadAPI("sc");
+  const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  let keySSI = await sharedEnclave.getKeySSIAsync();
+  if (typeof keySSI !== "string" && keySSI.getIdentifier) {
+    keySSI = keySSI.getIdentifier();
+  }
+  return keySSI;
+}
+
 export default {
   autoAuthorization,
   promisify,
@@ -640,5 +646,6 @@ export default {
   setSorUserId,
   getSorUserId,
   doMigration,
-  retryAsyncFunction
+  retryAsyncFunction,
+  getBreakGlassRecoveryCode
 };

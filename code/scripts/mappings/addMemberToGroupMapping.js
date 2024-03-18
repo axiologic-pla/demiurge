@@ -76,27 +76,15 @@ async function addMemberToGroupMapping(message) {
     sender: adminDID
   };
 
-  if(message.accessMode === constants.ADMIN_ACCESS_MODE){
-    try{
-      const sysadminSecret = await utils.getSysadminSecret();
-      if(!sysadminSecret){
-        const secret = await crypto.sha256JOSE(crypto.generateRandom(32), "base64");
-        await apiKeyClient.becomeSysAdmin(secret);
-      } else {
-        try{
-          await apiKeyClient.makeSysAdmin(utils.getUserIdFromUsername(member.username), crypto.sha256JOSE(crypto.generateRandom(32), "base64"));
-        }catch (err) {
-          const body = {
-            secret: sysadminSecret,
-            apiKey: crypto.sha256JOSE(crypto.generateRandom(32), "base64")
-          }
-          await apiKeyClient.becomeSysAdmin(JSON.stringify(body));
-        }
-      }
-    }catch (e) {
-      await apiKeyClient.makeSysAdmin(utils.getUserIdFromUsername(member.username), crypto.sha256JOSE(crypto.generateRandom(32), "base64"));
-    }
-  }else{
+  if(message.accessMode === constants.ADMIN_ACCESS_MODE) {
+    const sysadminSecret = await utils.getBreakGlassRecoveryCode();
+    const apiKey = await crypto.sha256JOSE(crypto.generateRandom(32), "base64");
+    const body = {
+      secret: sysadminSecret,
+      apiKey: apiKey
+    };
+    await apiKeyClient.becomeSysAdmin(JSON.stringify(body));
+  } else {
     const apiKey = {
       secret: crypto.sha256JOSE(crypto.generateRandom(32), "base64"),
       scope: message.accessMode
