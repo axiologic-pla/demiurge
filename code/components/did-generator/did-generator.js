@@ -1,5 +1,6 @@
 import config from "./did-generator.config.js";
 import {getStoredDID} from "../../scripts/services/BootingIdentityService.js";
+import utils from "../../scripts/utils.js";
 
 const {promisify} = $$;
 
@@ -105,28 +106,25 @@ async function generateDidDocumentAfterSubmission(domain, type, subType, payload
   const didMethod = type.toLowerCase();
   const didSubMethod = subType && subType.toLowerCase();
 
-  const tryToCreateDIDDocument = async () => {
+  const createDIDDocument = async () => {
     let didDocument;
-    try{
-      switch (didMethod) {
-        case "ssi": {
-          switch (didSubMethod) {
-            case "group":
-            case "name": {
-              didDocument = await promisify(w3cDID.createIdentity)(`ssi:${didSubMethod}`, domain, payload);
-              return {didDocument};
-            }
+    switch (didMethod) {
+      case "ssi": {
+        switch (didSubMethod) {
+          case "group":
+          case "name": {
+            didDocument = await promisify(w3cDID.createIdentity)(`ssi:${didSubMethod}`, domain, payload);
+            return {didDocument};
           }
-          break;
         }
+        break;
       }
-    }catch (e) {
-      return await tryToCreateDIDDocument();
     }
-  }
+  };
 
-  return await tryToCreateDIDDocument();
+  return await utils.retryAsyncFunction(createDIDDocument, 3, 100);
 }
+
 // DOM Components
 
 function createDidGeneratorSelect(types) {
@@ -472,23 +470,22 @@ function createDidGenerator(config) {
       const openDSU = require("opendsu");
       const w3cDID = openDSU.loadAPI("w3cdid");
 
-      const tryToLoadDID = async () => {
+      const _loadDID = async () => {
         try {
-          did = await $$.promisify(w3cDID.resolveDID)(
-              `did:${type.toLowerCase()}:${subType.toLowerCase()}:${domain}:${userId}`
-          );
+          did = await $$.promisify(w3cDID.resolveDID)(`did:${type.toLowerCase()}:${subType.toLowerCase()}:${domain}:${userId}`);
         } catch (e) {
-          if (!e.rootCause || e.rootCause === openDSU.constants.ERROR_ROOT_CAUSE.MISSING_DATA || e.rootCause === openDSU.constants.ERROR_ROOT_CAUSE.UNKNOWN_ERROR) {
+          if (!e.rootCause || e.rootCause === openDSU.constants.ERROR_ROOT_CAUSE.MISSING_DATA_ERROR || e.rootCause === openDSU.constants.ERROR_ROOT_CAUSE.UNKNOWN_ERROR) {
             did = null;
-          }else{
-            did = await tryToLoadDID();
+          } else {
+            throw e;
           }
         }
         return did;
       }
+
       let i = 1;
       do {
-        did = await tryToLoadDID();
+        did = await utils.retryAsyncFunction(_loadDID, 3, 100);
         if (did) {
           userId = data.inputElement.value + i++;
         }
@@ -564,6 +561,8 @@ function createDidGenerator(config) {
       });
 
       submitElement.addEventListener("click", async () => {
+        submitElement.innerHTML = `<i class="fa fa-circle-o-notch fa-spin" style="font-size:18px; width: 18px; height: 18px;"></i>`
+
         submitElement.disabled = true;
         let {didDocument} = submitElement.data;
 

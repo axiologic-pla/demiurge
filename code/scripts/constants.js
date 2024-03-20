@@ -14,7 +14,8 @@ export default {
     GOVERNANCE_ORGANIZATIONS: "governance_organizations",
     VOTING_SESSIONS: "voting_sessions",
     VOTING_DATA_TABLE: "voting_data",
-    VOTES_LIST_TABLE: "votes_list"
+    VOTES_LIST_TABLE: "votes_list",
+    API_KEYS_TABLE:"api_keys_table"
   },
   VOTING_DATA_PK: "voting_data_pk",
   CONTENT_TYPE: {
@@ -60,12 +61,19 @@ export default {
     enclaveName: "epiEnclave",
     accessMode: "write"
   }],
+  APPS: {
+    DSU_FABRIC: "DSU_Fabric",
+    DEMIURGE: "Demiurge"
+  },
+  API_KEY_NAME: "apiKey",
   EPI_ADMIN_GROUP_NAME: "ePI Administration Group",
   EPI_ADMIN_GROUP: "ePI_Administration_Group",
   EPI_READ_GROUP: "ePI_Read_Group",
   EPI_WRITE_GROUP: "ePI_Write_Group",
   EPI_SHARED_ENCLAVE: "epiEnclave",
-
+  SOR_USER_ID: "sorUserId",
+  SYSADMIN_SECRET: "sysadminSecret",
+  SYSADMIN_CREATED: "sysadminCreated",
   JWT_ENCODING: "JWT_ENCODING",
   GS1_ENCODING: "GS1_ENCODING",
   OTHER_ENCODING: "OTHER_ENCODING",

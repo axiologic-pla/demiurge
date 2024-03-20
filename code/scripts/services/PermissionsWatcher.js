@@ -124,11 +124,10 @@ class PermissionsWatcher {
       }
       console.debug("Caught an error during checking access", err);
     }
-    let migrationDone = await this.testAndMigrateFromMQs();
-    if(!migrationDone){
-      return false;
-    }
-    return await this.checkAccess();
+    // let migrationDone = await this.testAndMigrateFromMQs();
+    // if(!migrationDone){
+    //   return false;
+    // }
   }
 
   async migrateGroup (groupDID, enclaveData, includeAllPossible){

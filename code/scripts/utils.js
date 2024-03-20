@@ -2,6 +2,7 @@ import Message from "./utils/Message.js";
 import constants from "./constants.js";
 import LogService from "./services/LogService.js";
 import {getGroupCredential} from "./mappings/utils.js";
+import {getStoredDID} from "./services/BootingIdentityService.js";
 
 function promisify(fun) {
   return function (...args) {
@@ -283,24 +284,66 @@ async function isValidDID(stringDID) {
   }
 }
 
-async function getAdminGroup(sharedEnclave) {
-  const tryToGetAdminGroup = async () => {
-    let groups = [];
+async function getGroupByType(sharedEnclave, accessMode, groupName) {
+  const _getGroup = async () => {
     try {
-      groups = await promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
-      let adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE || gr.name === constants.EPI_ADMIN_GROUP_NAME) || {};
-      if (!adminGroup) {
-        throw new Error("Admin group not created yet.")
+      const groups = await promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
+      const group = groups.find(gr => gr.accessMode === accessMode || gr.name === groupName) || {};
+      if (!group) {
+        throw new Error(`Group ${groupName} not found in the shared enclave`);
       }
-      return adminGroup;
+      return group;
     } catch (e) {
       let notificationHandler = require("opendsu").loadAPI("error");
       notificationHandler.reportUserRelevantWarning(`Failed to retrieve configuration data. Retrying ...`);
-      notificationHandler.reportUserRelevantInfo(`Failed to get info about admin group. Retrying ...`, e);
-      return await tryToGetAdminGroup();
+      notificationHandler.reportUserRelevantInfo(`Failed to get info about group. Retrying ...`, e);
+      throw e;
     }
   }
-  return await tryToGetAdminGroup();
+  return await retryAsyncFunction(_getGroup, 3, 100);
+}
+
+// Specific functions for admin, write, and read groups, utilizing the generic function
+async function getAdminGroup(sharedEnclave) {
+  return getGroupByType(sharedEnclave, constants.ADMIN_ACCESS_MODE, constants.EPI_ADMIN_GROUP_NAME);
+}
+
+async function getWriteGroup(sharedEnclave) {
+  return getGroupByType(sharedEnclave, constants.WRITE_ACCESS_MODE, constants.EPI_WRITE_GROUP);
+}
+
+async function getReadGroup(sharedEnclave) {
+  return getGroupByType(sharedEnclave, constants.READ_ONLY_ACCESS_MODE, constants.EPI_READ_GROUP);
+}
+
+async function associateGroupAccess(sharedEnclave, groupType) {
+  const AVAILABLE_ACCESS_MODES = [constants.WRITE_ACCESS_MODE, constants.READ_ONLY_ACCESS_MODE];
+  if (!AVAILABLE_ACCESS_MODES.includes(groupType)) {
+    throw new Error(`Invalid group type: ${groupType}`);
+  }
+
+  const openDSU = require("opendsu");
+  const apiKeySpace = openDSU.loadAPI("apiKey");
+  const crypto = openDSU.loadAPI("crypto");
+  const w3cdid = openDSU.loadAPI("w3cdid");
+  const apiKeyClient = apiKeySpace.getAPIKeysClient();
+
+  const group = groupType === constants.WRITE_ACCESS_MODE ? await getWriteGroup(sharedEnclave) : await getReadGroup(sharedEnclave);
+  const groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(group.did);
+  const members = await $$.promisify(groupDIDDocument.getMembers)();
+  for (let member in members) {
+    const memberObject = members[member];
+    const apiKey = {
+      scope: groupType,
+      secret: crypto.sha256JOSE(crypto.generateRandom(32), "base64")
+    };
+    await apiKeyClient.associateAPIKey(
+        constants.APPS.DSU_FABRIC,
+        groupType,
+        getUserIdFromUsername(memberObject.username),
+        JSON.stringify(apiKey)
+    );
+  }
 }
 
 function getGroupName(group) {
@@ -413,6 +456,163 @@ function hideTextLoader() {
   })
 }
 
+function getUserIdFromUsername(username) {
+  let user = '';
+  let domain = '';
+
+  // Check if the input string contains an '@' symbol
+  if (username.includes('@')) {
+    // If '@' is present, split the string based on '/' and '@'
+    const [prefix, userDomain] = username.split('/');
+    [user, domain] = userDomain.split('@');
+  } else {
+    // If '@' is not present, assume format is 'prefix/username/domainWithExtra'
+    const parts = username.split('/');
+    user = parts[1];
+    domain = parts[2];
+  }
+
+  // Clean the domain by removing any trailing numbers using a regex
+  domain = domain.replace(/\d+$/, '');
+
+  return `${user}@${domain}`;
+}
+
+const setSharedEnclaveKey = async (key, value) => {
+  const openDSU = require("opendsu");
+  const scAPI = openDSU.loadAPI("sc");
+  const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  let batchId = await sharedEnclave.startOrAttachBatchAsync();
+  try {
+    await sharedEnclave.writeKeyAsync(key, value);
+    await sharedEnclave.commitBatchAsync(batchId);
+  } catch (e) {
+    await sharedEnclave.cancelBatchAsync(batchId);
+    throw e;
+  }
+}
+
+const getSharedEnclaveKey = async (key) => {
+  const openDSU = require("opendsu");
+  const scAPI = openDSU.loadAPI("sc");
+  const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  let record;
+  try {
+    record = await sharedEnclave.readKeyAsync(key);
+  } catch (e) {
+    // ignore
+  }
+  return record;
+}
+
+const setSysadminCreated = async (sysadminCreated) => {
+  return await setSharedEnclaveKey(constants.SYSADMIN_CREATED, sysadminCreated);
+}
+
+const getSysadminCreated = async () => {
+  return await getSharedEnclaveKey(constants.SYSADMIN_CREATED);
+}
+const setSorUserId = async (userId) => {
+  return await setSharedEnclaveKey(constants.SOR_USER_ID, userId);
+}
+
+const getSorUserId = async () => {
+  return await getSharedEnclaveKey(constants.SOR_USER_ID);
+}
+
+async function doMigration(sharedEnclave) {
+  const openDSU = require("opendsu");
+  const apiKeySpace = openDSU.loadAPI("apiKey");
+  const crypto = openDSU.loadAPI("crypto");
+  const w3cdid = openDSU.loadAPI("w3cdid");
+  let notificationHandler = openDSU.loadAPI("error");
+
+  let adminGroup = await getAdminGroup(sharedEnclave);
+  let response = await fetch(`${window.location.origin}/checkIfMigrationIsNeeded`);
+  if(response.status !== 200){
+    throw new Error(`Failed to check if migration is needed. Status: ${response.status}`);
+  }
+  let migrationNeeded = await response.text();
+  if (migrationNeeded === "true") {
+    const apiKeyClient = apiKeySpace.getAPIKeysClient();
+    try {
+      notificationHandler.reportUserRelevantInfo(`System Alert: Migration of Access Control Mechanisms is Currently Underway. Your Patience is Appreciated.`);
+      const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
+      let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
+      await fetch(`${window.location.origin}/doMigration`, {
+        body: JSON.stringify({epiEnclaveKeySSI: enclaveKeySSI}),
+        method: "PUT",
+        headers: {"Content-Type": "application/json"}
+      });
+      let did = await getStoredDID();
+      try {
+        const sysadminSecret = await getBreakGlassRecoveryCode();
+        const apiKey = crypto.sha256JOSE(crypto.generateRandom(32), "base64");
+        const body = {
+          secret: sysadminSecret,
+          apiKey
+        }
+        await apiKeyClient.becomeSysAdmin(JSON.stringify(body));
+        await setSysadminCreated(true);
+      }catch (e) {
+        // already sysadmin
+      }
+      let groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroup.did);
+      const members = await $$.promisify(groupDIDDocument.getMembers)();
+      for (let member in members) {
+        const memberObject = members[member];
+        if (member !== did) {
+          await apiKeyClient.makeSysAdmin(getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
+        }
+      }
+    }catch (e) {
+      console.log(e);
+      notificationHandler.reportUserRelevantError(`Failed to migrate Access Control Mechanisms.`);
+      return;
+    }
+
+    async function assignAccessToGroups(sharedEnclave) {
+      await associateGroupAccess(sharedEnclave, constants.WRITE_ACCESS_MODE);
+      await associateGroupAccess(sharedEnclave, constants.READ_ONLY_ACCESS_MODE);
+    }
+
+    await assignAccessToGroups(sharedEnclave);
+    notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
+  }
+}
+
+
+function retryAsyncFunction(asyncFunction, maxTries, timeBetweenRetries, ...args) {
+  return new Promise(async (resolve, reject) => {
+    let attempt = 0;
+    while (attempt < maxTries) {
+      try {
+        const result = await asyncFunction(...args);
+        resolve(result); // Successful execution, resolve the promise with the result
+        return; // Exit the function
+      } catch (error) {
+        attempt++;
+        if (attempt >= maxTries) {
+           $$.forceTabRefresh();
+        } else {
+          await new Promise(resolve => setTimeout(resolve, timeBetweenRetries)); // Wait before the next retry
+        }
+      }
+    }
+  });
+}
+
+async function getBreakGlassRecoveryCode() {
+  const openDSU = require("opendsu");
+  const scAPI = openDSU.loadAPI("sc");
+  const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  let keySSI = await sharedEnclave.getKeySSIAsync();
+  if (typeof keySSI !== "string" && keySSI.getIdentifier) {
+    keySSI = keySSI.getIdentifier();
+  }
+  return keySSI;
+}
+
 export default {
   autoAuthorization,
   promisify,
@@ -437,5 +637,16 @@ export default {
   setWalletStatus,
   getWalletStatus,
   showTextLoader,
-  hideTextLoader
+  hideTextLoader,
+  getUserIdFromUsername,
+  getWriteGroup,
+  getReadGroup,
+  associateGroupAccess,
+  setSysadminCreated,
+  getSysadminCreated,
+  setSorUserId,
+  getSorUserId,
+  doMigration,
+  retryAsyncFunction,
+  getBreakGlassRecoveryCode
 };

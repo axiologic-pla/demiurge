@@ -1,0 +1,87 @@
+dw-title {
+    margin-bottom: 2rem;
+}
+
+.dw-keys.dw-data-grid {
+    padding: 0px;
+    border: none;
+    margin-right: 1rem;
+}
+
+.dw-keys {
+    margin-top: var(--sl-spacing-x-large);
+}
+
+.dw-keys .no-data {
+    display: block;
+    padding: var(--sl-spacing-large);
+    border: var(--keys-border);
+    background-color: var(--keys-background);
+    grid-column: 1 / -1;
+}
+
+.dw-keys .no-data .dw-spinner,
+.dw-keys .dw-data-grid-item > div {
+    padding: 0;
+}
+
+.dw-keys .dw-data-grid-item {
+    padding: 5px 15px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.dw-keys .no-data > p {
+    text-align: center;
+}
+
+.delete-key-button {
+    width: 72px;
+    height: 57px;
+}
+
+.delete-key-button:hover {
+    background: var(--dw-app-color);
+    -moz-box-shadow: 1px 1px 1px rgba(0, 0, 0, .65);
+    -webkit-box-shadow: 1px 1px 1px rgba(0, 0, 0, .65);
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, .65);
+}
+
+.delete-key-button .button-icon {
+    background-color: #000000;
+}
+
+.delete-key-button:hover .button-icon {
+    background-color: #FFFFFF;
+}
+
+.add-key-button {
+    margin-bottom: unset;
+}
+
+.button-icon {
+    background-color: #FFFFFF;
+}
+
+#generate-key-div {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+#generate-key-div input {
+    max-width: 50%;
+}
+
+.copy-container {
+    padding: 1rem 0;
+    max-width: 65%;
+}
+
+.api-key-note {
+    font-size: small;
+    color: grey;
+    margin-top: 5px;
+}

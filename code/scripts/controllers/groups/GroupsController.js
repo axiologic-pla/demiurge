@@ -195,7 +195,7 @@ class GroupsController extends DwController {
       const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();
       const recoveryCode = document.getElementById("data-recovery-key-input").value;
       if (recoveryCode === "") {
-        this.notificationHandler.reportUserRelevantError(`Please insert Recovery Data Key.`);
+        this.notificationHandler.reportUserRelevantError(`Please insert Data Recovery Key.`);
         return;
       }
       try {
@@ -213,6 +213,11 @@ class GroupsController extends DwController {
           this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
         }
         await utils.setEpiEnclave(enclaveRecord);
+        await fetch(`${window.location.origin}/doMigration`, {
+          body: JSON.stringify({epiEnclaveKeySSI: enclaveRecord.enclaveKeySSI}),
+          method: "PUT",
+          headers: {"Content-Type": "application/json"}
+        });
         await utils.addLogMessage(this.did, "Use of the Data Recovery Key", this.groupName, this.userName);
       } catch (e) {
         this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
