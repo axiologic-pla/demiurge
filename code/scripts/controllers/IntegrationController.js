@@ -69,14 +69,24 @@ class IntegrationController extends DwController {
                     secret: crypto.sha256JOSE(crypto.generateRandom(32), "base64"),
                     scope: constants.WRITE_ACCESS_MODE
                 }
-                await apiKeyClient.associateAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, userId, JSON.stringify(apiKey));
-                await utils.setSorUserId(userId);
+                try {
+                    await apiKeyClient.associateAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, userId, JSON.stringify(apiKey));
+                    await utils.setSorUserId(userId);
+                } catch (e) {
+                    this.notificationHandler.reportUserRelevantError("Failed to authorize the application");
+                    return;
+                }
                 self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
                 self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
             });
             this.onTagClick("revoke-authorisation", async () => {
                 const sorUserId = await utils.getSorUserId();
-                await apiKeyClient.deleteAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, sorUserId);
+                try {
+                    await apiKeyClient.deleteAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, sorUserId);
+                } catch (e) {
+                    this.notificationHandler.reportUserRelevantError("Failed to revoke the authorisation");
+                    return;
+                }
                 await utils.setSorUserId("");
                 self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
                 self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
