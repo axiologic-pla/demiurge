@@ -65,12 +65,12 @@ class IntegrationController extends DwController {
                     return;
                 }
                 const userId = await response.text();
-                await utils.setSorUserId(userId);
                 const apiKey = {
                     secret: crypto.sha256JOSE(crypto.generateRandom(32), "base64"),
                     scope: constants.WRITE_ACCESS_MODE
                 }
                 await apiKeyClient.associateAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, userId, JSON.stringify(apiKey));
+                await utils.setSorUserId(userId);
                 self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
                 self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
             });
