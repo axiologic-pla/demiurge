@@ -76,6 +76,7 @@ class IntegrationController extends DwController {
                     this.notificationHandler.reportUserRelevantError("Failed to authorize the application");
                     return;
                 }
+                await utils.addLogMessage(this.did, constants.OPERATIONS.AUTHORIZE, this.groupName);
                 self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
                 self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
             });
@@ -88,6 +89,7 @@ class IntegrationController extends DwController {
                     return;
                 }
                 await utils.setSorUserId("");
+                await utils.addLogMessage(this.did, constants.OPERATIONS.REVOKE, this.groupName);
                 self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
                 self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
                 this.model = {
