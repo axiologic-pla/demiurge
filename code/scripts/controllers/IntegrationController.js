@@ -73,6 +73,7 @@ class IntegrationController extends DwController {
                     await apiKeyClient.associateAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, userId, JSON.stringify(apiKey));
                     await utils.setSorUserId(userId);
                 } catch (e) {
+                    console.log(e)
                     this.notificationHandler.reportUserRelevantError("Failed to authorize the application");
                     return;
                 }
@@ -85,6 +86,7 @@ class IntegrationController extends DwController {
                 try {
                     await apiKeyClient.deleteAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, sorUserId);
                 } catch (e) {
+                    console.log(e)
                     this.notificationHandler.reportUserRelevantError("Failed to revoke the authorisation");
                     return;
                 }
