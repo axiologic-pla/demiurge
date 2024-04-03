@@ -65,19 +65,33 @@ class IntegrationController extends DwController {
                     return;
                 }
                 const userId = await response.text();
-                await utils.setSorUserId(userId);
                 const apiKey = {
                     secret: crypto.sha256JOSE(crypto.generateRandom(32), "base64"),
                     scope: constants.WRITE_ACCESS_MODE
                 }
-                await apiKeyClient.associateAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, userId, JSON.stringify(apiKey));
+                try {
+                    await apiKeyClient.associateAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, userId, JSON.stringify(apiKey));
+                    await utils.setSorUserId(userId);
+                } catch (e) {
+                    console.log(e)
+                    this.notificationHandler.reportUserRelevantError("Failed to authorize the application");
+                    return;
+                }
+                await utils.addLogMessage(this.did, constants.OPERATIONS.AUTHORIZE, this.groupName);
                 self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
                 self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
             });
             this.onTagClick("revoke-authorisation", async () => {
                 const sorUserId = await utils.getSorUserId();
-                await apiKeyClient.deleteAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, sorUserId);
+                try {
+                    await apiKeyClient.deleteAPIKey(constants.APPS.DSU_FABRIC, constants.API_KEY_NAME, sorUserId);
+                } catch (e) {
+                    console.log(e)
+                    this.notificationHandler.reportUserRelevantError("Failed to revoke the authorisation");
+                    return;
+                }
                 await utils.setSorUserId("");
+                await utils.addLogMessage(this.did, constants.OPERATIONS.REVOKE, this.groupName);
                 self.element.querySelector("#revoke-inputs-container").classList.toggle("hidden");
                 self.element.querySelector("#authorize-inputs-container").classList.toggle("hidden");
                 this.model = {
