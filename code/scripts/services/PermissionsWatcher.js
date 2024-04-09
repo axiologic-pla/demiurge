@@ -53,7 +53,7 @@ class PermissionsWatcher {
         $$.forceTabRefresh();
         return;
       }
-    }).catch(async err=>{
+    }).catch(async ()=>{
       //at this point this check if fails may not be that important....
     });
   }
@@ -169,7 +169,7 @@ class PermissionsWatcher {
       if(!this.pendingPromises){
         this.pendingPromises = [];
       }
-      return new Promise((resolve, reject)=>{
+      return new Promise((resolve)=>{
         this.pendingPromises.push(resolve);
       });
     }
@@ -190,9 +190,8 @@ class PermissionsWatcher {
       let groupName = constants.EPI_ADMIN_GROUP;
       let adminGroupDID = `did:ssi:group:${domain}:${groupName}`;
 
-      let adminDIDDocument;
       try{
-        adminDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroupDID);
+        await $$.promisify(w3cdid.resolveDID)(adminGroupDID);
       }catch(err){
         return;
       }
@@ -242,4 +241,4 @@ class PermissionsWatcher {
 
 export function getPermissionsWatcher(did, isAuthorizedHandler) {
   return new PermissionsWatcher(did, isAuthorizedHandler);
-};
+}

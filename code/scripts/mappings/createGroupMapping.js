@@ -12,9 +12,7 @@ async function createGroup(message) {
   const openDSU = require("opendsu");
   const w3cdid = openDSU.loadAPI("w3cdid");
   const scAPI = openDSU.loadAPI("sc");
-  const enclaveAPI = openDSU.loadAPI("enclave");
   const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
-  const vaultDomain = await promisify(scAPI.getVaultDomain)();
   const didDomain = await promisify(scAPI.getDIDDomain)();
 
 

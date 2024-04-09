@@ -12,9 +12,6 @@ async function removeMemberFromGroup(message) {
   const apiKeyClient = apiKeyAPIs.getAPIKeysClient();
   const mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
   let adminDID = await mainEnclave.readKeyAsync(constants.IDENTITY);
-  const msg = {
-    messageType: message.messageType
-  };
 
   const groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(message.groupDID);
   const memberDIDDocument = await $$.promisify(w3cdid.resolveDID)(message.memberDID);

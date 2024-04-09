@@ -1,5 +1,4 @@
 import constants from "../constants.js";
-import utils from "../utils.js";
 
 const openDSU = require("opendsu");
 const scAPI = openDSU.loadAPI("sc");
@@ -17,7 +16,7 @@ class ApiKeysController extends DwController {
       "api-key-name-input": ""
     };
 
-    this.model.onChange("api-key-name-input", (...props) => {
+    this.model.onChange("api-key-name-input", () => {
 
       if (!this.model["api-key-name-input"]) {
         this.element.querySelector("#generate-key-div button").disabled = true;

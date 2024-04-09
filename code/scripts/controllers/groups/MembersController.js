@@ -175,12 +175,12 @@ class MembersController extends DwController {
             }
         });
 
-        this.onTagClick("member.select", (selectedMember, ...props) => {
+        this.onTagClick("member.select", (selectedMember) => {
             this.model.selectedMember = selectedMember;
             ui.page.loadMemberPage({selectedGroup, selectedMember});
         });
 
-        this.onTagClick("member.delete", async (model, target, event) => {
+        this.onTagClick("member.delete", async (model, target) => {
             if (target.disabled) {
                 return
             }
@@ -198,7 +198,7 @@ class MembersController extends DwController {
             // ui.page.closeMultipleSelection();
         });
 
-        this.onTagClick("member.deactivate", async (model, target, event) => {
+        this.onTagClick("member.deactivate", async (model) => {
             await removeGroupMember(model.did, constants.OPERATIONS.DEACTIVATE)
             // ui.page.closeMultipleSelection();
         });

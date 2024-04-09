@@ -9,7 +9,6 @@ const notificationHandler = openDSU.loadAPI("error");
 const scAPI = openDSU.loadApi("sc");
 const typicalBusinessLogicHub = didAPI.getTypicalBusinessLogicHub();
 const {setConfig, getConfig, addControllers, addHook, navigateToPageTag} = WebCardinal.preload;
-const {define} = WebCardinal.components;
 
 let userData;
 
@@ -89,7 +88,6 @@ async function watchAndHandleExecution(fnc) {
 }
 
 async function initializeWebCardinalConfig() {
-  let userName = "-"
   const config = getConfig();
   config.translations = false;
   config.logLevel = "none";
@@ -132,10 +130,6 @@ function finishInit() {
 
   addHook(constants.HOOKS.AFTER_APP_LOADS, async () => {
     await import("../components/did-generator/did-generator.js");
-    const {getEnvironmentDataAsync} = await import("./hooks/getEnvironmentData.js");
-    const envData = await getEnvironmentDataAsync() || {};
-    const enableGovernance = envData.enableGovernance || false;
-
     let status = await utils.getWalletStatus();
 
     if (status === constants.ACCOUNT_STATUS.CREATED) {

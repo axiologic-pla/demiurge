@@ -82,10 +82,6 @@ class GroupsUI extends DwController {
 
       rootElement.append(documentFragment);
 
-      const tabGroupElement = rootElement.querySelector(".dw-group-members-container");
-
-      const storedActiveTab = localStorage.getItem(key);
-
       /*  tabGroupElement.addEventListener("sl-tab-show", (event) => {
           const tab = event.detail.name;
 
@@ -152,7 +148,6 @@ class GroupsController extends DwController {
 
     this.onTagClick("recover-data-key", async () => {
       const openDSU = require("opendsu");
-      const config = openDSU.loadAPI("config");
       const scAPI = openDSU.loadAPI("sc");
       try {
         const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
@@ -175,7 +170,7 @@ class GroupsController extends DwController {
 
     })
 
-    this.element.addEventListener("copy-to-clipboard", async (e) => {
+    this.element.addEventListener("copy-to-clipboard", async () => {
       await utils.addLogMessage(this.did, "Copy Data Recovery Key", this.groupName, this.userName);
     })
 
@@ -191,8 +186,6 @@ class GroupsController extends DwController {
     })
 
     this.onTagClick("data-recovery-key-submit", async () => {
-      const w3cDID = require("opendsu").loadAPI("w3cdid");
-      const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();
       const recoveryCode = document.getElementById("data-recovery-key-input").value;
       if (recoveryCode === "") {
         this.notificationHandler.reportUserRelevantError(`Please insert Data Recovery Key.`);
@@ -244,7 +237,7 @@ class GroupsController extends DwController {
           groupSelect.blur();
         });*/
 
-    this.onTagClick("select-tab", (model, target, event) => {
+    this.onTagClick("select-tab", (model, target) => {
       this.model.selectedTabIndex = this.model.groups.findIndex(group => group.pk === target.getAttribute("tab-name"));
       this.model.selectedGroup = this.model.groups[this.model.selectedTabIndex];
     })

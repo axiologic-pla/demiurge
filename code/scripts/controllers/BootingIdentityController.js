@@ -34,7 +34,7 @@ function BootingIdentityController(...props) {
   const {ui} = self;
   ui.disableMenu();
 
-  self.onTagClick("paste-from-clipboard", async (model, target, event) => {
+  self.onTagClick("paste-from-clipboard", async (model, target) => {
     const result = await navigator.permissions.query({
       name: "clipboard-read",
     });
@@ -48,7 +48,7 @@ function BootingIdentityController(...props) {
   self.finishingStepOfWalletCreation = () => {
     self.initialisingModal.destroy();
     utils.setWalletStatus(constants.ACCOUNT_STATUS.CREATED).then(() => {
-      self.element.addEventListener("copy-to-clipboard", async (e) => {
+      self.element.addEventListener("copy-to-clipboard", async () => {
         let adminGroup = await utils.getAdminGroup(self.sharedEnclave);
         let groupName = utils.getGroupName(adminGroup);
         WebCardinal.wallet.groupName = groupName;
@@ -138,7 +138,7 @@ function BootingIdentityController(...props) {
       disableFooter: true,
     })
 
-    self.onTagClick("continue", async (model, target, event) => {
+    self.onTagClick("continue", async (model, target) => {
       if (target.disabled) {
         return
       }
@@ -384,7 +384,7 @@ function BootingIdentityController(...props) {
   typicalBusinessLogicHub.mainDIDCreated(async (error, did) => {
     if (error) {
       console.log(error);
-      return alert(`Failed to initialise. Probably an infrastructure issue. ${e.message}`);
+      return alert(`Failed to initialise. Probably an infrastructure issue. ${error.message}`);
     }
     if (self.isFirstAdmin) {
       if (did) {

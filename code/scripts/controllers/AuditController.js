@@ -140,8 +140,6 @@ class LogsDataSource extends DataSource {
 class AuditController extends DwController {
   constructor(...props) {
     super(...props);
-    const {ui} = this;
-
     this.model = {
       did: this.did, domain: this.domain,
     };
@@ -167,7 +165,7 @@ class AuditController extends DwController {
       })
     }
 
-    this.onTagClick("audit-export", async (model, target, event) => {
+    this.onTagClick("audit-export", async () => {
       const waitCsv = this.showModalFromTemplate('wait-download/template');
       let csvResult = await this.model.logsDataSource.exportToCSV();
       let url = window.URL.createObjectURL(csvResult);
@@ -180,7 +178,7 @@ class AuditController extends DwController {
       waitCsv.destroy();
     })
 
-    this.onTagClick("prev-page", (model, target, event) => {
+    this.onTagClick("prev-page", (model, target) => {
       target.parentElement.querySelector(".next-page-btn").disabled = false;
       this.model.logsDataSource.goToPreviousPage();
       if (this.model.logsDataSource.getCurrentPageIndex() === 1) {
@@ -188,7 +186,7 @@ class AuditController extends DwController {
       }
 
     })
-    this.onTagClick("next-page", (model, target, event) => {
+    this.onTagClick("next-page", (model, target) => {
 
       target.parentElement.querySelector(".prev-page-btn").disabled = false;
       if (this.model.logsDataSource.hasMoreLogs) {
