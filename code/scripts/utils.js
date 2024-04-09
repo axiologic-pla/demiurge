@@ -463,7 +463,7 @@ function getUserIdFromUsername(username) {
   // Check if the input string contains an '@' symbol
   if (username.includes('@')) {
     // If '@' is present, split the string based on '/' and '@'
-    const userDomain = username.split('/');
+    const [prefix, userDomain] = username.split('/');
     [user, domain] = userDomain.split('@');
   } else {
     // If '@' is not present, assume format is 'prefix/username/domainWithExtra'
