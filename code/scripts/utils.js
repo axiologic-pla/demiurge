@@ -3,6 +3,15 @@ import constants from "./constants.js";
 import LogService from "./services/LogService.js";
 import {getGroupCredential} from "./mappings/utils.js";
 import {getStoredDID} from "./services/BootingIdentityService.js";
+const openDSU = require("opendsu");
+const apiKeySpace = openDSU.loadAPI("apiKey");
+const crypto = openDSU.loadAPI("crypto");
+const w3cdid = openDSU.loadAPI("w3cdid");
+const scAPI = openDSU.loadAPI("sc");
+const enclaveAPI = openDSU.loadAPI("enclave");
+const resolver = openDSU.loadAPI("resolver");
+const config = openDSU.loadAPI("config");
+let notificationHandler = openDSU.loadAPI("error");
 
 function promisify(fun) {
   return function (...args) {
@@ -23,12 +32,10 @@ function promisify(fun) {
 }
 
 function getPKFromContent(stringContent) {
-  const crypto = require("opendsu").loadAPI("crypto");
   return crypto.sha256(stringContent);
 }
 
 async function sendGroupMessage(sender, group, content, contentType, recipientType, groupOperation) {
-  const w3cdid = require("opendsu").loadAPI("w3cdid");
   const groupDIDDocument = await promisify(w3cdid.resolveDID)(group.did);
   const message = new Message();
   message.setSender(sender);
@@ -44,7 +51,6 @@ async function sendGroupMessage(sender, group, content, contentType, recipientTy
 }
 
 async function sendUserMessage(sender, group, member, content, contentType, recipientType, operation) {
-  const w3cdid = require("opendsu").loadAPI("w3cdid");
   let didDocument = await promisify(w3cdid.resolveDID)(sender);
   const receiverDIDDocument = await promisify(w3cdid.resolveDID)(member.did);
   const message = new Message();
@@ -59,8 +65,6 @@ async function sendUserMessage(sender, group, member, content, contentType, reci
 }
 
 async function writeEnvironmentFile(mainDSU, env) {
-  const openDSU = require("opendsu");
-  const scAPI = openDSU.loadAPI("sc");
   let batchId = await mainDSU.startOrAttachBatchAsync();
   try {
     await $$.promisify(mainDSU.writeFile)("/environment.json", JSON.stringify(env));
@@ -80,12 +84,7 @@ async function writeEnvironmentFile(mainDSU, env) {
 
 //recovery arg is used to determine if the enclave is created for the first time or a recovery is performed
 async function initSharedEnclave(keySSI, enclaveConfig, recovery) {
-  const openDSU = require("opendsu");
-  const scAPI = openDSU.loadAPI("sc");
-  const enclaveAPI = openDSU.loadAPI("enclave");
-  const resolver = openDSU.loadAPI("resolver");
   const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
-  let notificationHandler = openDSU.loadAPI("error");
   if (recovery) {
     try {
       await $$.promisify(resolver.loadDSU)(keySSI);
@@ -158,8 +157,6 @@ async function initSharedEnclave(keySSI, enclaveConfig, recovery) {
 
 
 async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
-  const openDSU = require("opendsu");
-  const scAPI = openDSU.loadAPI("sc");
   const mainDSU = await $$.promisify(scAPI.getMainDSU)();
   let env = await $$.promisify(mainDSU.readFile)("/environment.json");
   env = JSON.parse(env.toString());
@@ -170,8 +167,6 @@ async function addSharedEnclaveToEnv(enclaveType, enclaveDID, enclaveKeySSI) {
 }
 
 async function getSharedEnclaveDataFromEnv() {
-  const openDSU = require("opendsu");
-  const scAPI = openDSU.loadAPI("sc");
   const mainDSU = await $$.promisify(scAPI.getMainDSU)();
   let env = await $$.promisify(mainDSU.readFile)("/environment.json");
   env = JSON.parse(env.toString());
@@ -184,17 +179,12 @@ async function getSharedEnclaveDataFromEnv() {
 }
 
 async function setEpiEnclave(enclaveRecord) {
-  const openDSU = require("opendsu");
-  const config = openDSU.loadAPI("config");
-  const scAPI = openDSU.loadAPI("sc");
   const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
   await sharedEnclave.writeKeyAsync(constants.EPI_SHARED_ENCLAVE, enclaveRecord);
   await $$.promisify(config.setEnv)(constants.EPI_SHARED_ENCLAVE, enclaveRecord.enclaveKeySSI);
 }
 
 async function removeSharedEnclaveFromEnv() {
-  const openDSU = require("opendsu");
-  const scAPI = openDSU.loadAPI("sc");
   const mainDSU = await $$.promisify(scAPI.getMainDSU)();
   let env = await $$.promisify(mainDSU.readFile)("/environment.json");
   env = JSON.parse(env.toString());
@@ -208,8 +198,6 @@ async function removeSharedEnclaveFromEnv() {
 }
 
 async function getManagedFeatures() {
-  const openDSU = require("opendsu");
-  const config = openDSU.loadAPI("config");
   let managedFeatures = {};
   try {
     for (let i = 0; i < constants.MANAGED_FEATURES_ARR.length; i++) {
@@ -222,7 +210,6 @@ async function getManagedFeatures() {
 }
 
 async function fetchGroups() {
-  const scAPI = require("opendsu").loadAPI("sc");
   const enclaveDB = await $$.promisify(scAPI.getSharedEnclave)();
   let groups;
   try {
@@ -276,7 +263,6 @@ function waitForEnclave(enclave, callback) {
 
 async function isValidDID(stringDID) {
   try {
-    const w3cdid = require("opendsu").loadAPI("w3cdid");
     await promisify(w3cdid.resolveDID)(stringDID);
     return true;
   } catch (err) {
@@ -294,7 +280,6 @@ async function getGroupByType(sharedEnclave, accessMode, groupName) {
       }
       return group;
     } catch (e) {
-      let notificationHandler = require("opendsu").loadAPI("error");
       notificationHandler.reportUserRelevantWarning(`Failed to retrieve configuration data. Retrying ...`);
       notificationHandler.reportUserRelevantInfo(`Failed to get info about group. Retrying ...`, e);
       throw e;
@@ -322,12 +307,7 @@ async function associateGroupAccess(sharedEnclave, groupType) {
     throw new Error(`Invalid group type: ${groupType}`);
   }
 
-  const openDSU = require("opendsu");
-  const apiKeySpace = openDSU.loadAPI("apiKey");
-  const crypto = openDSU.loadAPI("crypto");
-  const w3cdid = openDSU.loadAPI("w3cdid");
   const apiKeyClient = apiKeySpace.getAPIKeysClient();
-
   const group = groupType === constants.WRITE_ACCESS_MODE ? await getWriteGroup(sharedEnclave) : await getReadGroup(sharedEnclave);
   const groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(group.did);
   const members = await $$.promisify(groupDIDDocument.getMembers)();
@@ -385,7 +365,6 @@ async function readMappingEngineMessages(path, DSUStorage) {
 
   }
   if (!messages) {
-    let notificationHandler = require("opendsu").loadAPI("error");
     notificationHandler.reportUserRelevantWarning(`Failed to retrieve configuration data. Retrying ...`);
     return await this.readMappingEngineMessages(path, DSUStorage);
   }
@@ -393,9 +372,7 @@ async function readMappingEngineMessages(path, DSUStorage) {
 }
 
 async function autoAuthorization(did) {
-
-  const scAPI = require("opendsu").loadAPI("sc");
-  let SecretsHandler = require("opendsu").loadApi("w3cdid").SecretsHandler;
+  let SecretsHandler = w3cdid.SecretsHandler;
   let handler = await SecretsHandler.getInstance(did);
   let domain = await $$.promisify(scAPI.getVaultDomain)();
   const enclaveData = await getSharedEnclaveDataFromEnv();
@@ -404,7 +381,6 @@ async function autoAuthorization(did) {
 }
 
 async function setWalletStatus(walletStatus) {
-  const scAPI = require("opendsu").loadAPI("sc");
   const walletStorage = await $$.promisify(scAPI.getMainEnclave)();
   let batchId = await walletStorage.startOrAttachBatchAsync();
 
@@ -422,8 +398,7 @@ async function setWalletStatus(walletStatus) {
 }
 
 async function getWalletStatus() {
-  const dbAPI = require("opendsu").loadAPI("sc");
-  let walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
+  let walletStorage = await $$.promisify(scAPI.getMainEnclave)();
   let record;
 
   try {
@@ -479,8 +454,6 @@ function getUserIdFromUsername(username) {
 }
 
 const setSharedEnclaveKey = async (key, value) => {
-  const openDSU = require("opendsu");
-  const scAPI = openDSU.loadAPI("sc");
   const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
   let batchId = await sharedEnclave.startOrAttachBatchAsync();
   try {
@@ -493,8 +466,6 @@ const setSharedEnclaveKey = async (key, value) => {
 }
 
 const getSharedEnclaveKey = async (key) => {
-  const openDSU = require("opendsu");
-  const scAPI = openDSU.loadAPI("sc");
   const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
   let record;
   try {
@@ -520,65 +491,137 @@ const getSorUserId = async () => {
   return await getSharedEnclaveKey(constants.SOR_USER_ID);
 }
 
-async function doMigration(sharedEnclave) {
-  const openDSU = require("opendsu");
-  const apiKeySpace = openDSU.loadAPI("apiKey");
-  const crypto = openDSU.loadAPI("crypto");
-  const w3cdid = openDSU.loadAPI("w3cdid");
-  let notificationHandler = openDSU.loadAPI("error");
-
+async function migrateData(sharedEnclave){
   let adminGroup = await getAdminGroup(sharedEnclave);
-  let response = await fetch(`${window.location.origin}/checkIfMigrationIsNeeded`);
-  if(response.status !== 200){
-    throw new Error(`Failed to check if migration is needed. Status: ${response.status}`);
-  }
-  let migrationNeeded = await response.text();
-  if (migrationNeeded === "true") {
-    const apiKeyClient = apiKeySpace.getAPIKeysClient();
+  const apiKeyClient = apiKeySpace.getAPIKeysClient();
+  try {
+    notificationHandler.reportUserRelevantInfo(`System Alert: Migration of Access Control Mechanisms is Currently Underway. Your Patience is Appreciated.`);
+    const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
+    let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
+    let response
     try {
-      notificationHandler.reportUserRelevantInfo(`System Alert: Migration of Access Control Mechanisms is Currently Underway. Your Patience is Appreciated.`);
-      const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
-      let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
-      await fetch(`${window.location.origin}/doMigration`, {
+      response = await fetch(`${window.location.origin}/doMigration`, {
         body: JSON.stringify({epiEnclaveKeySSI: enclaveKeySSI}),
         method: "PUT",
         headers: {"Content-Type": "application/json"}
       });
-      let did = await getStoredDID();
-      try {
-        const sysadminSecret = await getBreakGlassRecoveryCode();
-        const apiKey = crypto.sha256JOSE(crypto.generateRandom(32), "base64");
-        const body = {
-          secret: sysadminSecret,
-          apiKey
-        }
-        await apiKeyClient.becomeSysAdmin(JSON.stringify(body));
-        await setSysadminCreated(true);
-      }catch (e) {
-        // already sysadmin
-      }
-      let groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroup.did);
-      const members = await $$.promisify(groupDIDDocument.getMembers)();
-      for (let member in members) {
-        const memberObject = members[member];
-        if (member !== did) {
-          await apiKeyClient.makeSysAdmin(getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
-        }
-      }
     }catch (e) {
-      console.log(e);
       notificationHandler.reportUserRelevantError(`Failed to migrate Access Control Mechanisms.`);
       return;
     }
+    if(response.status !== 200){
+      console.log(response.statusText);
+      notificationHandler.reportUserRelevantError(`Failed to migrate Access Control Mechanisms.`);
+      return;
+    }
+    let did = await getStoredDID();
+    try {
+      const sysadminSecret = await getBreakGlassRecoveryCode();
+      const apiKey = crypto.sha256JOSE(crypto.generateRandom(32), "base64");
+      const body = {
+        secret: sysadminSecret,
+        apiKey
+      }
+      await apiKeyClient.becomeSysAdmin(JSON.stringify(body));
+      await setSysadminCreated(true);
+    }catch (e) {
+      // already sysadmin
+    }
+    let groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroup.did);
+    const members = await $$.promisify(groupDIDDocument.getMembers)();
+    for (let member in members) {
+      const memberObject = members[member];
+      if (member !== did) {
+        await apiKeyClient.makeSysAdmin(getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
+      }
+    }
+  }catch (e) {
+    console.log(e);
+    notificationHandler.reportUserRelevantError(`Failed to migrate Access Control Mechanisms.`);
+    return;
+  }
 
-    async function assignAccessToGroups(sharedEnclave) {
-      await associateGroupAccess(sharedEnclave, constants.WRITE_ACCESS_MODE);
-      await associateGroupAccess(sharedEnclave, constants.READ_ONLY_ACCESS_MODE);
+  async function assignAccessToGroups(sharedEnclave) {
+    await associateGroupAccess(sharedEnclave, constants.WRITE_ACCESS_MODE);
+    await associateGroupAccess(sharedEnclave, constants.READ_ONLY_ACCESS_MODE);
+  }
+
+  await assignAccessToGroups(sharedEnclave);
+  notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
+}
+
+async function doMigration(sharedEnclave) {
+  function showMigrationDialog() {
+    // Check if the dialog already exists
+    let dialog = document.getElementById('migrationDialog');
+    if (!dialog) {
+      dialog = document.createElement('div');
+      dialog.id = 'migrationDialog';
+      dialog.style.position = 'fixed';
+      dialog.style.left = '0';
+      dialog.style.top = '0';
+      dialog.style.width = '100%';
+      dialog.style.height = '100%';
+      dialog.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+      dialog.style.zIndex = '1000';
+      dialog.style.display = 'flex';
+      dialog.style.justifyContent = 'center';
+      dialog.style.alignItems = 'center';
+      dialog.style.color = 'black';
+      dialog.innerHTML = '<div style="padding: 40px; background: #FFF;">Migration is in progress, please wait...</div>';
+      document.body.appendChild(dialog);
+    } else {
+      dialog.style.display = 'flex';
+    }
+  }
+
+  // Function to hide the migration dialog
+  function hideMigrationDialog() {
+    const dialog = document.getElementById('migrationDialog');
+    if (dialog) {
+      dialog.style.display = 'none';
     }
 
-    await assignAccessToGroups(sharedEnclave);
-    notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
   }
+  if (!sharedEnclave) {
+    sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  }
+  let response = await fetch(`${window.location.origin}/getMigrationStatus`);
+  if (response.status !== 200) {
+    throw new Error(`Failed to check migration status. HTTP status: ${response.status}`);
+  }
+
+  let migrationStatus = await response.text();
+
+  if (migrationStatus === constants.MIGRATION_STATUS.NOT_STARTED) {
+    await migrateData(sharedEnclave);
+    return;
+  }
+
+
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  if (migrationStatus === constants.MIGRATION_STATUS.IN_PROGRESS) {
+    showMigrationDialog();
+  }
+
+  while (migrationStatus === constants.MIGRATION_STATUS.IN_PROGRESS) {
+    await delay(10000);
+
+    response = await fetch(`${window.location.origin}/getMigrationStatus`);
+    if (response.status !== 200) {
+      throw new Error(`Failed to recheck migration status. HTTP status: ${response.status}`);
+    }
+    migrationStatus = await response.text();
+
+    if (migrationStatus === constants.MIGRATION_STATUS.COMPLETED) {
+      hideMigrationDialog();
+      console.log('Migration completed successfully.');
+      return;
+    }
+  }
+
+  console.log('Migration completed successfully.');
 }
 
 
@@ -603,8 +646,6 @@ function retryAsyncFunction(asyncFunction, maxTries, timeBetweenRetries, ...args
 }
 
 async function getBreakGlassRecoveryCode() {
-  const openDSU = require("opendsu");
-  const scAPI = openDSU.loadAPI("sc");
   const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
   let keySSI = await sharedEnclave.getKeySSIAsync();
   if (typeof keySSI !== "string" && keySSI.getIdentifier) {

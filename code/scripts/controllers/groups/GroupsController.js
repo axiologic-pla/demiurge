@@ -206,11 +206,7 @@ class GroupsController extends DwController {
           this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
         }
         await utils.setEpiEnclave(enclaveRecord);
-        await fetch(`${window.location.origin}/doMigration`, {
-          body: JSON.stringify({epiEnclaveKeySSI: enclaveRecord.enclaveKeySSI}),
-          method: "PUT",
-          headers: {"Content-Type": "application/json"}
-        });
+        await utils.doMigration();
         await utils.addLogMessage(this.did, "Use of the Data Recovery Key", this.groupName, this.userName);
       } catch (e) {
         this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
