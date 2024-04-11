@@ -13,35 +13,6 @@ class GroupsUI extends DwController {
   }
 
   // listeners
-
-  // addBlockchainDomainListener() {
-  //   const inputElement = this.getElementByTag("blockchain-domain");
-  //
-  //   const nativeElement = inputElement.shadowRoot.querySelector("[part=input]");
-  //   if (!(nativeElement instanceof HTMLElement)) return;
-  //
-  //   const buttonElements = inputElement.querySelectorAll("sl-button");
-  //   const [editButtonElement, saveButtonElement] = buttonElements;
-  //
-  //   editButtonElement.addEventListener("click", (event) => {
-  //     event.stopPropagation();
-  //     editButtonElement.setAttribute("hidden", "");
-  //     saveButtonElement.removeAttribute("hidden");
-  //     inputElement.disabled = false;
-  //     setTimeout(() => {
-  //       nativeElement.focus();
-  //       nativeElement.setSelectionRange(0, nativeElement.value.length);
-  //     });
-  //   });
-  //
-  //   saveButtonElement.addEventListener("click", (event) => {
-  //     event.stopPropagation();
-  //     saveButtonElement.setAttribute("hidden", "");
-  //     editButtonElement.removeAttribute("hidden");
-  //     inputElement.disabled = true;
-  //   });
-  // }
-
   addGroupContentListener() {
     const part = "group-content";
     const rootElement = this.querySelector(`#dw-${part}`);
@@ -78,40 +49,11 @@ class GroupsUI extends DwController {
         }
       }
 
-
       rootElement.append(documentFragment);
-
-      /*  tabGroupElement.addEventListener("sl-tab-show", (event) => {
-          const tab = event.detail.name;
-
-          if (tab === "members") {
-            localStorage.removeItem(key);
-          }
-
-          localStorage.setItem(key, tab);
-        });
-
-        if (tabGroupElement && storedActiveTab) {
-          setTimeout(async () => {
-            await tabGroupElement.show(storedActiveTab);
-            rootElement.hidden = false;
-          });
-        } else {
-          rootElement.hidden = false;
-        }
-
-       */
     });
   }
 
   // methods
-
-  /*
-    async addGroup(model, target) {
-      return await this.ui.submitGenericForm(model, target);
-    }
-  */
-
   async selectGroup(model, target) {
     if (target.checked) {
       target.checked = false;
