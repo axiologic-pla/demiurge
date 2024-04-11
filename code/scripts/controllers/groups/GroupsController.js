@@ -43,7 +43,6 @@ class GroupsUI extends DwController {
   // }
 
   addGroupContentListener() {
-    const key = "dw:groups:active-tab";
     const part = "group-content";
     const rootElement = this.querySelector(`#dw-${part}`);
     const subParts = {
@@ -206,7 +205,6 @@ class GroupsController extends DwController {
           this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
         }
         await utils.setEpiEnclave(enclaveRecord);
-        await utils.doMigration();
         await utils.addLogMessage(this.did, "Use of the Data Recovery Key", this.groupName, this.userName);
       } catch (e) {
         this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
