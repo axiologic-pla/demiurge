@@ -100,7 +100,7 @@ export default class FileManagementService {
           return reject('Could not get file as a Buffer');
         }
 
-        dsuInstance.writeFile(path, $$.Buffer.from(arrayBuffer), undefined, (err, keySSI) => {
+        dsuInstance.writeFile(path, $$.Buffer.from(arrayBuffer), undefined, (err) => {
           if (err) {
             return reject(new Error(err));
           }

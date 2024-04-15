@@ -9,10 +9,8 @@ function checkIfCreateEnclaveMessage(message) {
 async function createEnclave(message) {
   const openDSU = require("opendsu");
   const scAPI = openDSU.loadAPI("sc");
-  const enclaveAPI = openDSU.loadAPI("enclave");
   const resolver = openDSU.loadAPI("resolver");
 
-  const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
   const vaultDomain = await promisify(scAPI.getVaultDomain)();
   const dsu = await $$.promisify(resolver.createSeedDSU)(vaultDomain);
   const keySSI = await $$.promisify(dsu.getKeySSIAsString)();

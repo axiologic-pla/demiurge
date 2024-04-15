@@ -123,5 +123,10 @@ export default {
         CLICK: "click",
         FOCUSOUT: "focusout",
         CHANGE: "change"
+    },
+    MIGRATION_STATUS: {
+        NOT_STARTED: "not_started",
+        IN_PROGRESS: "in_progress",
+        COMPLETED: "completed"
     }
 };

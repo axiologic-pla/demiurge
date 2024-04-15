@@ -114,7 +114,6 @@ async function setupDefaultModel(userData) {
 
   wallet.userDetails = userData.userAppDetails;
   wallet.userName = userData.userName;
-  let userName = userData.userName || "-";
 
   wallet.did = await getStoredDID();
   wallet.status = await utils.getWalletStatus();
@@ -134,7 +133,7 @@ class DwUI {
    * @param {'primary' | 'success' | 'info' | 'warning' | 'danger'} [type]
    * @param {boolean} [closable]
    */
-  showToast(message, {duration, icon, type, closable} = {}) {
+  showToast(message, {duration, icon, type} = {}) {
     if (typeof message === "object") {
       message = JSON.stringify(message, null, 4);
     }

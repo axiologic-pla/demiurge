@@ -3,8 +3,6 @@ const { DwController } = WebCardinal.controllers;
 class MyIdentitiesController extends DwController {
   constructor(...props) {
     super(...props);
-    const { ui } = this;
-
     this.model = {
       did: this.did,
       domain: this.domain,

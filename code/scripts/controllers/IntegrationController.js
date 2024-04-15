@@ -6,7 +6,6 @@ const {DwController} = WebCardinal.controllers;
 class IntegrationController extends DwController {
     constructor(...props) {
         super(...props);
-        const {ui} = this;
         window.WebCardinal.loader.hidden = false;
         this.model = {
             "app-id-input": "",

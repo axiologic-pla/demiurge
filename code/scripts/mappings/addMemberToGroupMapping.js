@@ -69,13 +69,6 @@ async function addMemberToGroupMapping(message) {
   let allPossibleGroups =  await sharedEnclave.filterAsync(constants.TABLES.GROUPS, "enclaveName == epiEnclave");
   groupCredential.allPossibleGroups = allPossibleGroups;
 
-  const msg = {
-    messageType: constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP,
-    credential: groupCredential,
-    enclave: enclaveRecord,
-    sender: adminDID
-  };
-
   if(message.accessMode === constants.ADMIN_ACCESS_MODE) {
     const _becomeSysAdmin = async () => {
       const sysadminSecret = await utils.getBreakGlassRecoveryCode();
