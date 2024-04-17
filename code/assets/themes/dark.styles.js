@@ -1,5 +1,5 @@
 import {
-  i
+    i
 } from "../chunks/chunk.4WUNMDF2.js";
 import "../chunks/chunk.IHGPZX35.js";
 
@@ -565,5 +565,5 @@ var dark_styles_default = i`
   }
 `;
 export {
-  dark_styles_default as default
+    dark_styles_default as default
 };

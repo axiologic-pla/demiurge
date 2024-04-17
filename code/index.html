@@ -22,19 +22,19 @@
     <link rel="icon" type="image/png" href="favicon/favicon.png"/>
 
     <script>
-      if (window.frameElement) {
-        const iframeIdentity = window.frameElement.getAttribute('identity');
+        if (window.frameElement) {
+            const iframeIdentity = window.frameElement.getAttribute('identity');
 
-        if (iframeIdentity) {
-          window.parent.document.dispatchEvent(
-            new CustomEvent(iframeIdentity, {
-              detail: {
-                status: 'completed',
-              },
-            })
-          );
+            if (iframeIdentity) {
+                window.parent.document.dispatchEvent(
+                    new CustomEvent(iframeIdentity, {
+                        detail: {
+                            status: 'completed',
+                        },
+                    })
+                );
+            }
         }
-      }
     </script>
 </head>
 <body>

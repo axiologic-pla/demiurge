@@ -1,5 +1,6 @@
 import constants from "../constants.js";
 import utils from "../utils.js";
+
 const promisify = utils.promisify;
 
 function checkIfDeleteGroupMessage(message) {
@@ -14,4 +15,4 @@ async function deleteGroup(message) {
 }
 
 require("opendsu").loadAPI("m2dsu").defineMapping(checkIfDeleteGroupMessage, deleteGroup);
-export  {deleteGroup}
+export {deleteGroup}

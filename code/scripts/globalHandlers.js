@@ -7,45 +7,45 @@
 
 if ($$) {
     $$.refreshInProgress = false;
-    $$.showErrorAlert = (text)=>{
-        if(!$$.refreshInProgress){
+    $$.showErrorAlert = (text) => {
+        if (!$$.refreshInProgress) {
             alert(text);
         }
     }
 
-    $$.forceTabRefresh = ()=>{
+    $$.forceTabRefresh = () => {
         $$.refreshInProgress = true;
         const time = 1500;
-        setTimeout(()=>{
+        setTimeout(() => {
             console.info("The refresh procedure is currently executing...");
-            try{
+            try {
                 window.top.location.reload();
                 window.top.history.go(0);
                 window.top.location.href = window.top.location.href;
-            }catch(err){
+            } catch (err) {
                 console.debug(`Failed to execute refresh because of `, err);
             }
         }, time);
         console.info(`The page refresh is scheduled to occur in ${time}ms.`);
     }
 
-    $$.navigateToPage = (page)=>{
+    $$.navigateToPage = (page) => {
         $$.refreshInProgress = true;
-        setTimeout(()=>{
+        setTimeout(() => {
             $$.history.go(page);
         }, 1500);
         console.warn("Navigating to a new page...");
     }
 
-    $$.forceRedirect = (url)=>{
+    $$.forceRedirect = (url) => {
         $$.refreshInProgress = true;
-        setTimeout(()=>{
+        setTimeout(() => {
             window.top.location.replace(url);
         }, 1500);
         console.warn("Redirecting...");
     }
 
-    $$.disableAlerts = ()=>{
+    $$.disableAlerts = () => {
         $$.refreshInProgres = true;
     }
 
@@ -58,18 +58,18 @@ if ($$) {
         }
     }
 
-    $$.disableBrowserConfirm = function(){
+    $$.disableBrowserConfirm = function () {
         $$.confirmDisabled = true;
     }
 
-    $$.enableBrowserConfirm = function(){
+    $$.enableBrowserConfirm = function () {
         $$.confirmDisabled = false;
     };
 
-    $$.hookConfirm = function(){
+    $$.hookConfirm = function () {
         let confirm = window.confirm;
-        window.confirm = function(message){
-            if($$.confirmDisabled){
+        window.confirm = function (message) {
+            if ($$.confirmDisabled) {
                 return true;
             }
             return confirm.call(window, message);

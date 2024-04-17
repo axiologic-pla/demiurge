@@ -1,4 +1,5 @@
 @import url("../../assets/fonts/fontawesome/font-awesome.min.css");
+
 :host {
     --sl-input-border-radius-large: 0;
     --sl-input-border-radius-medium: 0;

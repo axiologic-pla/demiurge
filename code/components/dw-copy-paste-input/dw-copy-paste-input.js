@@ -66,130 +66,130 @@ template.innerHTML = `
     `;
 
 class DwCopyPasteInput extends HTMLElement {
-  constructor() {
-    super();
-    this._value = "";
-    this._inputType = "text";
-    this._type = "copy";
-    this.attachShadow({mode: 'open'});
-    this.showToast = new DwUI().showToast;
-    this.shadowRoot.appendChild(template.content.cloneNode(true));
-    this.inputElement = this.shadowRoot.querySelector("input");
-    this.buttonElement = this.shadowRoot.querySelector("button");
-    this.buttonElement.addEventListener("click", this.btnClickHandler.bind(this))
-    this.inputElement.addEventListener("input", this.inputChange.bind(this))
-  }
-
-  async connectedCallback() {
-    for (let i = 0; i < this.attributes.length; i++) {
-      const {name, value} = this.attributes[i];
-      if (name === "value") {
-        continue;
-      }
-
-      if (name === "inputType") {
-        this.inputElement.setAttribute("type", value);
-        continue;
-      }
-
-      if (name === "button-type") {
-        this.type = value;
-        continue;
-      }
-
-      if (name === "button-label") {
-        this.buttonElement.innerText = value;
-        continue;
-      }
-      this.inputElement.setAttribute(name, value);
+    constructor() {
+        super();
+        this._value = "";
+        this._inputType = "text";
+        this._type = "copy";
+        this.attachShadow({mode: 'open'});
+        this.showToast = new DwUI().showToast;
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
+        this.inputElement = this.shadowRoot.querySelector("input");
+        this.buttonElement = this.shadowRoot.querySelector("button");
+        this.buttonElement.addEventListener("click", this.btnClickHandler.bind(this))
+        this.inputElement.addEventListener("input", this.inputChange.bind(this))
     }
-  }
 
-  inputChange(event) {
-    this.value = event.target.value;
-  }
+    async connectedCallback() {
+        for (let i = 0; i < this.attributes.length; i++) {
+            const {name, value} = this.attributes[i];
+            if (name === "value") {
+                continue;
+            }
 
-  async btnClickHandler(event) {
-    if (this.type.toLowerCase() === "paste") {
-      const result = await navigator.permissions.query({
-        name: "clipboard-read",
-      });
-      if (result.state === "granted" || result.state === "prompt") {
-        this.value = await navigator.clipboard.readText();
-      }
+            if (name === "inputType") {
+                this.inputElement.setAttribute("type", value);
+                continue;
+            }
+
+            if (name === "button-type") {
+                this.type = value;
+                continue;
+            }
+
+            if (name === "button-label") {
+                this.buttonElement.innerText = value;
+                continue;
+            }
+            this.inputElement.setAttribute(name, value);
+        }
     }
-    if (this.type.toLowerCase() === "copy") {
-      try {
-        document.execCommand("copy");
-      } catch (err) {
-        // we ignore the error due to the fact that some browsers don't support one of the methods in the try block
-      }
-      try {
-        await navigator.clipboard.writeText(this.inputElement.value)
-      } catch (err) {
-        // we ignore the error due to the fact that some browsers don't support one of the methods in the try block
-      }
-      await this.showToast(`Copied to clipboard!`);
-      this.dispatchEvent(new CustomEvent("copy-to-clipboard", {
-        bubbles: true,
-        detail: {"value": this.inputElement.value}
-      }));
+
+    inputChange(event) {
+        this.value = event.target.value;
     }
-  }
 
-
-  disconnectedCallback() {
-    if (this.buttonElement) {
-      this.buttonElement.removeEventListener("click", this.btnClickHandler);
+    async btnClickHandler(event) {
+        if (this.type.toLowerCase() === "paste") {
+            const result = await navigator.permissions.query({
+                name: "clipboard-read",
+            });
+            if (result.state === "granted" || result.state === "prompt") {
+                this.value = await navigator.clipboard.readText();
+            }
+        }
+        if (this.type.toLowerCase() === "copy") {
+            try {
+                document.execCommand("copy");
+            } catch (err) {
+                // we ignore the error due to the fact that some browsers don't support one of the methods in the try block
+            }
+            try {
+                await navigator.clipboard.writeText(this.inputElement.value)
+            } catch (err) {
+                // we ignore the error due to the fact that some browsers don't support one of the methods in the try block
+            }
+            await this.showToast(`Copied to clipboard!`);
+            this.dispatchEvent(new CustomEvent("copy-to-clipboard", {
+                bubbles: true,
+                detail: {"value": this.inputElement.value}
+            }));
+        }
     }
-    this.innerHTML = "";
-  }
 
-  static get observedAttributes() {
-    return ["value"];
-  }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (this.hasAttribute(name)) {
-      switch (name) {
-        case "value":
-          this.value = newValue;
-      }
+    disconnectedCallback() {
+        if (this.buttonElement) {
+            this.buttonElement.removeEventListener("click", this.btnClickHandler);
+        }
+        this.innerHTML = "";
     }
-  }
 
-  set value(value) {
-    if (this.inputElement) {
-      this.inputElement.value = value;
+    static get observedAttributes() {
+        return ["value"];
     }
-    this._value = value;
-    this.dispatchEvent(new CustomEvent("copy-paste-change", {
-      bubbles: true,
-      detail: {"value": value}
-    }));
-  }
 
-  get value() {
-    return this._value;
-  }
-
-  set inputType(value) {
-    if (this.inputElement) {
-      this.inputElement.type = value;
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (this.hasAttribute(name)) {
+            switch (name) {
+                case "value":
+                    this.value = newValue;
+            }
+        }
     }
-  }
 
-  get inputType() {
-    return this.inputElement.type;
-  }
+    set value(value) {
+        if (this.inputElement) {
+            this.inputElement.value = value;
+        }
+        this._value = value;
+        this.dispatchEvent(new CustomEvent("copy-paste-change", {
+            bubbles: true,
+            detail: {"value": value}
+        }));
+    }
 
-  set type(value) {
-    this._type = value;
-  }
+    get value() {
+        return this._value;
+    }
 
-  get type() {
-    return this._type;
-  }
+    set inputType(value) {
+        if (this.inputElement) {
+            this.inputElement.type = value;
+        }
+    }
+
+    get inputType() {
+        return this.inputElement.type;
+    }
+
+    set type(value) {
+        this._type = value;
+    }
+
+    get type() {
+        return this._type;
+    }
 }
 
 customElements.define("dw-copy-paste-input", DwCopyPasteInput);
