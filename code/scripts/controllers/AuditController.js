@@ -111,7 +111,7 @@ class LogsDataSource extends DataSource {
 
             let pagContainer = document.querySelector(".pagination-container");
             if (pagContainer) {
-                this.dataSourceRezults.length > this.itemsOnPage ? pagContainer.hidden = false : pagContainer.hidden = true;
+                pagContainer.hidden = this.dataSourceRezults.length <= this.itemsOnPage;
                 resultData = this.dataSourceRezults.slice(startOffset, startOffset + dataLengthForCurrentPage);
                 this.hasMoreLogs = this.dataSourceRezults.length >= startOffset + dataLengthForCurrentPage + 1;
 

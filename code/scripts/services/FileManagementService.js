@@ -34,7 +34,7 @@ export default class FileManagementService {
         return fileContent;
     }
 
-    downloadFileToDevice = (file) => {
+    downloadFileToDevice (file){
         if (!file) {
             file = this.file;
         }
@@ -50,7 +50,7 @@ export default class FileManagementService {
         link.href = window.URL.createObjectURL(file.rawBlob);
         link.download = file.fileName;
         link.click();
-    };
+    }
 
     async writeFileToDsu(dsuSSI, filePath, data) {
         if (!data) {

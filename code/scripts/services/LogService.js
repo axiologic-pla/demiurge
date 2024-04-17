@@ -32,10 +32,9 @@ export default class LogService {
                 let existingRecord = await $$.promisify(storageService.getRecord, storageService)(this.logsTable, log.logPk);
                 //duplicated logs, ignoring
                 return callback(undefined, existingRecord);
-            } catch (err) {
+            } catch (e) {
                 //do nothing, it was expected for new logs
             }
-
             let batchId = await storageService.startOrAttachBatchAsync();
             try {
 

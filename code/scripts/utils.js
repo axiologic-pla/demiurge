@@ -94,19 +94,15 @@ async function initSharedEnclave(keySSI, enclaveConfig, recovery) {
         }
     }
     let enclave;
-    try {
-        enclave = enclaveAPI.initialiseWalletDBEnclave(keySSI);
+    enclave = enclaveAPI.initialiseWalletDBEnclave(keySSI);
 
-        function waitForEnclaveInitialization() {
-            return new Promise((resolve) => {
-                enclave.on("initialised", resolve)
-            })
-        }
-
-        await waitForEnclaveInitialization();
-    } catch (e) {
-        throw e
+    function waitForEnclaveInitialization() {
+        return new Promise((resolve) => {
+            enclave.on("initialised", resolve)
+        })
     }
+
+    await waitForEnclaveInitialization();
 
 
     const enclaveDID = await $$.promisify(enclave.getDID)();

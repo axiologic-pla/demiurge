@@ -250,7 +250,7 @@ class MembersController extends DwController {
                         return reject(err);
                     }
                     let result = members.map((member) => {
-                        member["enable_deactivate_group_member_feature"] = this.model.enable_deactivate_group_member_feature;
+                        member.enable_deactivate_group_member_feature = this.model.enable_deactivate_group_member_feature;
                         return member;
                     })
                     return resolve(result);
@@ -268,7 +268,7 @@ class MembersController extends DwController {
     async addMember(group, member) {
         const w3cDID = require("opendsu").loadAPI("w3cdid");
         const didDocument = await promisify(w3cDID.resolveDID)(member.did);
-        member["username"] = didDocument.getName();
+        member.username = didDocument.getName();
         const addMemberToGroupMessage = {
             messageType: constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP,
             groupDID: group.did,

@@ -435,7 +435,7 @@ function BootingIdentityController(...props) {
                     await self.waitForApproval(didDocument);
                     submitElement.loading = false;
                 } catch (e) {
-                    return alert(`Failed to subscribe. Probably an infrastructure issue. ${err.message}`);
+                    return alert(`Failed to subscribe. Probably an infrastructure issue. ${e.message}`);
                 }
             });
         }
