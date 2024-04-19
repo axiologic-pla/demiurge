@@ -1,7 +1,8 @@
-import {getStoredDID, setStoredDID, setWalletStatus, setMainDID} from "../services/BootingIdentityService.js";
+import {getStoredDID, setStoredDID, setMainDID} from "../services/BootingIdentityService.js";
 import constants from "../constants.js";
 import utils from "../utils.js";
 import MessagesService from "../services/MessagesService.js";
+import {getPermissionsWatcher} from "../services/PermissionsWatcher.js";
 
 const {DwController} = WebCardinal.controllers;
 
@@ -10,22 +11,54 @@ const scAPI = openDSU.loadAPI("sc");
 const w3cDID = openDSU.loadAPI("w3cdid");
 const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();
 
+
 function BootingIdentityController(...props) {
+
+  if (history.state.isBack) {
+    history.back();
+    history.back();
+    return;
+  }
+
   let self = new DwController(...props);
+
+  self.initPermissionsWatcher = () => {
+    //we don't need any permissions watcher at this point in time
+  };
+
   self.isFirstAdmin = history.state.state.isFirstAdmin;
   self.model = {
     domain: self.domain, username: self.userDetails
   };
 
-  const {ui} = self
+  const {ui} = self;
+  ui.disableMenu();
 
+  self.onTagClick("paste-from-clipboard", async (model, target) => {
+    const result = await navigator.permissions.query({
+      name: "clipboard-read",
+    });
+    if (result.state === "granted" || result.state === "prompt") {
+      const did = await navigator.clipboard.readText();
+      target.parentElement.value = did;
+      return {did};
+    }
+  });
 
-  self.onReceivedInitMessage = (message) => {
+  self.finishingStepOfWalletCreation = () => {
     self.initialisingModal.destroy();
-    setWalletStatus(constants.ACCOUNT_STATUS.CREATED).then(() => {
+    utils.setWalletStatus(constants.ACCOUNT_STATUS.CREATED).then(() => {
+      self.element.addEventListener("copy-to-clipboard", async () => {
+        let adminGroup = await utils.getAdminGroup(self.sharedEnclave);
+        let groupName = utils.getGroupName(adminGroup);
+        WebCardinal.wallet.groupName = groupName;
+        await utils.addLogMessage(self.did, "Copy Break Glass Recovery Code", groupName, self.userName);
+      })
+
       self.showModalFromTemplate("dw-dialog-break-glass-recovery/template", () => {
-      }, () => {
-        self.accessWallet()
+      }, async () => {
+        await utils.autoAuthorization(self.did);
+        self.accessWallet();
       }, {
         model: {sharedEnclaveKeySSI: self.keySSI},
         disableClosing: false,
@@ -33,42 +66,14 @@ function BootingIdentityController(...props) {
         disableExpanding: true,
         disableFooter: true,
         disableHeader: true
-      })
-      self.notificationHandler.reportDevRelevantInfo("Finished processing message " + JSON.stringify(message));
-
-      /*       self.showModalFromTemplate("dw-dialog-break-glass-recovery/template", {
-               sharedEnclaveKeySSI: self.keySSI,
-             }, {
-               parentElement: self.element, disableClosing: false, onClose: () => {
-                 self.accessWallet();
-               }
-             }).then(() => {
-               self.notificationHandler.reportDevRelevantInfo("Finished processing message " + JSON.stringify(message));
-             })
-           }).catch(e => {
-             self.notificationHandler.reportUserRelevantInfo("Failed to initialise wallet: ", e);
-           })*/
-    })
-
-    // submitElement.loading = false;
-
-    self.onTagClick("paste-from-clipboard", async (model, target, event) => {
-      const result = await navigator.permissions.query({
-        name: "clipboard-read",
       });
-      if (result.state === "granted" || result.state === "prompt") {
-        const did = await navigator.clipboard.readText();
-        target.parentElement.value = did;
-        return {did};
-      }
-    });
-
+    })
 
   }
   self.onAccessGranted = (message) => {
     utils.addSharedEnclaveToEnv(message.enclave.enclaveType, message.enclave.enclaveDID, message.enclave.enclaveKeySSI)
       .then(() => {
-        setWalletStatus(constants.ACCOUNT_STATUS.CREATED)
+        utils.setWalletStatus(constants.ACCOUNT_STATUS.CREATED)
           .then(() => self.accessWallet()).catch(e => {
           self.notificationHandler.reportUserRelevantInfo("Failed to initialise wallet: ", e);
         });
@@ -83,33 +88,15 @@ function BootingIdentityController(...props) {
     try {
       const sharedEnclave = await self.getSharedEnclave();
       let adminGroup = await utils.getAdminGroup(sharedEnclave);
-      await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, adminGroup.name, self.userName);
+      await utils.addLogMessage(self.did, constants.OPERATIONS.LOGIN, utils.getGroupName(adminGroup), self.userName);
+      history.replaceState({isBack: true}, "");
+      await utils.doMigration(sharedEnclave);
       self.navigateToPageTag("groups");
     } catch (e) {
       self.notificationHandler.reportDevRelevantInfo(`Failed to audit login action. Probably an infrastructure or network issue`, e);
       return alert(`Failed to audit login action. Probably an infrastructure or network issue. ${e.message}`);
     }
-
   }
-
-
-  /*  self.getAdminGroup = async (sharedEnclave) => {
-      const tryToGetAdminGroup = async () => {
-        let groups = [];
-        try {
-          groups = await utils.promisify(sharedEnclave.filter)(constants.TABLES.GROUPS);
-          let adminGroup = groups.find((gr) => gr.accessMode === constants.ADMIN_ACCESS_MODE || gr.name === constants.EPI_ADMIN_GROUP_NAME) || {};
-          if (!adminGroup) {
-            throw new Error("Admin group not created yet.")
-          }
-          return adminGroup;
-        } catch (e) {
-          self.notificationHandler.reportUserRelevantInfo(`Failed to get info about admin group. Retrying ...`, e);
-          return await tryToGetAdminGroup();
-        }
-      }
-      return await tryToGetAdminGroup();
-    }*/
 
   self.showInitDialog = async (did) => {
     if (typeof did === "object") {
@@ -130,19 +117,18 @@ function BootingIdentityController(...props) {
     })
   }
 
+
   self.waitForApproval = async (did) => {
     if (typeof did !== "string") {
       did = did.getIdentifier();
     }
     self.did = did;
-    typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onAccessGranted);
-    /*    await self.ui.showDialogFromComponent("dw-dialog-waiting-approval", {
-          did: did,
-        }, {
-          parentElement: self.element, disableClosing: true
-        });*/
 
-    self.showModalFromTemplate("waiting-approval/template", () => {
+    getPermissionsWatcher(did, () => {
+      self.accessWallet();
+    });
+
+    let waitApprovalModal = self.showModalFromTemplate("waiting-approval/template", () => {
     }, () => {
     }, {
       model: {did: did},
@@ -152,7 +138,10 @@ function BootingIdentityController(...props) {
       disableFooter: true,
     })
 
-    self.onTagClick("continue", async (model, target, event) => {
+    self.onTagClick("continue", async (model, target) => {
+      if (target.disabled) {
+        return
+      }
       try {
         const recoveryCode = document.getElementById("add-member-input").value;
         if (recoveryCode === "") {
@@ -161,15 +150,21 @@ function BootingIdentityController(...props) {
         }
 
         target.loading = true;
+        target.disabled = true;
         await self.setSharedEnclaveKeySSI(recoveryCode);
         let sharedEnclave = await self.getSharedEnclave();
         self.keySSI = await self.getSharedEnclaveKeySSI(sharedEnclave);
         await self.storeDID(self.did);
         await self.firstOrRecoveryAdminToAdministrationGroup(self.did, self.userDetails, constants.OPERATIONS.BREAK_GLASS_RECOVERY);
+        await utils.setWalletStatus(constants.ACCOUNT_STATUS.CREATED);
         target.loading = false;
+        waitApprovalModal.destroy();
+        self.accessWallet();
       } catch (e) {
-        self.notificationHandler.reportUserRelevantError("Failed to gain access to the wallet. Check your recovery code and try again", e)
+        self.notificationHandler.reportUserRelevantError("Failed to gain access to the wallet. Check your recovery code and try again");
+        self.notificationHandler.reportDevRelevantInfo("Failed to gain access to the wallet with recovery code: ", e);
         target.loading = false;
+        target.disabled = false;
       }
     })
   }
@@ -261,38 +256,28 @@ function BootingIdentityController(...props) {
   }
 
   self.createInitialDID = async () => {
+    const _createDID = async () => {
     const didDomain = await self.getDIDDomain();
-    try {
-      await $$.promisify(w3cDID.createIdentity)(constants.SSI_NAME_DID_TYPE, didDomain, constants.INITIAL_IDENTITY_PUBLIC_NAME);
-    } catch (e) {
-      self.notificationHandler.reportUserRelevantWarning(`Failed to create DID. Retrying ...`);
-      await self.createInitialDID();
+      try {
+        await $$.promisify(w3cDID.createIdentity)(constants.SSI_NAME_DID_TYPE, didDomain, constants.INITIAL_IDENTITY_PUBLIC_NAME);
+      } catch (e) {
+        self.notificationHandler.reportUserRelevantWarning(`Failed to create DID. Retrying ...`);
+        throw e;
+      }
     }
+
+    await utils.retryAsyncFunction(_createDID, 3, 100);
   }
 
   self.createGroups = async () => {
     const sharedEnclave = await self.getSharedEnclave();
-    const messages = await self.readMappingEngineMessages(constants.GROUP_MESSAGES_PATH);
+    const messages = await utils.readMappingEngineMessages(constants.GROUP_MESSAGES_PATH, self.DSUStorage);
     await self.processMessages(sharedEnclave, messages);
-  }
-
-  self.readMappingEngineMessages = async (path) => {
-    let messages;
-    try {
-      messages = await $$.promisify(self.DSUStorage.getObject.bind(self.DSUStorage))(path);
-    } catch (e) {
-
-    }
-    if (!messages) {
-      self.notificationHandler.reportUserRelevantWarning(`Failed to retrieve configuration data. Retrying ...`);
-      return await self.readMappingEngineMessages(path);
-    }
-    return messages;
   }
 
   self.createEnclaves = async () => {
     const mainEnclave = await self.getMainEnclave();
-    const messages = await self.readMappingEngineMessages(constants.ENCLAVE_MESSAGES_PATH);
+    const messages = await utils.readMappingEngineMessages(constants.ENCLAVE_MESSAGES_PATH, self.DSUStorage);
     await self.processMessages(mainEnclave, messages);
     self.notificationHandler.reportUserRelevantInfo(`Processed create enclave messages`);
     await self.setSharedEnclave(mainEnclave);
@@ -300,25 +285,24 @@ function BootingIdentityController(...props) {
   }
 
   self.setSharedEnclave = async (mainEnclave) => {
-    const tryToSetSharedEnclave = async () => {
+    const _setSharedEnclave = async () => {
       try {
         const enclaveRecord = await mainEnclave.readKeyAsync(constants.SHARED_ENCLAVE);
         await $$.promisify(typicalBusinessLogicHub.setSharedEnclave)(enclaveRecord.enclaveKeySSI);
         await utils.addSharedEnclaveToEnv(enclaveRecord.enclaveType, enclaveRecord.enclaveDID, enclaveRecord.enclaveKeySSI);
       } catch (e) {
         self.notificationHandler.reportUserRelevantWarning(`Failed to add shared enclave to environment. Retrying ...`);
-        await tryToSetSharedEnclave();
+        throw e;
       }
-    }
-
-    await tryToSetSharedEnclave();
+    };
+    await utils.retryAsyncFunction(_setSharedEnclave, 3, 100);
   }
 
   self.storeSharedEnclaves = async () => {
     const mainEnclave = await self.getMainEnclave();
     const enclaves = await $$.promisify(mainEnclave.getAllRecords)(constants.TABLES.GROUP_ENCLAVES);
     const sharedEnclave = await self.getSharedEnclave();
-    await sharedEnclave.safeBeginBatchAsync();
+    let batchId = await sharedEnclave.startOrAttachBatchAsync();
     try {
       for (let i = 0; i < enclaves.length; i++) {
         await sharedEnclave.writeKeyAsync(enclaves[i].enclaveName, enclaves[i]);
@@ -326,14 +310,14 @@ function BootingIdentityController(...props) {
       }
     } catch (e) {
       try {
-        await sharedEnclave.cancelBatchAsync();
+        await sharedEnclave.cancelBatchAsync(batchId);
       } catch (err) {
         console.log(err);
       }
       throw e;
     }
 
-    await sharedEnclave.commitBatchAsync();
+    await sharedEnclave.commitBatchAsync(batchId);
     self.keySSI = await self.getSharedEnclaveKeySSI(sharedEnclave);
   }
 
@@ -356,41 +340,51 @@ function BootingIdentityController(...props) {
       groupDID: adminGroup.did,
       enclaveName: adminGroup.enclaveName,
       memberDID: did,
-      memberName: userDetails
+      memberName: userDetails,
+      accessMode: constants.ADMIN_ACCESS_MODE
     };
     self.did = did;
     await self.processMessages(sharedEnclave, addMemberToGroupMessage);
-    await utils.addLogMessage(did, logAction, adminGroup.name, self.userName || "-");
+    await utils.addLogMessage(did, logAction, utils.getGroupName(adminGroup), self.userName || "-");
   }
 
   self.processMessages = async (storageService, messages) => {
-    if (!messages) {
-      return
-    }
-    if (!Array.isArray(messages)) {
-      messages = [messages];
+    let remainingMessages = messages;
+    const _processMessages = async (messages) => {
+      if (!messages) {
+        return
+      }
+      if (!Array.isArray(messages)) {
+        messages = [messages];
+      }
+
+      let undigestedMessages = [];
+
+      for (let i = 0; i < messages.length; i++) {
+        try {
+          undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, [messages[i]]);
+        } catch (err) {
+          console.log(err);
+          remainingMessages = messages;
+          self.notificationHandler.reportUserRelevantWarning(`Failed to process message: ${err.message}. Retrying ...`);
+          throw err;
+        }
+        if (undigestedMessages && undigestedMessages.length > 0) {
+          ui.showToast(`Couldn't process all messages. Retrying`);
+          remainingMessages = undigestedMessages.map(msgObj => msgObj.message);
+          console.log("Remaining messages:", remainingMessages);
+          throw new Error("Couldn't process all messages.");
+        }
+      }
     }
 
-    let undigestedMessages = [];
-
-    for (let i = 0; i < messages.length; i++) {
-      try {
-        undigestedMessages = await $$.promisify(MessagesService.processMessagesWithoutGrouping)(storageService, [messages[i]]);
-      } catch (err) {
-        return await self.processMessages(storageService, messages);
-      }
-      if (undigestedMessages && undigestedMessages.length > 0) {
-        ui.showToast(`Couldn't process all messages. Retrying`);
-        const remainingMessages = undigestedMessages.map(msgObj => msgObj.message);
-        console.log("Remaining messages:", remainingMessages);
-        return await self.processMessages(storageService, remainingMessages);
-      }
-    }
+    await utils.retryAsyncFunction(_processMessages, 3, 100, remainingMessages);
   }
 
   typicalBusinessLogicHub.mainDIDCreated(async (error, did) => {
     if (error) {
-      return alert(`Failed to initialise. Probably an infrastructure issue. ${e.message}`);
+      console.log(error);
+      return alert(`Failed to initialise. Probably an infrastructure issue. ${error.message}`);
     }
     if (self.isFirstAdmin) {
       if (did) {
@@ -411,10 +405,15 @@ function BootingIdentityController(...props) {
           self.notificationHandler.reportUserRelevantInfo("Created enclaves");
           await self.createGroups();
           self.notificationHandler.reportUserRelevantInfo("Created groups");
-          typicalBusinessLogicHub.subscribe(constants.MESSAGE_TYPES.ADD_MEMBER_TO_GROUP, self.onReceivedInitMessage)
           await self.firstOrRecoveryAdminToAdministrationGroup(didDocument, self.userDetails);
+
+          //we need to auto-authorize because we are the first one...
+          await utils.autoAuthorization(self.did);
+
           self.notificationHandler.reportUserRelevantInfo("Waiting for final initialization steps");
+          self.finishingStepOfWalletCreation();
         } catch (e) {
+          console.log(e);
           return alert(`Failed to initialise. Probably an infrastructure issue. ${e.message}`);
         }
 

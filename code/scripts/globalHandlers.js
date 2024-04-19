@@ -15,10 +15,18 @@ if ($$) {
 
     $$.forceTabRefresh = ()=>{
         $$.refreshInProgress = true;
+        const time = 1500;
         setTimeout(()=>{
-            window.top.location.reload();
-        }, 1500);
-        console.warn("Refreshing...");
+            console.info("The refresh procedure is currently executing...");
+            try{
+                window.top.location.reload();
+                window.top.history.go(0);
+                window.top.location.href = window.top.location.href;
+            }catch(err){
+                console.debug(`Failed to execute refresh because of `, err);
+            }
+        }, time);
+        console.info(`The page refresh is scheduled to occur in ${time}ms.`);
     }
 
     $$.navigateToPage = (page)=>{

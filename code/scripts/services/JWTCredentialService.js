@@ -1,8 +1,6 @@
 const openDSU = require('opendsu');
 const credentials = openDSU.loadAPI('credentials');
-const validationStrategies = credentials.validationStrategies;
 const JWT_ERRORS = credentials.JWT_ERRORS;
-const validationStrategiesTypes = validationStrategies.VALIDATION_STRATEGIES;
 
 class JWTCredentialService {
   async createVerifiableCredential(issuer, subject, options = {}) {

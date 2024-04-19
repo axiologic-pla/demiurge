@@ -1,34 +1,46 @@
 import constants from "../constants.js";
-
+import utils from "../utils.js";
 const openDSU = require("opendsu");
 const dbAPI = openDSU.loadAPI("db");
 const scAPI = openDSU.loadAPI("sc");
 const w3cDID = openDSU.loadAPI("w3cdid");
-const typicalBusinessLogicHub = w3cDID.getTypicalBusinessLogicHub();
 
 /**
  * @param {string} did - identifier of DIDDocument
  */
 async function setStoredDID(did, walletStatus = constants.ACCOUNT_STATUS.WAITING_APPROVAL) {
-  const tryToSetStoredDID = async () => {
-    const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
+  const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
+  const _setStoredDID = async () => {
     if (typeof did !== "string") {
       did = did.getIdentifier();
     }
-    await walletStorage.safeBeginBatchAsync();
+    let batchId = await walletStorage.startOrAttachBatchAsync();
     try {
+      await scAPI.setMainDIDAsync(did);
       await walletStorage.writeKeyAsync(constants.IDENTITY, {did, walletStatus});
-      await walletStorage.commitBatchAsync();
+      await walletStorage.commitBatchAsync(batchId);
     } catch (e) {
       try {
-        await walletStorage.cancelBatchAsync();
+        await walletStorage.cancelBatchAsync(batchId);
       } catch (err) {
         console.log(err);
       }
-      await tryToSetStoredDID();
+      throw e;
     }
+  };
+
+  let identity;
+  try {
+    identity = await walletStorage.readKeyAsync(constants.IDENTITY);
+  } catch (e) {
+    identity = undefined;
   }
-  await tryToSetStoredDID();
+
+  if(identity && identity.did === did && identity.walletStatus === walletStatus){
+    return;
+  }
+
+  await utils.retryAsyncFunction(_setStoredDID, 3, 100);
 }
 
 async function getStoredDID() {
@@ -49,49 +61,6 @@ async function getStoredDID() {
 
   return record.did;
 }
-
-async function setWalletStatus(walletStatus) {
-  const walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-  await walletStorage.safeBeginBatchAsync();
-
-  try {
-    await walletStorage.writeKeyAsync(constants.WALLET_STATUS, walletStatus);
-    await walletStorage.commitBatchAsync();
-  } catch (err) {
-    try {
-      await walletStorage.cancelBatchAsync();
-    } catch (e) {
-      return console.log(e, err);
-    }
-    console.log(err);
-  }
-}
-
-async function getWalletStatus() {
-  let walletStorage = await $$.promisify(dbAPI.getMainEnclave)();
-  /*
-
-    let sharedEnclave;
-    try {
-      sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
-    } catch (err) {
-    }
-
-    if (sharedEnclave) {
-      return constants.ACCOUNT_STATUS.CREATED;
-    }
-  */
-
-  let record;
-
-  try {
-    record = await walletStorage.readKeyAsync(constants.WALLET_STATUS);
-  } catch (err) {
-  }
-
-  return record;
-}
-
 async function didWasApproved(did) {
   if (typeof did !== "string") {
     did = did.getIdentifier();
@@ -124,4 +93,4 @@ async function setMainDID(typicalBusinessLogicHub, didDocument, notificationHand
   }
 }
 
-export {getStoredDID, setStoredDID, getWalletStatus, didWasApproved, setWalletStatus, setMainDID};
+export {getStoredDID, setStoredDID, didWasApproved, setMainDID};

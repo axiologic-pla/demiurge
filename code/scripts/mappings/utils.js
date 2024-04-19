@@ -4,8 +4,6 @@ async function removeMemberFromGroup(message) {
     const openDSU = require("opendsu");
     const w3cdid = openDSU.loadAPI("w3cdid");
     const scAPI = openDSU.loadAPI("sc");
-    const vaultDomain = await $$.promisify(scAPI.getVaultDomain)();
-    const dsu = await this.createDSU(vaultDomain, "seed")
     const groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(message.groupDID);
     await $$.promisify(groupDIDDocument.removeMembers)([message.memberDID]);
     const mainEnclave = await $$.promisify(scAPI.getMainEnclave)();
@@ -18,6 +16,16 @@ async function removeMemberFromGroup(message) {
     await $$.promisify(adminDID_Document.sendMessage)(JSON.stringify(msg), memberDID_Document);
 }
 
+async function getGroupCredential(groupDID){
+    const openDSU = require("opendsu");
+    const scAPI = openDSU.loadAPI("sc");
+    const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+    const credentials = await sharedEnclave.filterAsync(constants.TABLES.GROUPS_CREDENTIALS, `groupDID == ${groupDID}`);
+    let groupCredential = credentials.find(el => el.credentialType === constants.CREDENTIAL_TYPES.WALLET_AUTHORIZATION);
+    return groupCredential;
+}
+
 export {
-    removeMemberFromGroup
+    removeMemberFromGroup,
+    getGroupCredential
 }

@@ -12,9 +12,7 @@ async function createGroup(message) {
   const openDSU = require("opendsu");
   const w3cdid = openDSU.loadAPI("w3cdid");
   const scAPI = openDSU.loadAPI("sc");
-  const enclaveAPI = openDSU.loadAPI("enclave");
   const enclaveDB = await $$.promisify(scAPI.getMainEnclave)();
-  const vaultDomain = await promisify(scAPI.getVaultDomain)();
   const didDomain = await promisify(scAPI.getDIDDomain)();
 
 
@@ -38,7 +36,7 @@ async function createGroup(message) {
     group.did = groupDIDDocument.getIdentifier();
 
     const sharedEnclaveDB = await $$.promisify(scAPI.getSharedEnclave)();
-    await sharedEnclaveDB.safeBeginBatchAsync();
+    let batchId = await sharedEnclaveDB.startOrAttachBatchAsync();
     try {
       await sharedEnclaveDB.insertRecordAsync(constants.TABLES.GROUPS, group.did, group);
 
@@ -55,7 +53,7 @@ async function createGroup(message) {
       });
     } catch (e) {
       try{
-        await sharedEnclaveDB.cancelBatchAsync();
+        await sharedEnclaveDB.cancelBatchAsync(batchId);
       }catch (err) {
         console.log(err);
       }
@@ -63,10 +61,10 @@ async function createGroup(message) {
       throw e;
     }
     try{
-      await sharedEnclaveDB.commitBatchAsync();
+      await sharedEnclaveDB.commitBatchAsync(batchId);
     }catch (e) {
       try{
-        await sharedEnclaveDB.cancelBatchAsync();
+        await sharedEnclaveDB.cancelBatchAsync(batchId);
       } catch (err) {
         console.log(err);
       }

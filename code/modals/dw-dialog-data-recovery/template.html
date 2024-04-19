@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="modals/dw-dialog-data-recovery/style.css">
+<div class="custom-modal-header header-color" slot="header">
+    <h3>
+        Data Recovery Key
+    </h3>
+</div>
+<main>
+    <div id="copy-recovery-key-div">
+        <h4>Copy Data Recovery Key</h4>
+        <dw-copy-paste-input button-label="Copy" value="@dataRecoveryKey" type="password"
+                             readonly></dw-copy-paste-input>
+    </div>
+    <div id="paste-recovery-key-div">
+        <h3>
+            <img src="./assets/images/icons/clipboard-check.svg"/>
+
+            Or go ahead and
+        </h3>
+        <br>
+        <h4>Paste and submit your Data Recovery Key here</h4>
+
+
+        <div class="recovery-code-actions-wrapper">
+            <dw-copy-paste-input button-label="Paste" button-type="paste"
+                                 placeholder="Recovery Key"
+                                 type="password"
+                                 id="data-recovery-key-input" required clearable></dw-copy-paste-input>
+
+            <button disabled type="primary" data-tag="data-recovery-key-submit" class="dw-action-button dw-icon-button submit-recovery-button">
+                <span class="button-label">Submit</span>
+            </button>
+
+        </div>
+    </div>
+</main>

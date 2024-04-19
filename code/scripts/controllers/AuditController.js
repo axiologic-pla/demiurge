@@ -108,14 +108,18 @@ class LogsDataSource extends DataSource {
         await $$.promisify(this.sharedEnclaveDB.refresh.bind(this.sharedEnclaveDB))();
         this.dataSourceRezults = await $$.promisify(this.sharedEnclaveDB.filter.bind(this.sharedEnclaveDB))(this.tableName, "__timestamp > 0", "dsc", this.itemsOnPage * 2);
       }
-      this.dataSourceRezults.length > this.itemsOnPage ? document.querySelector(".pagination-container").hidden = false : document.querySelector(".pagination-container").hidden = true;
-      resultData = this.dataSourceRezults.slice(startOffset, startOffset + dataLengthForCurrentPage);
-      this.hasMoreLogs = this.dataSourceRezults.length >= startOffset + dataLengthForCurrentPage + 1;
 
-      if (!this.hasMoreLogs) {
-        document.querySelector(".pagination-container .next-page-btn").disabled = true;
-      } else {
-        document.querySelector(".pagination-container .next-page-btn").disabled = false;
+      let pagContainer = document.querySelector(".pagination-container");
+      if (pagContainer) {
+        this.dataSourceRezults.length > this.itemsOnPage ? pagContainer.hidden = false : pagContainer.hidden = true;
+        resultData = this.dataSourceRezults.slice(startOffset, startOffset + dataLengthForCurrentPage);
+        this.hasMoreLogs = this.dataSourceRezults.length >= startOffset + dataLengthForCurrentPage + 1;
+
+        if (!this.hasMoreLogs) {
+          document.querySelector(".pagination-container .next-page-btn").disabled = true;
+        } else {
+          document.querySelector(".pagination-container .next-page-btn").disabled = false;
+        }
       }
 
     } catch (e) {
@@ -136,8 +140,6 @@ class LogsDataSource extends DataSource {
 class AuditController extends DwController {
   constructor(...props) {
     super(...props);
-    const {ui} = this;
-
     this.model = {
       did: this.did, domain: this.domain,
     };
@@ -163,7 +165,7 @@ class AuditController extends DwController {
       })
     }
 
-    this.onTagClick("audit-export", async (model, target, event) => {
+    this.onTagClick("audit-export", async () => {
       const waitCsv = this.showModalFromTemplate('wait-download/template');
       let csvResult = await this.model.logsDataSource.exportToCSV();
       let url = window.URL.createObjectURL(csvResult);
@@ -176,7 +178,7 @@ class AuditController extends DwController {
       waitCsv.destroy();
     })
 
-    this.onTagClick("prev-page", (model, target, event) => {
+    this.onTagClick("prev-page", (model, target) => {
       target.parentElement.querySelector(".next-page-btn").disabled = false;
       this.model.logsDataSource.goToPreviousPage();
       if (this.model.logsDataSource.getCurrentPageIndex() === 1) {
@@ -184,7 +186,7 @@ class AuditController extends DwController {
       }
 
     })
-    this.onTagClick("next-page", (model, target, event) => {
+    this.onTagClick("next-page", (model, target) => {
 
       target.parentElement.querySelector(".prev-page-btn").disabled = false;
       if (this.model.logsDataSource.hasMoreLogs) {

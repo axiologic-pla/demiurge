@@ -6,7 +6,7 @@ template.innerHTML = `
 <style>
 .copy-paste-input-container {
     border-radius: 8px;
-    border: 1px solid #00CA86;
+    border: 1px solid #328569;
     background: #FFF;
     font-size: 1rem;
     height: 2.5rem;
@@ -25,17 +25,18 @@ template.innerHTML = `
     height: calc(2.5rem - 1px * 2);
     margin: 0 1rem;
     flex: 1 1 auto;
-    font-family: inherit;
+    font-family: "DM Sans medium";
     font-size: inherit;
     font-weight: inherit;
     min-width: 0px;
-    color: rgb(39 39 42);
+    color: #328569;
     border: none;
     background: none;
     box-shadow: none;
     padding: 0px;
     cursor: inherit;
     appearance: none;
+    font-family: "DM Sans regular";
 }
 
 .copy-paste-input-container input:focus {
@@ -45,10 +46,16 @@ template.innerHTML = `
 .copy-paste-input-container button {
     background: none;
     border: none;
-    color: #00CA86;
+    color: #328569;
     font-style: normal;
     font-weight: 700;
     margin-right: 10px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-family: "DM Sans regular";
+}
+.copy-paste-input-container button:hover {
+    color: #039665;
 }
 
  </style>
@@ -70,7 +77,7 @@ class DwCopyPasteInput extends HTMLElement {
     this.inputElement = this.shadowRoot.querySelector("input");
     this.buttonElement = this.shadowRoot.querySelector("button");
     this.buttonElement.addEventListener("click", this.btnClickHandler.bind(this))
-    this.inputElement.addEventListener("change", this.inputChange.bind(this))
+    this.inputElement.addEventListener("input", this.inputChange.bind(this))
   }
 
   async connectedCallback() {
@@ -118,13 +125,15 @@ class DwCopyPasteInput extends HTMLElement {
         // we ignore the error due to the fact that some browsers don't support one of the methods in the try block
       }
       try {
-        navigator.clipboard.writeText(this.inputElement.value).then(() => {
-        }, () => {
-        });
+        await navigator.clipboard.writeText(this.inputElement.value)
       } catch (err) {
         // we ignore the error due to the fact that some browsers don't support one of the methods in the try block
       }
       await this.showToast(`Copied to clipboard!`);
+      this.dispatchEvent(new CustomEvent("copy-to-clipboard", {
+        bubbles: true,
+        detail: {"value": this.inputElement.value}
+      }));
     }
   }
 
@@ -154,6 +163,10 @@ class DwCopyPasteInput extends HTMLElement {
       this.inputElement.value = value;
     }
     this._value = value;
+    this.dispatchEvent(new CustomEvent("copy-paste-change", {
+      bubbles: true,
+      detail: {"value": value}
+    }));
   }
 
   get value() {

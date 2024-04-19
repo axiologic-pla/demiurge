@@ -1,7 +1,6 @@
 import constants from "../../constants.js";
 import utils from "../../utils.js";
 import {cloneTemplate} from "../../../components/utils.js";
-import getStorageService from "../../services/StorageService.js";
 import MessagesService from "../../services/MessagesService.js";
 
 const {DwController} = WebCardinal.controllers;
@@ -10,40 +9,11 @@ const {promisify} = utils;
 class GroupsUI extends DwController {
   constructor(...props) {
     super(...props);
+
   }
 
   // listeners
-
-  // addBlockchainDomainListener() {
-  //   const inputElement = this.getElementByTag("blockchain-domain");
-  //
-  //   const nativeElement = inputElement.shadowRoot.querySelector("[part=input]");
-  //   if (!(nativeElement instanceof HTMLElement)) return;
-  //
-  //   const buttonElements = inputElement.querySelectorAll("sl-button");
-  //   const [editButtonElement, saveButtonElement] = buttonElements;
-  //
-  //   editButtonElement.addEventListener("click", (event) => {
-  //     event.stopPropagation();
-  //     editButtonElement.setAttribute("hidden", "");
-  //     saveButtonElement.removeAttribute("hidden");
-  //     inputElement.disabled = false;
-  //     setTimeout(() => {
-  //       nativeElement.focus();
-  //       nativeElement.setSelectionRange(0, nativeElement.value.length);
-  //     });
-  //   });
-  //
-  //   saveButtonElement.addEventListener("click", (event) => {
-  //     event.stopPropagation();
-  //     saveButtonElement.setAttribute("hidden", "");
-  //     editButtonElement.removeAttribute("hidden");
-  //     inputElement.disabled = true;
-  //   });
-  // }
-
   addGroupContentListener() {
-    const key = "dw:groups:active-tab";
     const part = "group-content";
     const rootElement = this.querySelector(`#dw-${part}`);
     const subParts = {
@@ -79,44 +49,11 @@ class GroupsUI extends DwController {
         }
       }
 
-
       rootElement.append(documentFragment);
-
-      const tabGroupElement = rootElement.querySelector(".dw-group-members-container");
-
-      const storedActiveTab = localStorage.getItem(key);
-
-      /*  tabGroupElement.addEventListener("sl-tab-show", (event) => {
-          const tab = event.detail.name;
-
-          if (tab === "members") {
-            localStorage.removeItem(key);
-          }
-
-          localStorage.setItem(key, tab);
-        });
-
-        if (tabGroupElement && storedActiveTab) {
-          setTimeout(async () => {
-            await tabGroupElement.show(storedActiveTab);
-            rootElement.hidden = false;
-          });
-        } else {
-          rootElement.hidden = false;
-        }
-
-       */
     });
   }
 
   // methods
-
-/*
-  async addGroup(model, target) {
-    return await this.ui.submitGenericForm(model, target);
-  }
-*/
-
   async selectGroup(model, target) {
     if (target.checked) {
       target.checked = false;
@@ -150,6 +87,91 @@ class GroupsController extends DwController {
     ui.page.addGroupContentListener.call(this);
 
 
+    this.onTagClick("recover-data-key", async () => {
+      const openDSU = require("opendsu");
+      const scAPI = openDSU.loadAPI("sc");
+      try {
+        const sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+        const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
+        let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
+        this.recoveryDataKeyModal = this.showModalFromTemplate("dw-dialog-data-recovery/template", () => {
+        }, () => {
+        }, {
+          model: {
+            dataRecoveryKey: enclaveKeySSI,
+          },
+          disableClosing: false,
+          showCancelButton: false,
+          disableExpanding: true,
+          disableFooter: true,
+        })
+      } catch (e) {
+        this.notificationHandler.reportUserRelevantError(`Couldn't get sharedEnclaveKeySSI.`);
+      }
+
+    })
+
+    this.element.addEventListener("copy-to-clipboard", async () => {
+      await utils.addLogMessage(this.did, "Copy Data Recovery Key", this.groupName, this.userName);
+    })
+
+    this.element.addEventListener("copy-paste-change", async (e) => {
+      if (e.target.id !== "data-recovery-key-input") {
+        return;
+      }
+      if (e.detail.value && e.detail.value.trim()) {
+        document.querySelector(".submit-recovery-button").disabled = false;
+      } else {
+        document.querySelector(".submit-recovery-button").disabled = true;
+      }
+    })
+
+    this.onTagClick("data-recovery-key-submit", async () => {
+      const recoveryCode = document.getElementById("data-recovery-key-input").value;
+      if (recoveryCode === "") {
+        this.notificationHandler.reportUserRelevantError(`Please insert Data Recovery Key.`);
+        return;
+      }
+      try {
+        let messages = await utils.readMappingEngineMessages(constants.ENCLAVE_MESSAGES_PATH, this.DSUStorage);
+        let epiEnclaveMsg = messages.find((msg) => msg.enclaveName === this.model.selectedGroup.enclaveName)
+        if (!epiEnclaveMsg) {
+          this.notificationHandler.reportUserRelevantError(`Wrong or missing enclave name`);
+          return;
+        }
+        let enclaveRecord;
+        try {
+          enclaveRecord = await utils.initSharedEnclave(recoveryCode, epiEnclaveMsg, true);
+        } catch (e) {
+          this.recoveryDataKeyModal.destroy()
+          this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
+        }
+        await utils.setEpiEnclave(enclaveRecord);
+        // trigger migration in case total data loss recovery
+        let response;
+        try{
+          response = await fetch(`${window.location.origin}/doMigration`, {
+            body: JSON.stringify({epiEnclaveKeySSI: enclaveRecord.enclaveKeySSI}),
+            method: "PUT",
+            headers: {"Content-Type": "application/json"}
+          });
+        }catch (e) {
+          this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
+          return;
+        }
+
+        if(response.status !== 200){
+          console.log(response.statusText);
+          this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
+          return;
+        }
+        await utils.addLogMessage(this.did, "Use of the Data Recovery Key", this.groupName, this.userName);
+      } catch (e) {
+        this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
+      }
+
+      this.recoveryDataKeyModal.destroy()
+    })
     this.onTagClick("group.add", async (...props) => {
       try {
         const {name} = await ui.page.addGroup(...props);
@@ -169,7 +191,7 @@ class GroupsController extends DwController {
           groupSelect.blur();
         });*/
 
-    this.onTagClick("select-tab", (model, target, event) => {
+    this.onTagClick("select-tab", (model, target) => {
       this.model.selectedTabIndex = this.model.groups.findIndex(group => group.pk === target.getAttribute("tab-name"));
       this.model.selectedGroup = this.model.groups[this.model.selectedTabIndex];
     })
