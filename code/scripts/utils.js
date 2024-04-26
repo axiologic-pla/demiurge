@@ -435,20 +435,22 @@ function getUserIdFromUsername(username) {
   let user = '';
   let domain = '';
 
-  // Check if the input string contains an '@' symbol
-  if (username.includes('@')) {
-    // If '@' is present, split the string based on '/' and '@'
-    const userDomain = username.split('/')[1];
-    [user, domain] = userDomain.split('@');
-  } else {
-    // If '@' is not present, assume format is 'prefix/username/domainWithExtra'
-    const parts = username.split('/');
-    user = parts[1];
-    domain = parts[2];
-  }
+  try {
+    if (username.includes('@')) {
+      const userDomain = username.split('/')[1];
+      [user, domain] = userDomain.split('@');
+    } else if (username.includes('/')) {
+      const parts = username.split('/');
+      user = parts[1];
+      domain = parts[2];
+    } else {
+      return username;
+    }
 
-  // Clean the domain by removing any trailing numbers using a regex
-  domain = domain.replace(/\d+$/, '');
+    domain = domain.replace(/\d+$/, '');
+  } catch (e) {
+    return username;
+  }
 
   return `${user}@${domain}`;
 }
@@ -496,6 +498,28 @@ async function migrateData(sharedEnclave){
   const apiKeyClient = apiKeySpace.getAPIKeysClient();
   try {
     notificationHandler.reportUserRelevantInfo(`System Alert: Migration of Access Control Mechanisms is Currently Underway. Your Patience is Appreciated.`);
+    let did = await getStoredDID();
+    try {
+      const sysadminSecret = await getBreakGlassRecoveryCode();
+      const apiKey = crypto.sha256JOSE(crypto.generateRandom(32), "base64");
+      const body = {
+        secret: sysadminSecret,
+        apiKey
+      }
+      await apiKeyClient.becomeSysAdmin(JSON.stringify(body));
+      await setSysadminCreated(true);
+    }catch (e) {
+      console.log(e);
+      // already sysadmin
+    }
+    let groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroup.did);
+    const members = await $$.promisify(groupDIDDocument.getMembers)();
+    for (let member in members) {
+      const memberObject = members[member];
+      if (member !== did) {
+        await apiKeyClient.makeSysAdmin(getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
+      }
+    }
     const epiEnclaveRecord = await $$.promisify(sharedEnclave.readKey)(constants.EPI_SHARED_ENCLAVE);
     let enclaveKeySSI = epiEnclaveRecord.enclaveKeySSI;
     let response
@@ -513,27 +537,6 @@ async function migrateData(sharedEnclave){
       console.log(response.statusText);
       notificationHandler.reportUserRelevantError(`Failed to migrate Access Control Mechanisms.`);
       return;
-    }
-    let did = await getStoredDID();
-    try {
-      const sysadminSecret = await getBreakGlassRecoveryCode();
-      const apiKey = crypto.sha256JOSE(crypto.generateRandom(32), "base64");
-      const body = {
-        secret: sysadminSecret,
-        apiKey
-      }
-      await apiKeyClient.becomeSysAdmin(JSON.stringify(body));
-      await setSysadminCreated(true);
-    }catch (e) {
-      // already sysadmin
-    }
-    let groupDIDDocument = await $$.promisify(w3cdid.resolveDID)(adminGroup.did);
-    const members = await $$.promisify(groupDIDDocument.getMembers)();
-    for (let member in members) {
-      const memberObject = members[member];
-      if (member !== did) {
-        await apiKeyClient.makeSysAdmin(getUserIdFromUsername(memberObject.username), crypto.generateRandom(32).toString("base64"));
-      }
     }
   }catch (e) {
     console.log(e);
@@ -597,7 +600,6 @@ async function doMigration(sharedEnclave) {
     await migrateData(sharedEnclave);
     return;
   }
-
 
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
