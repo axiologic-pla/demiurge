@@ -550,10 +550,9 @@ async function migrateData(sharedEnclave){
   }
 
   await assignAccessToGroups(sharedEnclave);
-  notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
 }
 
-async function doMigration(sharedEnclave) {
+async function doMigration(sharedEnclave, force = false) {
   function showMigrationDialog() {
     // Check if the dialog already exists
     let dialog = document.getElementById('migrationDialog');
@@ -584,10 +583,13 @@ async function doMigration(sharedEnclave) {
     if (dialog) {
       dialog.style.display = 'none';
     }
-
   }
+
   if (!sharedEnclave) {
     sharedEnclave = await $$.promisify(scAPI.getSharedEnclave)();
+  }
+  if(force){
+    await migrateData(sharedEnclave);
   }
   let response = await fetch(`${window.location.origin}/getMigrationStatus`);
   if (response.status !== 200) {
@@ -596,12 +598,23 @@ async function doMigration(sharedEnclave) {
 
   let migrationStatus = await response.text();
 
-  if (migrationStatus === constants.MIGRATION_STATUS.NOT_STARTED) {
-    await migrateData(sharedEnclave);
+  if (migrationStatus === constants.MIGRATION_STATUS.FAILED) {
+    notificationHandler.reportUserRelevantError(`Failed to migrate Access Control Mechanisms.`);
     return;
   }
 
+  if (migrationStatus === constants.MIGRATION_STATUS.NOT_STARTED) {
+    await migrateData(sharedEnclave);
+  }
+
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  response = await fetch(`${window.location.origin}/getMigrationStatus`);
+  if (response.status !== 200) {
+    throw new Error(`Failed to check migration status. HTTP status: ${response.status}`);
+  }
+
+  migrationStatus = await response.text();
 
   if (migrationStatus === constants.MIGRATION_STATUS.IN_PROGRESS) {
     showMigrationDialog();
@@ -618,12 +631,12 @@ async function doMigration(sharedEnclave) {
 
     if (migrationStatus === constants.MIGRATION_STATUS.COMPLETED) {
       hideMigrationDialog();
-      console.log('Migration completed successfully.');
+      notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
       return;
     }
   }
 
-  console.log('Migration completed successfully.');
+  notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
 }
 
 

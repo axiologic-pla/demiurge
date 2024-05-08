@@ -148,23 +148,7 @@ class GroupsController extends DwController {
         }
         await utils.setEpiEnclave(enclaveRecord);
         // trigger migration in case total data loss recovery
-        let response;
-        try{
-          response = await fetch(`${window.location.origin}/doMigration`, {
-            body: JSON.stringify({epiEnclaveKeySSI: enclaveRecord.enclaveKeySSI}),
-            method: "PUT",
-            headers: {"Content-Type": "application/json"}
-          });
-        }catch (e) {
-          this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
-          return;
-        }
-
-        if(response.status !== 200){
-          console.log(response.statusText);
-          this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
-          return;
-        }
+        await utils.doMigration(undefined, true);
         await utils.addLogMessage(this.did, "Use of the Data Recovery Key", this.groupName, this.userName);
       } catch (e) {
         this.notificationHandler.reportUserRelevantError(`Couldn't initialize wallet DBEnclave with provided code`);
