@@ -635,8 +635,6 @@ async function doMigration(sharedEnclave, force = false) {
       return;
     }
   }
-
-  notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
 }
 
 
