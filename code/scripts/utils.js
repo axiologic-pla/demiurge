@@ -319,7 +319,7 @@ async function associateGroupAccess(sharedEnclave, groupType) {
     };
     await apiKeyClient.associateAPIKey(
         constants.APPS.DSU_FABRIC,
-        groupType,
+        constants.API_KEY_NAME,
         getUserIdFromUsername(memberObject.username),
         JSON.stringify(apiKey)
     );
