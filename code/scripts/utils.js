@@ -598,11 +598,6 @@ async function doMigration(sharedEnclave, force = false) {
 
   let migrationStatus = await response.text();
 
-  if (migrationStatus === constants.MIGRATION_STATUS.FAILED) {
-    notificationHandler.reportUserRelevantError(`Failed to migrate Access Control Mechanisms.`);
-    return;
-  }
-
   if (migrationStatus === constants.MIGRATION_STATUS.NOT_STARTED) {
     await migrateData(sharedEnclave);
   }
@@ -620,6 +615,11 @@ async function doMigration(sharedEnclave, force = false) {
     showMigrationDialog();
   }
 
+  if (migrationStatus === constants.MIGRATION_STATUS.COMPLETED) {
+    notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully executed!`);
+    return;
+  }
+
   while (migrationStatus === constants.MIGRATION_STATUS.IN_PROGRESS) {
     await delay(10000);
 
@@ -632,6 +632,12 @@ async function doMigration(sharedEnclave, force = false) {
     if (migrationStatus === constants.MIGRATION_STATUS.COMPLETED) {
       hideMigrationDialog();
       notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
+      return;
+    }
+
+    if (migrationStatus === constants.MIGRATION_STATUS.FAILED) {
+      hideMigrationDialog();
+      notificationHandler.reportUserRelevantError(`Failed to migrate Access Control Mechanisms.`);
       return;
     }
   }
