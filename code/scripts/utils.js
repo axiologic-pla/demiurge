@@ -432,27 +432,22 @@ function hideTextLoader() {
 }
 
 function getUserIdFromUsername(username) {
-  let user = '';
-  let domain = '';
-
-  try {
+  const DSU_FABRIC = 'DSU_Fabric/';
+  const DEMIURGE = 'Demiurge/';
+  // if DSU_FABRIC username format:  DSU_Fabric/user@domain
+  if (username.includes(DSU_FABRIC)) {
+    username = username.replace(DSU_FABRIC, '');
     if (username.includes('@')) {
-      const userDomain = username.split('/')[1];
-      [user, domain] = userDomain.split('@');
-    } else if (username.includes('/')) {
-      const parts = username.split('/');
-      user = parts[1];
-      domain = parts[2];
-    } else {
-      return username;
+      username = username.replace(/\d+$/, '');
     }
-
-    domain = domain.replace(/\d+$/, '');
-  } catch (e) {
-    return username;
+  } else if (username.includes(DEMIURGE)) {
+    username = username.replace(DEMIURGE, '');
+    if (username.includes('/')) {
+      username = username.replace(/\d+$/, '');
+      username = username.replaceAll("/", "@");
+    }
   }
-
-  return `${user}@${domain}`;
+  return username;
 }
 
 const setSharedEnclaveKey = async (key, value) => {
