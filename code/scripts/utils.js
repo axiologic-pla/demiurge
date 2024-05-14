@@ -615,11 +615,6 @@ async function doMigration(sharedEnclave, force = false) {
     showMigrationDialog();
   }
 
-  if (migrationStatus === constants.MIGRATION_STATUS.COMPLETED) {
-    notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully executed!`);
-    return;
-  }
-
   while (migrationStatus === constants.MIGRATION_STATUS.IN_PROGRESS) {
     await delay(10000);
 
@@ -631,7 +626,7 @@ async function doMigration(sharedEnclave, force = false) {
 
     if (migrationStatus === constants.MIGRATION_STATUS.COMPLETED) {
       hideMigrationDialog();
-      notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully!`);
+      notificationHandler.reportUserRelevantInfo(`Migration of Access Control Mechanisms successfully executed !`);
       return;
     }
 
